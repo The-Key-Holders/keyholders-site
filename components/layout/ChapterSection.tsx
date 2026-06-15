@@ -1,5 +1,16 @@
+"use client";
+
 import { cn } from "@/lib/utils";
 import type { ReactNode } from "react";
+import { useRef } from "react";
+
+import gsap from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { useGSAP } from "@gsap/react";
+import { useReducedMotion } from "framer-motion";
+
+// Register GSAP ScrollTrigger plugin (once per module load)
+gsap.registerPlugin(ScrollTrigger);
 
 interface ChapterSectionProps {
   id: string;
@@ -31,11 +42,53 @@ export default function ChapterSection({
   align = "center",
   accent = "cyan",
 }: ChapterSectionProps) {
+  const reduceMotion = useReducedMotion();
+  const sectionRef = useRef<HTMLElement>(null);
+  const numberRef = useRef<HTMLParagraphElement>(null);
+  const labelRef = useRef<HTMLParagraphElement>(null);
+  const titleRef = useRef<HTMLHeadingElement>(null);
+
+  useGSAP(
+    () => {
+      if (reduceMotion) return;
+
+      const targets = [
+        numberRef.current,
+        labelRef.current,
+        titleRef.current,
+      ].filter(Boolean) as HTMLElement[];
+
+      if (targets.length === 0) return;
+
+      // Staggered chapter reveal: number → label → title
+      // Scroll-triggered for natural editorial flow (TerraPower polish)
+      // Once: true to avoid re-anim on re-scroll; respects reduced motion
+      gsap.fromTo(
+        targets,
+        { opacity: 0, y: 22 },
+        {
+          opacity: 1,
+          y: 0,
+          duration: 0.58,
+          ease: "power2.out",
+          stagger: 0.115,
+          scrollTrigger: {
+            trigger: sectionRef.current,
+            start: "top 78%",
+            once: true,
+          },
+        }
+      );
+    },
+    { scope: sectionRef, dependencies: [reduceMotion] }
+  );
+
   const isCenter = align === "center";
 
   return (
     <section
       id={id}
+      ref={sectionRef}
       className={cn(
         "section-padding relative border-t border-white/5",
         className
@@ -55,6 +108,7 @@ export default function ChapterSection({
             )}
           >
             <p
+              ref={numberRef}
               className={cn(
                 "font-display text-5xl font-bold tracking-tight sm:text-6xl",
                 chapterAccentMap[accent]
@@ -62,13 +116,17 @@ export default function ChapterSection({
             >
               {chapter}
             </p>
-            <p className="mt-2 text-xs font-semibold uppercase tracking-[0.35em] text-white/45">
+            <p
+              ref={labelRef}
+              className="mt-2 text-xs font-semibold uppercase tracking-[0.35em] text-white/45"
+            >
               {label}
             </p>
           </div>
 
           <div className={cn("flex-1", isCenter && "w-full max-w-4xl mx-auto")}>
             <h2
+              ref={titleRef}
               className={cn(
                 "font-display text-3xl font-bold tracking-tight text-white sm:text-4xl lg:text-5xl",
                 isCenter && "text-center"

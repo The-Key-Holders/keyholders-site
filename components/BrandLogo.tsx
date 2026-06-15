@@ -40,13 +40,14 @@ export default function BrandLogo({
       className={`inline-flex shrink-0 items-center rounded-lg transition opacity-100 hover:opacity-90 ${onDark ? "bg-white/95 px-2 py-1" : ""} ${className}`}
       aria-label={alt}
     >
+      {/* LCP polish (P1#7): priority extended to trade variant for /trade hero (TradeHero usage + handoff §7/§14 LCP; next/image auto eager+high fetchPriority). Review: StaticHeroShell + VaultHero use parent only; header/overlay/footer secondary ok. */}
       <Image
         src={src}
         alt={alt}
         width={width}
         height={height}
         className="h-9 w-auto sm:h-10"
-        priority={variant === "parent"}
+        priority={variant === "parent" || variant === "trade"}
       />
     </Link>
   );
