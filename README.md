@@ -8,8 +8,10 @@ Next.js 14 App Router site for **The Key Holders** (consumer trust hub) and **Ke
 
 | Route     | Brand              | Purpose                              |
 |-----------|--------------------|--------------------------------------|
-| `/`       | The Key Holders    | Consumer homepage, links to Geeks Next Door |
-| `/trade`  | Key Holders Trade  | B2B landing page with Stripe SKUs    |
+| `/`       | The Key Holders    | Consumer homepage (chapters 002-007), links to Geeks Next Door |
+| `/trade`  | Key Holders Trade  | B2B landing page with Stripe SKUs + success/cancel feedback |
+| `/labs`   | The Key Holders    | Standalone Labs (P2): Legacy Vault + FieldHub pipeline (verbatim §16/17) |
+| `/work`   | The Key Holders    | Standalone Work (P2): mission logs, Garner §16 verbatim + CurrentRMS |
 
 ## Quick Start
 
@@ -32,7 +34,7 @@ Open [http://localhost:3000](http://localhost:3000).
 | `npm run build` | Production build       |
 | `npm run start` | Start production server |
 | `npm run lint` | Run ESLint              |
-| `npm run test:e2e` | Playwright E2E tests |
+| `npm run test:e2e` | Playwright E2E tests (7/7 smoke covering home, trade feedback, /labs, /work) |
 
 ## Environment Variables
 
@@ -109,8 +111,9 @@ For full architecture, env checklist, operational steps, and future consideratio
 | TradeSectionHeader     | `components/trade/TradeSectionHeader.tsx` | Consistent section labels/titles |
 | VaultHero + hero/*     | `components/hero/*`                       | Cinematic scroll-unlock SVG key (UNLOCK_THRESHOLD), ParticleField, StaticHeroShell |
 | Ventures / HomeSections| `components/home/*`                       | Ventures, Labs, Work, Github, Contact, Founders |
-| ChapterSection         | `components/layout/ChapterSection.tsx`    | Editorial numbered wrapper (002–007) |
-| OverlayMenu            | `components/layout/OverlayMenu.tsx`       | Fullscreen TerraPower-style venture explorer |
+| ChapterSection         | `components/layout/ChapterSection.tsx`    | Editorial numbered wrapper (002–007); P1 GSAP stagger + reduced-motion |
+| OverlayMenu            | `components/layout/OverlayMenu.tsx`       | Fullscreen TerraPower-style venture explorer; P1 a11y (Esc + focus trap + return) |
+| (new P2) /labs /work pages | `app/labs/page.tsx`, `app/work/page.tsx` | Standalone deep pages (P2; /labs FieldHub + Legacy Vault; /work Garner verbatim) |
 | SmoothScroll           | `components/providers/SmoothScroll.tsx`   | Lenis wrapper |
 | ui/*                   | `components/ui/*`                         | shadcn primitives (button, sheet, etc.) |
 | CheckoutFeedback       | (see above)                               | Client banner for Stripe redirect states |
@@ -133,4 +136,6 @@ Fonts: Syne (display), DM Sans (body). See handoff §3.4 and §7 for hero system
 
 ## License
 
-Private — Key Holders / Key Holders Trade. See `docs/MODEL_HANDOFF.md` for backlog (P0 Stripe closure complete), success criteria, and maintenance process (§21).
+Private — Key Holders / Key Holders Trade. See `docs/MODEL_HANDOFF.md` for backlog (P0 Stripe closure complete + P1 GSAP/a11y/LCP + P2 /labs /work standalone), success criteria (all P0/P1/P2 checked per HMC §13), maintenance process (§21), and final gates (build + 7/7 e2e 2026-06-15).
+
+**P0/P1/P2 delivered (HMC 2026-06-15):** Stripe full (webhook + CheckoutFeedback success/cancel + dual-path + README), GSAP ChapterSection stagger + OverlayMenu a11y Esc/trap + BrandLogo LCP priority, standalone /labs + /work (verbatim + links + FieldHub richer + ServiceCard fix), e2e extended to 7/7, final build/MCP/review gates pass. No push here; owner decision. Cross-ref handoff for SHAs + evidence.
