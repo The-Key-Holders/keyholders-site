@@ -47,7 +47,9 @@ export default function ServiceCard({
 
       <div className="mt-4">
         <span className="font-display text-3xl font-bold text-gold">{formattedPrice}</span>
-        <span className="text-sm text-white/45"> one-time</span>
+        <span className="text-sm text-white/45">
+          {name.toLowerCase().includes("ongoing") ? " /mo retainer" : " one-time"}
+        </span>
       </div>
 
       <ul className="mt-6 flex-1 space-y-3">

@@ -5,7 +5,7 @@ import { cn } from "@/lib/utils";
 import { Menu, X } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 const ventures = [
   {
@@ -25,14 +25,14 @@ const ventures = [
   {
     name: "Labs",
     tagline: "Experiments in production",
-    href: "/#labs",
+    href: "/labs",
     external: false,
     accent: "violet",
   },
   {
     name: "Work",
     tagline: "Shipped mission logs",
-    href: "/#work",
+    href: "/work",
     external: false,
     accent: "emerald",
   },
@@ -50,6 +50,10 @@ export default function OverlayMenu() {
   const pathname = usePathname();
   const isTrade = pathname.startsWith("/trade");
 
+  // Refs for a11y: focus return + tab trap
+  const triggerRef = useRef<HTMLButtonElement>(null);
+  const menuRef = useRef<HTMLDivElement>(null);
+
   useEffect(() => {
     setOpen(false);
   }, [pathname]);
@@ -61,9 +65,83 @@ export default function OverlayMenu() {
     };
   }, [open]);
 
+  // Escape key closes (a11y §11 / P1)
+  useEffect(() => {
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape" && open) {
+        setOpen(false);
+      }
+    };
+    document.addEventListener("keydown", onKeyDown);
+    return () => document.removeEventListener("keydown", onKeyDown);
+  }, [open]);
+
+  // Focus return to trigger + simple focus trap when open
+  // (leverages existing role="dialog" + aria; no new primitives)
+  const wasOpenRef = useRef(false);
+  useEffect(() => {
+    if (open) {
+      wasOpenRef.current = true;
+
+      // On open: focus first focusable inside menu (close btn or first link)
+      const focusFirst = () => {
+        if (!menuRef.current) return;
+        const focusable = menuRef.current.querySelector<HTMLElement>(
+          'button, a[href], [tabindex]:not([tabindex="-1"])'
+        );
+        (focusable || menuRef.current).focus();
+      };
+      // Delay to ensure DOM visible after transition start
+      const t = setTimeout(focusFirst, 50);
+
+      // Simple tab trap (cycle focusables inside panel only)
+      const onTabTrap = (e: KeyboardEvent) => {
+        if (e.key !== "Tab" || !menuRef.current) return;
+        const focusables = Array.from(
+          menuRef.current.querySelectorAll<HTMLElement>(
+            'a[href], button:not([disabled]), [tabindex]:not([tabindex="-1"])'
+          )
+        ).filter((el) => el.offsetParent !== null); // visible only
+
+        if (focusables.length === 0) return;
+
+        const first = focusables[0];
+        const last = focusables[focusables.length - 1];
+        const active = document.activeElement as HTMLElement | null;
+
+        if (e.shiftKey) {
+          if (active === first || !menuRef.current.contains(active)) {
+            e.preventDefault();
+            last.focus();
+          }
+        } else {
+          if (active === last || !menuRef.current.contains(active)) {
+            e.preventDefault();
+            first.focus();
+          }
+        }
+      };
+      document.addEventListener("keydown", onTabTrap, true);
+
+      return () => {
+        clearTimeout(t);
+        document.removeEventListener("keydown", onTabTrap, true);
+      };
+    }
+
+    // Return focus only if we previously opened the menu (prevents stealing focus on mount)
+    if (wasOpenRef.current) {
+      wasOpenRef.current = false;
+      queueMicrotask(() => {
+        triggerRef.current?.focus();
+      });
+    }
+  }, [open]);
+
   return (
     <>
       <button
+        ref={triggerRef}
         type="button"
         onClick={() => setOpen(true)}
         className={cn(
@@ -100,6 +178,7 @@ export default function OverlayMenu() {
         />
 
         <div
+          ref={menuRef}
           className={cn(
             "relative flex h-full flex-col transition duration-500 ease-out",
             open ? "translate-y-0 opacity-100" : "-translate-y-4 opacity-0"

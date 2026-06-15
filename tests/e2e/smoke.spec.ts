@@ -47,3 +47,30 @@ test("trade page shows cancelled feedback banner for ?checkout=cancelled", async
   await expect(banner).not.toBeVisible();
   await expect(page).toHaveURL(/\/trade$/);
 });
+
+// P2-Content-Agent: new pages per approved plan + handoff §14 P2, §16 Garner verbatim, §17 strings
+test("labs page loads with editorial depth, Legacy Vault, live FieldHub, and back link", async ({ page }) => {
+  await page.goto("/labs");
+  await expect(page.getByRole("heading", { name: /experiments in production/i })).toBeVisible();
+  await expect(page.getByText(/Legacy Vault/i).first()).toBeVisible();
+  await expect(page.getByText(/FieldHub/i).first()).toBeVisible();
+  await expect(page.getByText(/2026 work-order brokering platform/i)).toBeVisible();
+  await expect(page.getByRole("link", { name: /back to the key holders/i })).toBeVisible();
+  // GitHub links present
+  await expect(page.getByRole("link", { name: /legacy vault repo/i })).toBeVisible();
+});
+
+test("work page loads with mission logs, Garner Roofing verbatim §16 data, CurrentRMS, back links", async ({ page }) => {
+  await page.goto("/work");
+  await expect(page.getByRole("heading", { name: /mission logs/i })).toBeVisible();
+  // Verbatim narrative + metrics from MODEL_HANDOFF §16 (use .first() + specific to avoid strict multi-match with "8 weeks" in bullets)
+  await expect(page.getByText(/ServiceTitan instance at-risk \(TitanAdvisor\)/i)).toBeVisible();
+  await expect(page.getByText(/At-risk → healthy status/i)).toBeVisible();
+  await expect(page.getByText(/Active users onboarded/i)).toBeVisible();
+  await expect(page.getByText(/Mobile adoption \(field team\)/i)).toBeVisible();
+  await expect(page.getByText(/Health Check for workflow\/integration gaps/i)).toBeVisible();
+  await expect(page.getByText(/Single-client results; outcomes vary/i)).toBeVisible();
+  // CurrentRMS + back links
+  await expect(page.getByText(/CurrentRMS ↔ Google Sheets Sync/i)).toBeVisible();
+  await expect(page.getByRole("link", { name: /back to the key holders/i })).toBeVisible();
+});

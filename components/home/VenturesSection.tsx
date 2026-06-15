@@ -33,7 +33,7 @@ const ventures = [
     chapter: "R&D",
     description:
       "Legacy Vault, FieldHub prototypes, and experiments we ship before they graduate to full ventures.",
-    href: "/#labs",
+    href: "/labs",
     external: false,
     cta: "See labs",
     accent: "border-violetGlow/25 hover:border-violetGlow/50",

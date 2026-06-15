@@ -48,7 +48,7 @@ export const tradeProducts: Record<TradeProductId, TradeProduct> = {
     id: "ongoing_support",
     name: "Ongoing Support",
     amountCents: 99700,
-    description: "Monthly retainer for priority support and check-ins",
+    description: "Monthly retainer for priority support and check-ins (billed as fixed payment per cycle)",
   },
 };
 

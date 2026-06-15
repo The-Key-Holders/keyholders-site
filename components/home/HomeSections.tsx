@@ -31,19 +31,21 @@ export function LabsSection() {
             View repo →
           </span>
         </a>
-        <div className="rounded-2xl border border-white/10 bg-white/[0.02] p-6">
-          <p className="text-xs font-semibold uppercase tracking-[0.25em] text-white/35">
-            Pipeline
+        <a
+          href="/labs"
+          className="group rounded-2xl border border-violetGlow/20 bg-white/[0.03] p-6 transition hover:border-violetGlow/50"
+        >
+          <p className="text-xs font-semibold uppercase tracking-[0.25em] text-violetGlow/70">
+            Pipeline • Live
           </p>
-          <h3 className="mt-2 font-display text-xl font-bold text-white">More labs soon</h3>
+          <h3 className="mt-2 font-display text-xl font-bold text-white">FieldHub</h3>
           <p className="mt-3 text-sm leading-relaxed text-white/55">
-            FieldHub, scrapers, and integration prototypes — curated on{" "}
-            <Link href="#github" className="text-cyanGlow hover:underline">
-              open source
-            </Link>{" "}
-            when ready.
+            2026 work-order brokering platform (Geeks Next Door). Orders via API/EDI/WebHooks → dispatch to field-tech platforms. Production deployed.
           </p>
-        </div>
+          <span className="mt-4 inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.2em] text-white/35 transition group-hover:text-violetGlow">
+            Explore on /labs &amp; GitHub →
+          </span>
+        </a>
       </div>
     </ChapterSection>
   );
