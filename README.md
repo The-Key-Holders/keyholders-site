@@ -48,10 +48,13 @@ NEXT_PUBLIC_STRIPE_BUY_BUTTON_USER_TRAINING=buy_btn_...
 NEXT_PUBLIC_STRIPE_BUY_BUTTON_ONGOING_SUPPORT=buy_btn_...
 ```
 
+## Repository
+
+**GitHub:** [github.com/The-Key-Holders/keyholders-site](https://github.com/The-Key-Holders/keyholders-site)
+
 ## Deploy to Vercel
 
-1. Push this repo to GitHub (or GitLab/Bitbucket).
-2. Go to [vercel.com/new](https://vercel.com/new) and import the repository.
+1. Repo is on GitHub — import at [vercel.com/new](https://vercel.com/new) → **The-Key-Holders/keyholders-site**.
 3. Framework preset: **Next.js** (auto-detected).
 4. Add environment variables from `.env.example` in **Project Settings → Environment Variables**.
 5. Deploy. Vercel will run `npm run build` automatically.
