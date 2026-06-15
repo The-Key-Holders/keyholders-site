@@ -1,122 +1,115 @@
+import ChapterSection from "@/components/layout/ChapterSection";
 import Link from "next/link";
 
 export function LabsSection() {
   return (
-    <section id="labs" className="section-padding border-t border-white/5 bg-vault-900/50">
-      <div className="container-narrow px-4 sm:px-6 lg:px-8">
-        <div className="mx-auto max-w-3xl text-center">
-          <p className="text-xs font-semibold uppercase tracking-[0.3em] text-violetGlow/80">
-            Labs
+    <ChapterSection
+      id="labs"
+      chapter="003"
+      label="Labs"
+      title="Experiments in production"
+      description="Legacy Vault and early prototypes live here — crypto estate planning, integrations, and tools we ship before they graduate to full ventures."
+      accent="violet"
+      className="bg-vault-900/50"
+      align="left"
+    >
+      <div className="grid gap-4 sm:grid-cols-2">
+        <a
+          href="https://github.com/CupofJavad/Bitcoin_Estate_Planning_Tool_Rust"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="group rounded-2xl border border-violetGlow/20 bg-white/[0.03] p-6 transition hover:border-violetGlow/50"
+        >
+          <p className="text-xs font-semibold uppercase tracking-[0.25em] text-violetGlow/70">
+            Flagship
           </p>
-          <h2 className="mt-3 text-3xl font-bold text-white sm:text-4xl">
-            Experiments in production
-          </h2>
-          <p className="mt-4 text-white/65">
-            Legacy Vault and early prototypes live here — crypto estate planning,
-            integrations, and tools we ship before they graduate to full ventures.
+          <h3 className="mt-2 font-display text-xl font-bold text-white">Legacy Vault</h3>
+          <p className="mt-3 text-sm leading-relaxed text-white/55">
+            Multi-chain estate planning — Rust API + Next.js. BTC, XMR, STX timelock policies.
           </p>
-        </div>
-        <div className="mt-10 grid gap-4 sm:grid-cols-2">
-          <a
-            href="https://github.com/CupofJavad/Bitcoin_Estate_Planning_Tool_Rust"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="glass-card border-violetGlow/30 p-6 transition hover:border-violetGlow/60"
-          >
-            <h3 className="text-lg font-semibold text-white">Legacy Vault</h3>
-            <p className="mt-2 text-sm text-white/60">
-              Multi-chain estate planning — Rust API + Next.js. BTC, XMR, STX timelock
-              policies.
-            </p>
-          </a>
-          <div className="glass-card border-white/10 p-6 opacity-80">
-            <h3 className="text-lg font-semibold text-white">More labs soon</h3>
-            <p className="mt-2 text-sm text-white/60">
-              FieldHub, scrapers, and integration prototypes — curated on{" "}
-              <Link href="#github" className="text-cyanGlow hover:underline">
-                /github
-              </Link>{" "}
-              when ready.
-            </p>
-          </div>
+          <span className="mt-4 inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.2em] text-white/35 transition group-hover:text-violetGlow">
+            View repo →
+          </span>
+        </a>
+        <div className="rounded-2xl border border-white/10 bg-white/[0.02] p-6">
+          <p className="text-xs font-semibold uppercase tracking-[0.25em] text-white/35">
+            Pipeline
+          </p>
+          <h3 className="mt-2 font-display text-xl font-bold text-white">More labs soon</h3>
+          <p className="mt-3 text-sm leading-relaxed text-white/55">
+            FieldHub, scrapers, and integration prototypes — curated on{" "}
+            <Link href="#github" className="text-cyanGlow hover:underline">
+              open source
+            </Link>{" "}
+            when ready.
+          </p>
         </div>
       </div>
-    </section>
+    </ChapterSection>
   );
 }
 
 export function WorkSection() {
   return (
-    <section id="work" className="section-padding bg-vault-950">
-      <div className="container-narrow px-4 sm:px-6 lg:px-8">
-        <div className="mx-auto max-w-3xl text-center">
-          <p className="text-xs font-semibold uppercase tracking-[0.3em] text-emeraldGlow/80">
-            Work
+    <ChapterSection
+      id="work"
+      chapter="004"
+      label="Work"
+      title="Mission logs"
+      description="Real integrations and case studies — not roadmap placeholders."
+      accent="emerald"
+      className="bg-vault-950"
+      align="left"
+    >
+      <div className="grid gap-6 lg:grid-cols-2">
+        <article className="rounded-2xl border border-gold/20 bg-white/[0.03] p-6">
+          <p className="text-xs font-semibold uppercase tracking-[0.3em] text-gold/70">Trade</p>
+          <h3 className="mt-2 font-display text-2xl font-bold text-white">Garner Roofing</h3>
+          <p className="mt-4 text-sm leading-relaxed text-white/55">
+            ServiceTitan cleanup, workflow fixes, and field-service optimization for a roofing
+            contractor — from at-risk TitanAdvisor status to healthy adoption in eight weeks.
           </p>
-          <h2 className="mt-3 text-3xl font-bold text-white sm:text-4xl">
-            Mission logs
-          </h2>
-          <p className="mt-4 text-white/65">
-            Real integrations and case studies — not roadmap placeholders.
-          </p>
-        </div>
-        <div className="mt-10 grid gap-4 lg:grid-cols-2">
-          <article className="glass-card p-6">
-            <p className="text-xs uppercase tracking-widest text-gold/80">Trade</p>
-            <h3 className="mt-2 text-xl font-semibold text-white">Garner Roofing</h3>
-            <p className="mt-3 text-sm text-white/60">
-              ServiceTitan cleanup, workflow fixes, and field-service optimization for a
-              roofing contractor.
-            </p>
-            <Link href="/trade" className="mt-4 inline-block text-sm text-cyanGlow hover:underline">
-              See Trade services →
-            </Link>
-          </article>
-          <a
-            href="https://github.com/The-Key-Holders/currentrms-google-sheets-sync"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="glass-card p-6 transition hover:border-emeraldGlow/40"
+          <div className="mt-6 grid grid-cols-3 gap-3">
+            {[
+              { m: "8 wks", l: "Recovery" },
+              { m: "30+", l: "Users" },
+              { m: "98%", l: "Mobile" },
+            ].map((s) => (
+              <div key={s.l} className="rounded-lg border border-white/10 p-3 text-center">
+                <p className="font-display text-lg font-bold text-gold">{s.m}</p>
+                <p className="text-[10px] uppercase tracking-wider text-white/40">{s.l}</p>
+              </div>
+            ))}
+          </div>
+          <Link
+            href="/trade#case-study"
+            className="mt-6 inline-flex items-center gap-2 text-sm font-semibold text-cyanGlow hover:underline"
           >
-            <p className="text-xs uppercase tracking-widest text-emeraldGlow/80">Integration</p>
-            <h3 className="mt-2 text-xl font-semibold text-white">CurrentRMS ↔ Sheets</h3>
-            <p className="mt-3 text-sm text-white/60">
-              Daily opportunity sync from Current RMS API to Google Sheets for event
-              production reporting.
-            </p>
-          </a>
-        </div>
-      </div>
-    </section>
-  );
-}
-
-export function AboutSection() {
-  return (
-    <section id="about" className="section-padding border-t border-white/5">
-      <div className="container-narrow px-4 sm:px-6 lg:px-8">
-        <div className="mx-auto max-w-3xl">
-          <h2 className="text-center text-3xl font-bold text-white">About The Key Holders</h2>
-          <p className="mt-6 leading-relaxed text-white/65">
-            The Key Holders is an umbrella for ventures that make technology work for
-            real people — from neighborly tech support through{" "}
-            <a
-              href="https://www.thegeeksnextdoor.com"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-cyanGlow hover:underline"
-            >
-              Geeks Next Door
-            </a>
-            , to contractor platform work through{" "}
-            <Link href="/trade" className="text-gold hover:underline">
-              Key Holders Trade
-            </Link>
-            .
+            Read case study →
+          </Link>
+        </article>
+        <a
+          href="https://github.com/The-Key-Holders/currentrms-google-sheets-sync"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="group rounded-2xl border border-emeraldGlow/20 bg-white/[0.03] p-6 transition hover:border-emeraldGlow/45"
+        >
+          <p className="text-xs font-semibold uppercase tracking-[0.3em] text-emeraldGlow/70">
+            Integration
           </p>
-        </div>
+          <h3 className="mt-2 font-display text-2xl font-bold text-white">
+            CurrentRMS ↔ Sheets
+          </h3>
+          <p className="mt-4 text-sm leading-relaxed text-white/55">
+            Daily opportunity sync from Current RMS API to Google Sheets for event production
+            reporting.
+          </p>
+          <span className="mt-6 inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.2em] text-white/35 transition group-hover:text-emeraldGlow">
+            View repo →
+          </span>
+        </a>
       </div>
-    </section>
+    </ChapterSection>
   );
 }
 
@@ -145,62 +138,78 @@ export function GithubSection() {
   ];
 
   return (
-    <section id="github" className="section-padding bg-vault-900/40">
-      <div className="container-narrow px-4 sm:px-6 lg:px-8">
-        <div className="mx-auto max-w-2xl text-center">
-          <h2 className="text-3xl font-bold text-white">Open source</h2>
-          <p className="mt-4 text-white/60">Curated repos — not the full org dump.</p>
-        </div>
-        <div className="mt-10 grid gap-4 sm:grid-cols-2">
-          {repos.map((repo) => (
-            <a
-              key={repo.name}
-              href={repo.href}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="glass-card p-5 transition hover:border-cyanGlow/40"
-            >
-              <h3 className="font-semibold text-white">{repo.name}</h3>
-              <p className="mt-2 text-sm text-white/60">{repo.desc}</p>
-            </a>
-          ))}
-        </div>
-        <p className="mt-8 text-center">
+    <ChapterSection
+      id="github"
+      chapter="005"
+      label="Open Source"
+      title="Curated repos"
+      description="Not the full org dump — projects we stand behind and actively maintain."
+      accent="cyan"
+      className="bg-vault-900/40"
+    >
+      <div className="grid gap-4 sm:grid-cols-2">
+        {repos.map((repo) => (
           <a
-            href="https://github.com/The-Key-Holders"
+            key={repo.name}
+            href={repo.href}
             target="_blank"
             rel="noopener noreferrer"
-            className="text-sm text-cyanGlow hover:underline"
+            className="group rounded-2xl border border-white/10 bg-white/[0.03] p-5 transition hover:border-cyanGlow/35"
           >
-            The-Key-Holders on GitHub →
+            <h3 className="font-semibold text-white">{repo.name}</h3>
+            <p className="mt-2 text-sm text-white/55">{repo.desc}</p>
+            <span className="mt-4 inline-block text-xs font-semibold uppercase tracking-[0.2em] text-white/30 transition group-hover:text-cyanGlow">
+              GitHub →
+            </span>
           </a>
-        </p>
+        ))}
       </div>
-    </section>
+      <p className="mt-8">
+        <a
+          href="https://github.com/The-Key-Holders"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-sm font-semibold text-cyanGlow hover:underline"
+        >
+          The-Key-Holders on GitHub →
+        </a>
+      </p>
+    </ChapterSection>
   );
 }
 
 export function ContactSection() {
   return (
-    <section id="connect" className="section-padding border-t border-white/5">
-      <div className="container-narrow px-4 sm:px-6 lg:px-8">
-        <div className="mx-auto max-w-xl text-center">
-          <h2 className="text-3xl font-bold text-white">Connect</h2>
-          <p className="mt-4 text-white/60">
-            Consumer services, contractor integrations, or collabs — we respond within one
-            business day.
-          </p>
-          <div className="glass-card mt-8 p-6 text-left">
-            <p className="text-sm text-white/45">Email</p>
-            <a
-              href="mailto:javadkhoshnevisan@gmail.com"
-              className="mt-1 block text-lg font-semibold text-cyanGlow hover:underline"
-            >
-              javadkhoshnevisan@gmail.com
-            </a>
-          </div>
+    <ChapterSection
+      id="connect"
+      chapter="007"
+      label="Connect"
+      title="Start a conversation"
+      description="Consumer services, contractor integrations, or collabs — we respond within one business day."
+      accent="cyan"
+    >
+      <div className="mx-auto max-w-lg rounded-2xl border border-white/10 bg-white/[0.03] p-8 text-center">
+        <p className="text-xs font-semibold uppercase tracking-[0.3em] text-white/40">Email</p>
+        <a
+          href="mailto:javadkhoshnevisan@gmail.com"
+          className="mt-3 block font-display text-xl font-bold text-cyanGlow hover:underline sm:text-2xl"
+        >
+          javadkhoshnevisan@gmail.com
+        </a>
+        <div className="mt-8 flex flex-col items-center justify-center gap-4 sm:flex-row">
+          <a
+            href="https://www.thegeeksnextdoor.com"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="btn-primary"
+          >
+            Get Tech Help
+          </a>
+          <Link href="/trade" className="btn-secondary">
+            Contractor Services
+          </Link>
         </div>
       </div>
-    </section>
+    </ChapterSection>
   );
 }

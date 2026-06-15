@@ -1,15 +1,15 @@
 "use client";
 
 import BrandLogo from "@/components/BrandLogo";
+import OverlayMenu from "@/components/layout/OverlayMenu";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
 const navLinks = [
   { href: "/", label: "Hub" },
-  { href: "/#labs", label: "Labs" },
-  { href: "/#work", label: "Work" },
   { href: "/trade", label: "Trade" },
+  { href: "/#founders", label: "Founders" },
   { href: "/#connect", label: "Connect" },
 ];
 
@@ -24,13 +24,13 @@ export default function Header() {
         "sticky top-0 z-50 border-b backdrop-blur-md transition-colors",
         isTrade
           ? "border-gold/20 bg-vault-950/90"
-          : "border-white/10 bg-vault-950/75"
+          : "border-white/10 bg-vault-950/80"
       )}
     >
       <div className="container-narrow flex h-16 items-center justify-between gap-4 px-4 sm:px-6 lg:px-8">
         <BrandLogo variant={isTrade ? "trade" : "parent"} />
 
-        <nav className="hidden items-center gap-1 md:flex">
+        <nav className="hidden items-center gap-1 lg:flex" aria-label="Primary">
           {navLinks.map((link) => {
             const isActive =
               link.href === "/"
@@ -58,14 +58,17 @@ export default function Header() {
           })}
         </nav>
 
-        <Link
-          href="https://www.thegeeksnextdoor.com"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="btn-primary hidden text-xs sm:inline-flex sm:px-4 sm:py-2"
-        >
-          Get Tech Help
-        </Link>
+        <div className="flex items-center gap-2 sm:gap-3">
+          <Link
+            href="https://www.thegeeksnextdoor.com"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="btn-primary hidden text-xs sm:inline-flex sm:px-4 sm:py-2"
+          >
+            Get Tech Help
+          </Link>
+          <OverlayMenu />
+        </div>
       </div>
     </header>
   );

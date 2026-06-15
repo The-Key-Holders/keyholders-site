@@ -3,6 +3,7 @@ import { DM_Sans, Syne } from "next/font/google";
 import Header from "@/components/Header";
 import SmoothScroll from "@/components/providers/SmoothScroll";
 import "./globals.css";
+import { cn } from "@/lib/utils";
 
 const syne = Syne({
   subsets: ["latin"],
@@ -50,7 +51,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={`${syne.variable} ${dmSans.variable}`}>
+    <html lang="en" className={cn(syne.variable, dmSans.variable)}>
       <body className="min-h-screen">
         <SmoothScroll>
           <Header />

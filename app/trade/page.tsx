@@ -1,7 +1,9 @@
+import CheckoutButton from "@/components/CheckoutButton";
 import Footer from "@/components/Footer";
 import ServiceCard from "@/components/ServiceCard";
 import TradeHero from "@/components/TradeHero";
 import TradeSectionHeader from "@/components/trade/TradeSectionHeader";
+import type { TradeProductId } from "@/lib/trade-products";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
@@ -22,7 +24,6 @@ const services = [
       "Priority issue list (top 5)",
       "30-min follow-up call",
     ],
-    stripePriceId: "price_diagnostic_497",
   },
   {
     name: "Health Check",
@@ -37,7 +38,6 @@ const services = [
       "90-day improvement roadmap",
     ],
     highlighted: true,
-    stripePriceId: "price_health_check_1497",
   },
   {
     name: "Quick Connect",
@@ -51,7 +51,6 @@ const services = [
       "Team handoff documentation",
       "14-day post-launch support",
     ],
-    stripePriceId: "price_quick_connect_2997",
   },
   {
     name: "Integration Audit",
@@ -64,7 +63,6 @@ const services = [
       "Cost & redundancy review",
       "Consolidation recommendations",
     ],
-    stripePriceId: "price_integration_audit_997",
   },
   {
     name: "User Training Sprint",
@@ -77,7 +75,6 @@ const services = [
       "Adoption tracking setup",
       "Manager coaching call",
     ],
-    stripePriceId: "price_user_training_1997",
   },
   {
     name: "Ongoing Support",
@@ -90,7 +87,6 @@ const services = [
       "Monthly health snapshot",
       "Rollover unused hours (1 month)",
     ],
-    stripePriceId: "price_ongoing_support_997",
   },
 ];
 
@@ -121,7 +117,7 @@ const faqs = [
   },
 ];
 
-const featuredBuy = [
+const featuredBuy: { label: string; price: number; id: TradeProductId }[] = [
   { label: "Diagnostic", price: 497, id: "diagnostic" },
   { label: "Health Check", price: 1497, id: "health_check" },
   { label: "Quick Connect", price: 2997, id: "quick_connect" },
@@ -137,28 +133,21 @@ export default function TradePage() {
           <TradeSectionHeader
             label="Engage"
             title="Start with a fixed-price engagement"
-            description="Placeholder Stripe buy buttons — replace href and data attributes with live Stripe Buy Button embeds."
+            description="Fixed-price engagements — checkout via Stripe. Buy Button embeds activate automatically when configured in .env.local."
           />
           <div className="mt-10 grid gap-6 sm:grid-cols-3">
             {featuredBuy.map((item) => (
               <div
                 key={item.id}
-                className="glass-card border-gold/20 p-6 text-center transition hover:border-gold/40"
+                className="rounded-2xl border border-gold/20 bg-white/[0.03] p-6 text-center transition hover:border-gold/40"
               >
-                <h3 className="text-lg font-semibold text-white">{item.label}</h3>
-                <p className="mt-2 text-3xl font-bold text-gold">
+                <h3 className="font-display text-lg font-semibold text-white">{item.label}</h3>
+                <p className="mt-2 font-display text-3xl font-bold text-gold">
                   ${item.price.toLocaleString()}
                 </p>
-                <a
-                  href="#buy"
-                  className="btn-gold mt-6 w-full"
-                  data-stripe-buy-button=""
-                  data-stripe-product={item.label}
-                  data-stripe-amount={item.price}
-                  data-stripe-price-id={`price_${item.id}_${item.price}`}
-                >
+                <CheckoutButton productId={item.id} className="mt-6 w-full">
                   Buy Now
-                </a>
+                </CheckoutButton>
               </div>
             ))}
           </div>
@@ -282,14 +271,7 @@ export default function TradePage() {
               Start with a Diagnostic or book a free 15-minute intro call.
             </p>
             <div className="mt-8 flex flex-col items-center justify-center gap-4 sm:flex-row">
-              <a
-                href="#buy"
-                className="btn-gold"
-                data-stripe-product="Diagnostic"
-                data-stripe-amount={497}
-              >
-                Book Diagnostic — $497
-              </a>
+              <CheckoutButton productId="diagnostic">Book Diagnostic — $497</CheckoutButton>
               <a href="mailto:javadkhoshnevisan@gmail.com" className="btn-secondary">
                 Schedule Intro Call
               </a>

@@ -1,8 +1,9 @@
 import Footer from "@/components/Footer";
+import FoundersSection from "@/components/home/FoundersSection";
+import VenturesSection from "@/components/home/VenturesSection";
 import dynamic from "next/dynamic";
 import StaticHeroShell from "@/components/hero/StaticHeroShell";
 import {
-  AboutSection,
   ContactSection,
   GithubSection,
   LabsSection,
@@ -17,10 +18,11 @@ export default function HomePage() {
   return (
     <>
       <VaultHero />
+      <VenturesSection />
       <LabsSection />
       <WorkSection />
       <GithubSection />
-      <AboutSection />
+      <FoundersSection />
       <ContactSection />
       <Footer variant="parent" />
     </>

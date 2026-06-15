@@ -1,3 +1,7 @@
+"use client";
+
+import CheckoutButton from "@/components/CheckoutButton";
+import { nameToProductId } from "@/lib/trade-products";
 import { cn } from "@/lib/utils";
 
 interface ServiceCardProps {
@@ -6,7 +10,6 @@ interface ServiceCardProps {
   description: string;
   features: string[];
   highlighted?: boolean;
-  stripePriceId?: string;
 }
 
 export default function ServiceCard({
@@ -15,7 +18,6 @@ export default function ServiceCard({
   description,
   features,
   highlighted = false,
-  stripePriceId,
 }: ServiceCardProps) {
   const formattedPrice = new Intl.NumberFormat("en-US", {
     style: "currency",
@@ -23,13 +25,15 @@ export default function ServiceCard({
     minimumFractionDigits: 0,
   }).format(price);
 
+  const productId = nameToProductId(name);
+
   return (
     <div
       className={cn(
-        "glass-card flex flex-col p-6 transition duration-300",
+        "flex flex-col rounded-2xl border bg-white/[0.03] p-6 transition duration-300",
         highlighted
           ? "border-gold/40 shadow-[0_0_32px_rgba(245,158,11,0.12)] hover:border-gold/60"
-          : "hover:border-white/20"
+          : "border-white/10 hover:border-white/20"
       )}
     >
       {highlighted && (
@@ -38,17 +42,17 @@ export default function ServiceCard({
         </span>
       )}
 
-      <h3 className="text-xl font-semibold text-white">{name}</h3>
-      <p className="mt-2 text-sm text-white/60">{description}</p>
+      <h3 className="font-display text-xl font-semibold text-white">{name}</h3>
+      <p className="mt-2 text-sm text-white/55">{description}</p>
 
       <div className="mt-4">
-        <span className="text-3xl font-bold text-gold">{formattedPrice}</span>
+        <span className="font-display text-3xl font-bold text-gold">{formattedPrice}</span>
         <span className="text-sm text-white/45"> one-time</span>
       </div>
 
       <ul className="mt-6 flex-1 space-y-3">
         {features.map((feature) => (
-          <li key={feature} className="flex items-start gap-2 text-sm text-white/65">
+          <li key={feature} className="flex items-start gap-2 text-sm text-white/60">
             <svg
               className="mt-0.5 h-4 w-4 shrink-0 text-gold"
               fill="none"
@@ -63,15 +67,13 @@ export default function ServiceCard({
         ))}
       </ul>
 
-      <a
-        href="#buy"
-        className={cn("mt-8 w-full text-center", highlighted ? "btn-gold" : "btn-secondary")}
-        data-stripe-price={stripePriceId ?? `price_placeholder_${name.toLowerCase().replace(/\s+/g, "_")}`}
-        data-stripe-amount={price}
-        data-stripe-product={name}
+      <CheckoutButton
+        productId={productId}
+        variant={highlighted ? "gold" : "secondary"}
+        className="mt-8 w-full"
       >
         Get Started
-      </a>
+      </CheckoutButton>
     </div>
   );
 }
