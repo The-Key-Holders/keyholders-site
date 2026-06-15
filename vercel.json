@@ -1,0 +1,19 @@
+{
+  "redirects": [
+    {
+      "source": "/neural-key-labs",
+      "destination": "/trade",
+      "permanent": true
+    },
+    {
+      "source": "/neuralkeylabs",
+      "destination": "/trade",
+      "permanent": true
+    },
+    {
+      "source": "/neural-key-labs/:path*",
+      "destination": "/trade",
+      "permanent": true
+    }
+  ]
+}
