@@ -1,4 +1,5 @@
 import CheckoutButton from "@/components/CheckoutButton";
+import CheckoutFeedback from "@/components/CheckoutFeedback";
 import Footer from "@/components/Footer";
 import ServiceCard from "@/components/ServiceCard";
 import TradeHero from "@/components/TradeHero";
@@ -123,10 +124,24 @@ const featuredBuy: { label: string; price: number; id: TradeProductId }[] = [
   { label: "Quick Connect", price: 2997, id: "quick_connect" },
 ];
 
-export default function TradePage() {
+export default function TradePage({
+  searchParams,
+}: {
+  searchParams?: { checkout?: string };
+}) {
+  // Compute checkout status from query param (set by Stripe success/cancel URLs in /api/checkout).
+  // Valid values: "success" | "cancelled" (see handoff §8). Null otherwise.
+  const checkout = searchParams?.checkout;
+  const feedbackStatus =
+    checkout === "success" ? "success" : checkout === "cancelled" ? "cancelled" : null;
+
   return (
     <div className="bg-vault-950">
       <TradeHero />
+
+      {/* Checkout feedback banner renders early (right after hero) when ?checkout param present.
+          Dismiss action uses router.replace to clean URL. All original sections (#buy, case-study, services, guarantee, faq, final-cta) remain 100% intact below. */}
+      <CheckoutFeedback status={feedbackStatus} />
 
       <section id="buy" className="border-t border-white/5 bg-vault-900/40">
         <div className="container-narrow section-padding px-4 sm:px-6 lg:px-8">

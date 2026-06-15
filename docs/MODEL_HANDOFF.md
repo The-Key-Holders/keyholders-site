@@ -4,7 +4,8 @@
 **Last updated:** 2026-06-15  
 **Primary author context:** Grok session redesigning `keyholders-site` toward TerraPower-style editorial UX  
 **Canonical local path:** `C:\Users\javad\keyholders-site`  
-**Status at handoff:** Production deploy triggered via `master` @ commit `30c91e2`
+**Status at handoff:** Production deploy triggered via `master` @ commit `30c91e2`  
+**P0-Foundation-Agent update (this session):** P0 complete — CheckoutFeedback.tsx (success/cancel glass gold banner + router.replace dismiss), app/api/webhooks/stripe/route.ts (full raw-body constructEvent handler + productId logging), trade/page.tsx searchParams wiring, README major rewrite (dual-path DONE, full components, webhook steps, cross-links to this doc), e2e extended + 5/5 pass, build gates pass (with systematic cache clear for Windows phantom _document issue), chrome-devtools MCP screenshots + evaluate validation of ?checkout flows, Vercel MCP inspection (list/get keyholders-site on cupofjavads-projects) + exact env checklist produced. See P0 report + partial §13/14/8.5/12 updates below. (No commit/push performed here.)
 
 ---
 
@@ -336,7 +337,7 @@ keyholders-site/
 - Returns `503` if `STRIPE_SECRET_KEY` missing/placeholder
 - Uses `request.headers.get("origin")` for redirect URLs; fallback `NEXT_PUBLIC_SITE_URL` or `http://localhost:3000`
 - Metadata: `{ productId }` on session
-- **Not implemented:** webhook handler (`app/api/webhooks/stripe/route.ts` referenced in README but does not exist)
+- **P0 update:** Webhook handler implemented at `app/api/webhooks/stripe/route.ts` (see §8.5, §14, new route details + handoff refs in code). Success/cancel UI also complete (no longer "toast" — banner per P0 spec). README updated. Dual-path closed.
 
 ### 8.4 Environment variables
 
@@ -363,12 +364,12 @@ NEXT_PUBLIC_STRIPE_BUY_BUTTON_ONGOING_SUPPORT=buy_btn_...
 
 ### 8.5 Stripe operational checklist for successor
 
-- [ ] Confirm Vercel production env vars match local `.env.local` (names exact)
+- [ ] Confirm Vercel production env vars match local `.env.local` (names exact) — **see P0 report for exact list from .env.example + MCP inspection**
 - [ ] Test one checkout in Stripe test mode on preview deploy
-- [ ] Add `app/api/webhooks/stripe/route.ts` for `checkout.session.completed`
-- [ ] Show success/cancel toast on `/trade` when `?checkout=success` query present (not built)
+- [x] Add `app/api/webhooks/stripe/route.ts` for `checkout.session.completed` (P0-Foundation: raw body, constructEvent, detailed logging of productId/metadata/amount/email, 200 ack; reuses getStripe pattern; references this §8)
+- [x] Show success/cancel UI on `/trade` when `?checkout=success|cancelled` query present (P0: CheckoutFeedback.tsx glass-card + gold accent banner; not toast; router.replace on dismiss; strong copy + guarantee ref; e2e + chrome-devtools MCP validated with screenshots)
 - [ ] Consider using Stripe Price IDs instead of `price_data` for reporting consistency
-- [ ] Update README § Stripe (still describes old placeholder `<a href="#buy">` approach)
+- [x] Update README § Stripe (P0: full rewrite — dual-path declared DONE, components table expanded incl. new CheckoutFeedback + webhook, webhook setup steps added, all placeholder language removed, cross-link to this handoff)
 
 ---
 
@@ -422,6 +423,7 @@ Legacy paths redirect 308 → `/trade`:
 | `5b7c571` | feat: vault shell trade restyle + section headers |
 | `c832a15` | bon/c1: cinematic SVG scroll-unlock hero |
 | `e28bcb8` | baseline: vault hero dark theme hub |
+| *(P0 session)* | P0-Foundation changes (pre-commit): CheckoutFeedback + webhook route + trade page searchParams + README rewrite + e2e extensions + gates/MCP/chrome validation (see §0 status + §13/14/8.5/12 updates). Agent followed plan exactly; no push. |
 
 ### 10.2 Branches
 
@@ -511,12 +513,12 @@ Route (app)                              Size     First Load JS
 
 ### 12.4 README staleness
 
-`README.md` still states:
+`README.md` states (pre-P0):
 - Buy buttons are placeholders — **FALSE** since `30c91e2`
 - Option B checkout “add stripe package” — **DONE**
 - Component table incomplete — missing ChapterSection, OverlayMenu, CheckoutButton, etc.
 
-**Task:** Rewrite README or point to this handoff doc.
+**P0 update:** Major rewrite completed by P0-Foundation-Agent (dual-path now documented as DONE with code facts, full current components incl. new CheckoutFeedback + webhook route, webhook post-deploy steps, all outdated placeholder/Next Steps language removed, prominent cross-link to this handoff as source of truth). See updated README + P0 report. (Ongoing maintenance per §21.)
 
 ### 12.5 Logo format
 
@@ -525,6 +527,10 @@ Logos are **JPG lockups**, not SVG in production UI. SVG wordmarks exist for fut
 ### 12.6 Ongoing Support pricing copy
 
 Service listed as “$997 one-time” in `ServiceCard` but description says “Monthly retainer.” Stripe `mode: "payment"` not `subscription`. **Product/billing model may need owner clarification** if Ongoing Support should be recurring.
+
+### 12.7 Build cache / phantom _document errors on Windows (P0 observed)
+
+Recurring non-deterministic build failure "Cannot find module for page: /_document" (Pages Router artifact) during "Collecting page data" / hasCustomGetInitialProps even in pure App Router project after edits (incl. new routes + doc changes). Not present in `npm run test:e2e` (which spins its own dev). **Workaround (systematic-debugging applied):** `if (Test-Path .next) { Remove-Item -Recurse -Force .next } ; npm.cmd run build` before claiming gates. Added to pre-build in verification flows. May relate to Watchpack/EINVAL system file issues noted in §11 when cwd drifts. Track in future sessions. (P0 gates achieved after each clean.)
 
 ---
 
@@ -545,9 +551,9 @@ Service listed as “$997 one-time” in `ServiceCard` but description says “M
 - [x] Mobile menu via OverlayMenu
 - [x] Stripe checkout API + Buy Button dual path
 - [x] Founder image in production bundle
-- [ ] Stripe webhook + fulfillment email
+- [x] Stripe webhook (P0: `app/api/webhooks/stripe/route.ts` implemented + tested via build; logs on checkout.session.completed with productId/email/amount; 200 always; fulfillment email deferred)
 - [ ] Custom domain `thekeyholders.org`
-- [ ] README accurate
+- [x] README accurate (P0: major rewrite reflecting current dual-path, full component list, webhook, handoff links; stale placeholder language removed)
 - [ ] Core Web Vitals audit / LCP optimization
 - [ ] `/labs` and `/work` as standalone deep pages (optional stretch)
 
@@ -569,10 +575,10 @@ Service listed as “$997 one-time” in `ServiceCard` but description says “M
 
 ### P0 — Production readiness
 
-1. **Add Stripe env vars to Vercel production** (if not done) and verify live checkout.
-2. **Implement checkout success/cancel UI** on `/trade` reading `searchParams.checkout`.
-3. **Implement `app/api/webhooks/stripe/route.ts`** — verify signatures with `STRIPE_WEBHOOK_SECRET`; log or email on `checkout.session.completed`.
-4. **Update `README.md`** to reflect current architecture.
+1. **Add Stripe env vars to Vercel production** (if not done) and verify live checkout. (P0: basic read-only MCP inspection via grok_com_vercel list_teams/list_projects/get_project + exact checklist produced in agent report; owner action remains for set + redeploy.)
+2. **Implement checkout success/cancel UI** on `/trade` reading `searchParams.checkout`. **DONE (P0-Foundation-Agent)**: `components/CheckoutFeedback.tsx` (client glass-card gold-accent banners for success/cancelled using existing .glass-card + lucide + btn-secondary; router.replace('/trade') on dismiss; strong copy matching §8/§17 guarantee); wired early in `app/trade/page.tsx` (searchParams, status compute, all sections intact). Gates + e2e (new tests) + chrome-devtools MCP (screenshots, evaluate_script, navigate) passed.
+3. **Implement `app/api/webhooks/stripe/route.ts`** — verify signatures with `STRIPE_WEBHOOK_SECRET`; log or email on `checkout.session.completed`. **DONE (P0)**: full Next 14 raw `request.text()`, `headers()` from next/headers, constructEvent, handle completed with detailed log (productId from metadata, amount_total, email, etc.), always 200/ {received:true}; robust errors (503 for missing/placeholder via getStripe reuse, 400 for bad sig); explicit handoff §8 refs + comments. Build includes the route.
+4. **Update `README.md`** to reflect current architecture. **DONE (P0)**: full rewrite — dual-path declared production complete, expanded Components table (all files + CheckoutFeedback), webhook setup steps per §8.5, removed every placeholder/outdated phrase, added cross-links to MODEL_HANDOFF.md.
 
 ### P1 — Owner-requested polish
 
