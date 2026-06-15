@@ -23,6 +23,21 @@ export const metadata: Metadata = {
   },
   description:
     "The Key Holders — high-tech venture hub for digital life services, contractor integrations, labs, and shipped work.",
+  metadataBase: new URL("https://www.thekeyholders.org"),
+  openGraph: {
+    title: "The Key Holders",
+    description:
+      "Unlock your digital universe — Geeks Next Door, Key Holders Trade, labs, and shipped work.",
+    url: "https://www.thekeyholders.org",
+    siteName: "The Key Holders",
+    type: "website",
+    locale: "en_US",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "The Key Holders",
+    description: "High-tech venture hub for digital life services.",
+  },
   icons: {
     icon: "/branding/parent-lockup.jpg",
     apple: "/branding/parent-lockup.jpg",

@@ -1,5 +1,6 @@
 import Footer from "@/components/Footer";
-import VaultHero from "@/components/hero/VaultHero";
+import dynamic from "next/dynamic";
+import StaticHeroShell from "@/components/hero/StaticHeroShell";
 import {
   AboutSection,
   ContactSection,
@@ -7,6 +8,10 @@ import {
   LabsSection,
   WorkSection,
 } from "@/components/home/HomeSections";
+
+const VaultHero = dynamic(() => import("@/components/hero/VaultHero"), {
+  loading: () => <StaticHeroShell />,
+});
 
 export default function HomePage() {
   return (
