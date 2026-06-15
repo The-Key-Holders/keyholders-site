@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="320" height="120" viewBox="0 0 320 120" role="img" aria-label="Key Holders Trade stacked">
+  <rect width="320" height="120" fill="#0F172A"/>
+  <path d="M160 24c-8 0-14 6-14 13 0 6 5 11 11 12l4 18h0l4-18c6-1 11-6 11-12 0-7-6-13-14-13z" fill="#F59E0B"/>
+  <text x="160" y="88" text-anchor="middle" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="22" font-weight="700" fill="#FAFAFA">Key Holders</text>
+  <text x="160" y="108" text-anchor="middle" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="12" font-weight="700" fill="#F59E0B" letter-spacing="5">TRADE</text>
+</svg>

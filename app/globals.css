@@ -1,0 +1,58 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    @apply bg-vault-950 font-sans text-white antialiased;
+  }
+
+  h1,
+  h2,
+  h3 {
+    @apply font-display;
+  }
+}
+
+@layer components {
+  .btn-primary {
+    @apply inline-flex items-center justify-center rounded-lg bg-gradient-to-r from-cyanGlow to-teal px-6 py-3 text-sm font-semibold text-vault-950 shadow-[0_0_24px_rgba(34,211,238,0.25)] transition hover:brightness-110 focus:outline-none focus:ring-2 focus:ring-cyanGlow focus:ring-offset-2 focus:ring-offset-vault-950;
+  }
+
+  .btn-secondary {
+    @apply inline-flex items-center justify-center rounded-lg border border-white/15 bg-white/5 px-6 py-3 text-sm font-semibold text-white backdrop-blur-sm transition hover:border-cyanGlow/40 hover:bg-white/10 focus:outline-none focus:ring-2 focus:ring-cyanGlow focus:ring-offset-2 focus:ring-offset-vault-950;
+  }
+
+  .btn-gold {
+    @apply inline-flex items-center justify-center rounded-lg bg-gold px-6 py-3 text-sm font-semibold text-vault-950 shadow-[0_0_20px_rgba(245,158,11,0.25)] transition hover:bg-goldLight focus:outline-none focus:ring-2 focus:ring-gold focus:ring-offset-2 focus:ring-offset-vault-950;
+  }
+
+  .card {
+    @apply rounded-xl border border-white/10 bg-white/5 p-6 shadow-sm backdrop-blur-sm;
+  }
+
+  .glass-card {
+    @apply rounded-2xl border border-white/10 bg-white/[0.04] backdrop-blur-md;
+  }
+
+  .section-padding {
+    @apply px-4 py-16 sm:px-6 lg:px-8 lg:py-24;
+  }
+
+  .container-narrow {
+    @apply mx-auto max-w-6xl;
+  }
+}
+
+/* Trade route keeps readable light surfaces inside dark shell */
+.theme-trade .trade-surface {
+  @apply bg-offwhite text-charcoal;
+}
+
+.theme-trade .trade-surface .card {
+  @apply border-gray-100 bg-white text-charcoal;
+}

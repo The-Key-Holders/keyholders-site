@@ -1,0 +1,153 @@
+================================================================================
+THE KEY HOLDERS SITE — GROK BUILD PLAYBOOK
+Project: C:\Users\javad\keyholders-site
+Updated: June 15, 2026
+================================================================================
+
+Use this file as your command cheat sheet while building the high-tech umbrella
+site. Paste prompts into Grok Build (Ctrl+P for palette).
+
+================================================================================
+PHASE MAP → GROK COMMANDS
+================================================================================
+
+PHASE 1 — CREATIVE DIRECTION (done)
+  /plan Design the Vault hero: dark cinematic hub, key unlock, venture orbit
+  brainstorming skill (auto) — requirements before creative work
+
+PHASE 2 — FOUNDATION + HERO (in progress)
+  /implement Upgrade keyholders-site: dark theme, Syne/DM Sans, framer-motion,
+    lenis smooth scroll, VaultHero on / with venture orbit cards
+  /check-work — verify build + review diff after hero lands
+
+PHASE 3 — PICK BEST HERO (when git is initialized)
+  /best-of-n 3 Vault hero on homepage — SVG scroll-unlock vs CSS particles vs
+    minimal glass orbit. Pick winner for mobile perf.
+  Requires: git repo (now initialized in this project)
+
+PHASE 4 — SUB-PAGES
+  /implement Add /geeks /work /labs /github /connect routes in vault design system
+  /implement Port /trade to dark-gold industrial variant with page transitions
+  shadcn skill (auto when adding UI primitives)
+  nextjs + react-best-practices skills (auto on TSX edits)
+
+PHASE 5 — DEPLOY + DNS
+  /deploy
+  vercel-cli + vercel MCP — link project, env vars, preview URLs
+  /verification end-to-end: home hero, /trade CTA, mobile scroll, LCP check
+
+PHASE 6 — POLISH
+  /web-perf audit LCP on thekeyholders.org homepage
+  /a11y-debugging keyboard nav + reduced-motion on vault hero
+  chrome-devtools MCP — debug animations, network, mobile viewport
+  /review — pre-merge code review on branch
+
+PHASE 7 — CONTENT
+  /docx case study for Garner Roofing (optional export from /work)
+  memory MCP — persist brand decisions, Stripe SKU IDs, DNS status across sessions
+
+================================================================================
+SLASH COMMANDS — QUICK REFERENCE FOR THIS PROJECT
+================================================================================
+
+BUILD & QUALITY
+  /implement <task>          Full implement → review → fix loop
+  /check-work                Self-verify build/tests before claiming done
+  /review                    Review uncommitted changes
+  /best-of-n 3 <task>        Parallel hero/layout candidates (needs git)
+
+PLANNING
+  /plan <task>               Explore + plan before code (ambiguous scope)
+  /design <topic>            Full design-doc-writer + reviewer loop
+  /execute-plan              Run PR plan DAG from design doc
+
+DEPLOY & DEBUG
+  /deploy                    Vercel deploy workflow
+  /verification <issue>      Full-story browser → API → data check
+  /web-perf                  Core Web Vitals via Chrome DevTools MCP
+  /chrome-devtools <task>    Browser automation + debugging
+
+PARALLEL / BACKGROUND
+  Ctrl+G                     Send long build to background
+  Ctrl+B                     Tasks pane
+  /loop 30m check Vercel preview health
+
+MID-TURN
+  Ctrl+Enter / Ctrl+I        Steer agent without cancelling
+  /btw also add prefers-reduced-motion fallback
+
+================================================================================
+SKILLS THAT AUTO-TRIGGER (relevant to this site)
+================================================================================
+
+  shadcn              UI components, theming, registries
+  nextjs              App Router, caching, routing
+  react-best-practices After multi-component TSX edits
+  vercel-cli          wrangler-like deploy commands
+  verification        "why isn't this working" after dev server
+  web-perf            Lighthouse / LCP after deploy
+  chrome-devtools     Interactive debugging in browser
+  imagine             Hero background / venture card art (explicit image only)
+  check-work          Before saying "done"
+  brainstorming       Before new creative sections
+  using-git-worktrees For /best-of-n and isolated experiments
+
+================================================================================
+MCP SERVERS — USE ON THIS PROJECT
+================================================================================
+
+  grok_com_github     Push repo, PRs, read FieldHub / curated repos list
+  grok_com_vercel       Deploy keyholders-site, env vars, domain thekeyholders.org
+  fetch                 Pull reference site HTML/CSS for inspiration
+  memory                Save: brand tokens, DNS state, Stripe link IDs
+  sequential-thinking   Complex information architecture decisions
+  time                  Schedule /loop deploy checks
+
+  chrome-devtools (plugin)  Hero animation debug, mobile viewport
+  NOT needed early: mongodb, neon, sentry, mixpanel, linear
+
+================================================================================
+RECOMMENDED PROMPT TEMPLATES (copy/paste)
+================================================================================
+
+HERO ITERATION
+  /best-of-n 3 Build the Vault hero for keyholders-site /. Dark navy, gold+cyan
+  glow, scroll-driven key unlock revealing 4 venture cards (Geeks, Trade, Labs,
+  Work). Must respect prefers-reduced-motion. Winner = best mobile Lighthouse.
+
+TRADE PAGE
+  /implement Restyle /trade as industrial dark-gold B2B page matching vault
+  shell. Keep all Stripe placeholders. Add Framer page transition from /.
+
+GITHUB PAGE
+  /implement Add /github with curated cards for FieldHub, Legacy Vault,
+  currentrms-google-sheets-sync, Starter_Pack only. Link to org.
+
+DEPLOY
+  Init git, push to The-Key-Holders/keyholders-site, link Vercel, add
+  thekeyholders.org domain. Use vercel MCP + /deploy.
+
+POST-DEPLOY
+  /web-perf audit homepage LCP and CLS on mobile
+  /check-work verify production URLs and redirects from neural-key-labs
+
+================================================================================
+KEYBOARD SHORTCUTS (Windows)
+================================================================================
+
+  Ctrl+P     Command palette (/commands, skills)
+  Ctrl+O     YOLO / auto-approve (faster iteration — use carefully)
+  Ctrl+G     Background long /implement or /best-of-n
+  Shift+Tab  Cycle Normal → Plan → Auto-approve
+  !          Shell mode — npm run dev, git, gh
+
+================================================================================
+LOCAL DEV
+================================================================================
+
+  cd C:\Users\javad\keyholders-site
+  npm install
+  npm run dev          → http://localhost:3000
+  npm run build        → must pass before /deploy
+
+================================================================================
