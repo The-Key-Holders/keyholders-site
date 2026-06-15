@@ -1,5 +1,6 @@
 import ChapterSection from "@/components/layout/ChapterSection";
 import Link from "next/link";
+import Image from "next/image";
 
 export function LabsSection() {
   return (
@@ -47,6 +48,11 @@ export function LabsSection() {
           </span>
         </a>
       </div>
+
+      {/* Teaser for new Reliability Suite depth (salvaged + simulator in /labs) */}
+      <p className="mt-4 text-xs text-white/40">
+        New in Labs: <Link href="/labs" className="text-violetGlow hover:underline">Reliability Suite</Link> (76-project roadmap + interactive preview).
+      </p>
     </ChapterSection>
   );
 }
@@ -133,9 +139,39 @@ export function GithubSection() {
       href: "https://github.com/The-Key-Holders/currentrms-google-sheets-sync",
     },
     {
+      name: "Reliability Infrastructure Roadmap",
+      desc: "Public portfolio & roadmap of 76 reliability and infrastructure projects.",
+      href: "https://github.com/The-Key-Holders/reliability-infrastructure-roadmap",
+    },
+    {
+      name: "Resilience Testing Toolkit",
+      desc: "Safe chaos engineering • failure injection & latency shaping for small teams.",
+      href: "https://github.com/The-Key-Holders/resilience-testing-toolkit",
+    },
+    {
+      name: "Personal Temporal Assistant",
+      desc: "AI command center for Gmail, Calendar, and partner planning. Constraint-aware governance.",
+      href: "https://github.com/CupofJavad/Personal_Assistant",
+    },
+    {
       name: "Starter Pack",
       desc: "Opinionated template for serious small apps.",
       href: "https://github.com/CupofJavad/Starter_Pack",
+    },
+    {
+      name: "Infrastructure Drift Detector",
+      desc: "Terraform / CDK drift detection — part of the 76-project reliability suite.",
+      href: "https://github.com/The-Key-Holders/infrastructure-drift-detector",
+    },
+    {
+      name: "Zero-Downtime Migration Orchestrator",
+      desc: "Coordinated database & infra migrations. From the active reliability development track.",
+      href: "https://github.com/The-Key-Holders/zero-downtime-migration-orchestrator",
+    },
+    {
+      name: "Incident Postmortems Collection",
+      desc: "Educational incident reports + reliability practices (completed & battle-tested).",
+      href: "https://github.com/The-Key-Holders/incident-postmortems-collection",
     },
   ];
 
@@ -149,6 +185,31 @@ export function GithubSection() {
       accent="cyan"
       className="bg-vault-900/40"
     >
+      {/* Visual polish: cinematic key banner using generated vault asset with glass overlay + additional new generated reliability grid for depth */}
+      <div className="relative mb-8 aspect-[16/6] w-full overflow-hidden rounded-2xl border border-white/10">
+        <Image
+          src="/images/keys-chain.jpg"
+          alt="Cinematic interlocking keys and chains in deep vault — open source curation visual"
+          fill
+          className="object-cover"
+        />
+        <div className="absolute inset-0 bg-gradient-to-r from-vault-950/85 via-vault-950/40 to-transparent" />
+        <div className="absolute inset-0 flex items-center p-8">
+          <p className="text-sm text-white/70 max-w-xs">Real code. Real constraints. Shipping in the open — including the full reliability portfolio. See full depth + interactive preview in <span className="text-cyanGlow/80">/labs</span>.</p>
+        </div>
+      </div>
+      <div className="relative mb-6 aspect-[16/5] w-full overflow-hidden rounded-2xl border border-white/10">
+        <Image
+          src="/images/reliability-grid.jpg"
+          alt="Reliability infrastructure grid cinematic dark with emerald cyan node/key motifs — curated OSS visual"
+          fill
+          className="object-cover"
+        />
+        <div className="absolute inset-0 bg-gradient-to-t from-vault-950/80 to-transparent p-6 flex items-end">
+          <p className="text-sm text-white/80">76 projects across foundational, active, and stable — drift detectors, resilience toolkits, policy guardrails, and production patterns now part of the curated feed.</p>
+        </div>
+      </div>
+
       <div className="grid gap-4 sm:grid-cols-2">
         {repos.map((repo) => (
           <a

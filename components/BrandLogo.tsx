@@ -12,18 +12,14 @@ interface BrandLogoProps {
 
 const config = {
   parent: {
-    src: "/branding/parent-lockup.jpg",
+    src: "/branding/parent-wordmark-a.svg",
     alt: "The Key Holders",
     href: "/",
-    height: 40,
-    width: 200,
   },
   trade: {
-    src: "/branding/trade-lockup.jpg",
+    src: "/branding/trade-wordmark-b-stacked.svg",
     alt: "Key Holders Trade",
     href: "/trade",
-    height: 44,
-    width: 220,
   },
 } as const;
 
@@ -32,21 +28,21 @@ export default function BrandLogo({
   onDark = false,
   className = "",
 }: BrandLogoProps) {
-  const { src, alt, href, height, width } = config[variant];
+  const { src, alt, href } = config[variant];
 
   return (
     <Link
       href={href}
-      className={`inline-flex shrink-0 items-center rounded-lg transition opacity-100 hover:opacity-90 ${onDark ? "bg-white/95 px-2 py-1" : ""} ${className}`}
+      className={`inline-flex shrink-0 items-center rounded-lg transition opacity-100 hover:opacity-90 ${onDark ? "bg-white/5 px-1.5 py-0.5" : ""} ${className}`}
       aria-label={alt}
     >
-      {/* LCP polish (P1#7): priority extended to trade variant for /trade hero (TradeHero usage + handoff §7/§14 LCP; next/image auto eager+high fetchPriority). Review: StaticHeroShell + VaultHero use parent only; header/overlay/footer secondary ok. */}
+      {/* Revised for dark vault theme (no white rect square from old JPG/SVG bg; uses edited dark-native SVGs with light text + site glow colors; crisp vector matches Syne font, cyan/gold accents, key motif from hero; subtle onDark glass lift instead of solid white). LCP priority kept. */}
       <Image
         src={src}
         alt={alt}
-        width={width}
-        height={height}
-        className="h-9 w-auto sm:h-10"
+        width={variant === "parent" ? 210 : 160}
+        height={variant === "parent" ? 40 : 60}
+        className="h-8 w-auto sm:h-9"
         priority={variant === "parent" || variant === "trade"}
       />
     </Link>

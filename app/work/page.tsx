@@ -1,5 +1,6 @@
 import Footer from "@/components/Footer";
 import Link from "next/link";
+import Image from "next/image";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
@@ -85,6 +86,30 @@ export default function WorkPage() {
               ))}
             </div>
 
+            {/* Integrated generated on-theme cinematic image (dark vault editorial with gold key/service motifs) + additional for depth */}
+            <div className="relative mt-8 aspect-[16/9] w-full overflow-hidden rounded-2xl border border-white/10">
+              <Image
+                src="/images/reliability-operations.jpg"
+                alt="Garner Roofing case study - cinematic dark scene with glowing gold key motifs and field-service tech, vault editorial"
+                fill
+                className="object-cover"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-vault-950/80 to-transparent p-6 flex items-end">
+                <p className="text-sm text-white/80">High-tech field-service rescue — matching the dark cinematic vault theme with gold/teal glows</p>
+              </div>
+            </div>
+            <div className="relative mt-4 aspect-[16/9] w-full overflow-hidden rounded-2xl border border-white/10">
+              <Image
+                src="/images/field-tech-key.jpg"
+                alt="Mission log visual - field production with glowing key motifs in editorial dark style"
+                fill
+                className="object-cover"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-vault-950/70 to-transparent p-6 flex items-end">
+                <p className="text-sm text-white/80">Ship. Measure. Hand off. — additional cinematic context for CurrentRMS + Garner integrations</p>
+              </div>
+            </div>
+
             {/* Exact work performed bullets from §16 */}
             <div className="glass-card mt-8 p-8">
               <h3 className="font-semibold text-white">Work performed</h3>
@@ -154,6 +179,19 @@ export default function WorkPage() {
               >
                 View source on GitHub →
               </a>
+            </div>
+          </div>
+
+          {/* Added on-theme visual for CurrentRMS integration depth */}
+          <div className="mt-6 relative aspect-video w-full max-w-2xl overflow-hidden rounded-2xl border border-white/10 mx-auto">
+            <Image
+              src="/images/keys-chain.jpg"
+              alt="CurrentRMS sync — linked keys and data chains cinematic dark vault editorial with emerald accents"
+              fill
+              className="object-cover"
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-vault-950/70 to-transparent p-5 flex items-end">
+              <p className="text-xs text-white/70">Daily sync • Idempotent • Zero-maintenance handoff</p>
             </div>
           </div>
         </div>

@@ -49,7 +49,7 @@ test("trade page shows cancelled feedback banner for ?checkout=cancelled", async
 });
 
 // P2-Content-Agent: new pages per approved plan + handoff §14 P2, §16 Garner verbatim, §17 strings
-test("labs page loads with editorial depth, Legacy Vault, live FieldHub, and back link", async ({ page }) => {
+test("labs page loads with editorial depth, Legacy Vault, live FieldHub, Reliability Suite, simulator preview, and back link", async ({ page }) => {
   await page.goto("/labs");
   await expect(page.getByRole("heading", { name: /experiments in production/i })).toBeVisible();
   await expect(page.getByText(/Legacy Vault/i).first()).toBeVisible();
@@ -58,6 +58,12 @@ test("labs page loads with editorial depth, Legacy Vault, live FieldHub, and bac
   await expect(page.getByRole("link", { name: /back to the key holders/i })).toBeVisible();
   // GitHub links present
   await expect(page.getByRole("link", { name: /legacy vault repo/i })).toBeVisible();
+
+  // Reliability Suite salvaged + interactive creative preview (candidate-1 enhancements)
+  await expect(page.getByRole("heading", { name: /Reliability Suite/i })).toBeVisible();
+  await expect(page.getByText(/76 reliability and infrastructure projects/i)).toBeVisible();
+  await expect(page.getByText(/Timelock Policy Simulator/i)).toBeVisible();
+  await expect(page.getByRole("button", { name: /apply timelock policy/i })).toBeVisible();
 });
 
 test("work page loads with mission logs, Garner Roofing verbatim §16 data, CurrentRMS, back links", async ({ page }) => {

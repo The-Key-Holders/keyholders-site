@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="420" height="80" viewBox="0 0 420 80" role="img" aria-label="The Key Holders">
-  <rect width="420" height="80" fill="#FAFAFA"/>
+  <rect width="420" height="80" fill="none"/>
   <circle cx="36" cy="40" r="22" fill="#0F172A"/>
-  <path d="M36 26c-6 0-10 4-10 9 0 4 3 7 7 8l3 14h0c1 0 2-1 2-2l3-14c4-1 7-4 7-8 0-5-4-9-10-9z" fill="#F59E0B"/>
-  <text x="72" y="48" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="28" font-weight="700" fill="#0F172A">The Key Holders</text>
+  <path d="M36 26c-6 0-10 4-10 9 0 4 3 7 7 8l3 14h0c1 0 2-1 2-2l3-14c4-1 7-4 7-8 0-5-4-9-10-9z" fill="#22D3EE"/>
+  <text x="72" y="48" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="28" font-weight="700" fill="#F1F5F9">The Key Holders</text>
 </svg>

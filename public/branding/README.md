@@ -17,3 +17,5 @@ Also in this folder from initial exploration:
 - `trade-wordmark-b-stacked.svg`
 
 Use SVGs if JPG lockup text needs replacement in a future polish pass.
+
+**Dark theme revision (2026):** Edited parent-wordmark-a.svg and trade-wordmark-a.svg (removed white rect backgrounds that caused "white square" rendering on vault-950; adjusted text/key fills to light #F1F5F9 + site cyan/gold accents for dark cinematic blend). BrandLogo.tsx now prefers the SVGs (stacked trade for vertical fit) with subtle onDark glass instead of solid white. Matches site gradients, glows, key motif, and all-dark editorial design. JPG lockups remain as backup assets.
