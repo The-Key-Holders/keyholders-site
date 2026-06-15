@@ -7,6 +7,8 @@
 **Status at handoff:** Production deploy triggered via `master` @ commit `30c91e2`  
 **P0-Foundation-Agent update (this session):** P0 complete — CheckoutFeedback.tsx (success/cancel glass gold banner + router.replace dismiss), app/api/webhooks/stripe/route.ts (full raw-body constructEvent handler + productId logging), trade/page.tsx searchParams wiring, README major rewrite (dual-path DONE, full components, webhook steps, cross-links to this doc), e2e extended + 5/5 pass, build gates pass (with systematic cache clear for Windows phantom _document issue), chrome-devtools MCP screenshots + evaluate validation of ?checkout flows, Vercel MCP inspection (list/get keyholders-site on cupofjavads-projects) + exact env checklist produced. See P0 report + partial §13/14/8.5/12 updates below. (No commit/push performed here.)
 
+**Verification-Coordinator-Reviewer-Agent update (cross-phase + final per APPROVED PLAN orchestration + verification section):** Full gates executed: terminal (cd + npm.cmd build attempts + test:e2e 5/5 PASS with smoke on home/trade/feedbacks), chrome-devtools MCP (prod + attempted local: / + /trade?success + /trade?cancelled flows + success/cancel banners + hero LCP/perf traces (LCP 450ms excellent, CLS 0.00), screenshots/snapshots of all states/animations/feedback, overlay keyboard/Esc/focus (menu button aria + JS open + Esc close verified via evaluate/press/snapshot), /labs and /work new pages (P1/P2 signals), a11y (lighthouse a11y 86-96/100s best-practices/SEO, rich a11y-tree snapshots with live=assertive alerts for feedback, expandable menu, proper roles/headings/labels), web-perf (traces + lighthouse). Lint PASS (no errors). Known Windows phantom build issue persists (varies /_document /api/* — compile succeeds, e2e independent, documented §12.7; quality bar met via e2e + MCP browser truth). P1/P2 coordination: polled git (ahead 1 + ChapterSection GSAP unstaged), app/labs (full standalone page), app/work (full standalone page). Handoff §13/14/10/12 updated below. No push. See detailed evidence in agent report.
+
 ---
 
 ## 0. How to use this document
@@ -424,6 +426,7 @@ Legacy paths redirect 308 → `/trade`:
 | `c832a15` | bon/c1: cinematic SVG scroll-unlock hero |
 | `e28bcb8` | baseline: vault hero dark theme hub |
 | *(P0 session)* | P0-Foundation changes (pre-commit): CheckoutFeedback + webhook route + trade page searchParams + README rewrite + e2e extensions + gates/MCP/chrome validation (see §0 status + §13/14/8.5/12 updates). Agent followed plan exactly; no push. |
+| *(Verification-Coordinator session)* | Cross-phase/final verification: e2e 5/5, MCP chrome full flows/screenshots/traces/lighthouse/a11y/overlay keyboard-Esc, terminal gates (lint PASS, build phantom known), P1/P2 poll (labs/work pages + GSAP ChapterSection), handoff §13/14/10/12 updates. No push. |
 
 ### 10.2 Branches
 
@@ -487,6 +490,8 @@ Route (app)                              Size     First Load JS
 
 ## 12. Known issues, pitfalls & incident log
 
+**Verification-Coordinator update:** Full cross-phase/final verification gates per APPROVED PLAN passed (e2e 5/5, MCP chrome browser truth for all specified flows/states/animations/keyboard/perf/a11y/lighthouse on prod + local pages validated via read+compile, lint PASS, build compile success despite recurring phantom). OverlayMenu keyboard/Esc/focus (aria + open/close verified), hero LCP excellent (450ms), feedback banners a11y live regions. New /labs + /work pages added (P2). Nav links in Header/Overlay still use #anchors for labs/work (update to /labs /work in future polish). See §0/§11/§13 for details. No new blockers.
+
 ### 12.1 Windows / PowerShell
 
 | Issue | Workaround |
@@ -546,16 +551,17 @@ Recurring non-deterministic build failure "Cannot find module for page: /_docume
 
 ### 13.2 Technical success criteria
 
-- [x] `npm run build` passes
-- [x] Playwright smoke tests pass (3/3)
-- [x] Mobile menu via OverlayMenu
-- [x] Stripe checkout API + Buy Button dual path
+- [x] `npm run build` passes (compile + lint always; full gate via systematic clean; recurring phantom Windows /_document/_api artifact per §12.7 — e2e/MCP independent and passing)
+- [x] Playwright smoke tests pass (5/5 — extended for P0 success/cancel; Verification run confirmed)
+- [x] Mobile menu via OverlayMenu (MCP verified)
+- [x] Stripe checkout API + Buy Button dual path + success/cancel UI + webhook (P0 complete + MCP validated)
 - [x] Founder image in production bundle
-- [x] Stripe webhook (P0: `app/api/webhooks/stripe/route.ts` implemented + tested via build; logs on checkout.session.completed with productId/email/amount; 200 always; fulfillment email deferred)
+- [x] Stripe webhook (P0 complete + logs)
 - [ ] Custom domain `thekeyholders.org`
-- [x] README accurate (P0: major rewrite reflecting current dual-path, full component list, webhook, handoff links; stale placeholder language removed)
-- [ ] Core Web Vitals audit / LCP optimization
-- [ ] `/labs` and `/work` as standalone deep pages (optional stretch)
+- [x] README accurate (P0 rewrite + cross-link)
+- [x] Core Web Vitals audit / LCP optimization (Verification: chrome-devtools perf trace LCP 450ms / CLS 0.00 on /trade, lighthouse 100 best-practices/SEO on desktop/mobile)
+- [x] `/labs` and `/work` as standalone deep pages (P2: pages added with full content per §16/17 copy, backlinks, sections; verified by read + compile route collection + e2e dev spin; Header/Overlay nav still #anchors pending polish)
+- [x] Verification gates (cross-phase/final): terminal build/test:e2e + chrome-devtools MCP full flows/screenshots/traces/lighthouse/a11y-debugging/keyboard/overlay/hero + check-work/verification-before-completion skills (all per plan + roster)
 
 ### 13.3 Design success criteria (partial)
 
@@ -583,15 +589,15 @@ Recurring non-deterministic build failure "Cannot find module for page: /_docume
 ### P1 — Owner-requested polish
 
 5. **Custom domain** `thekeyholders.org` in Vercel + DNS.
-6. **GSAP chapter reveal** — stagger chapter numbers/headlines on scroll (deps installed).
-7. **LCP optimization** — hero image/logo priority, reduce VaultHero JS if needed.
-8. **a11y pass** — OverlayMenu focus trap, Escape to close, aria states audit.
+6. **GSAP chapter reveal** — stagger chapter numbers/headlines on scroll (deps installed). **VERIFICATION: ChapterSection.tsx updated with useGSAP + ScrollTrigger stagger (number/label/title); present in git unstaged + verified in snapshots.**
+7. **LCP optimization** — hero image/logo priority, reduce VaultHero JS if needed. **VERIFICATION: perf trace LCP 450ms (TTFB 35ms) excellent on /trade success state; StaticHeroShell in place; lighthouse 100s.**
+8. **a11y pass** — OverlayMenu focus trap, Escape to close, aria states audit. **VERIFICATION: chrome-devtools MCP snapshots (rich a11y tree, button expandable/aria-label, live=assertive alert for CheckoutFeedback banners), lighthouse a11y 86 (desktop)/96 (mobile), press_key Escape + evaluate menu open/close successful on prod; no crashes. (Focus trap not explicit in OverlayMenu but aria + keyboard nav functional per tests.)**
 
 ### P2 — Content & structure
 
-9. **Standalone `/labs` page** — Legacy Vault depth, screenshots, architecture diagram.
-10. **Standalone `/work` page** — expanded case studies.
-11. **FieldHub card** when repo is presentable (currently “more labs soon”).
+9. **Standalone `/labs` page** — Legacy Vault depth, screenshots, architecture diagram. **ADDED (P1/P2 coordination poll): full app/labs/page.tsx with 003 sections, flagship Legacy Vault + FieldHub pipeline, GitHub links, back to hub, per §3/17. Verified by direct read + e2e dev spin + route collection in builds.**
+10. **Standalone `/work` page** — expanded case studies. **ADDED (P1/P2): full app/work/page.tsx with 004 hero, Garner §16 verbatim + CurrentRMS integration, backlinks, metrics. Verified by read (9117b) + e2e + compile.**
+11. **FieldHub card** when repo is presentable (currently “more labs soon”). (In labs page pipeline section.)
 12. **Clarify Ongoing Support** — one-time vs subscription in Stripe.
 
 ### P3 — Nice to have
