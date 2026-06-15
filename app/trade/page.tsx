@@ -1,6 +1,7 @@
 import Footer from "@/components/Footer";
 import ServiceCard from "@/components/ServiceCard";
 import TradeHero from "@/components/TradeHero";
+import TradeSectionHeader from "@/components/trade/TradeSectionHeader";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
@@ -120,39 +121,37 @@ const faqs = [
   },
 ];
 
+const featuredBuy = [
+  { label: "Diagnostic", price: 497, id: "diagnostic" },
+  { label: "Health Check", price: 1497, id: "health_check" },
+  { label: "Quick Connect", price: 2997, id: "quick_connect" },
+];
+
 export default function TradePage() {
   return (
-    <>
+    <div className="bg-vault-950">
       <TradeHero />
 
-      {/* Featured Buy Buttons */}
-      <section id="buy" className="bg-white border-b border-gray-100">
+      <section id="buy" className="border-t border-white/5 bg-vault-900/40">
         <div className="container-narrow section-padding px-4 sm:px-6 lg:px-8">
-          <div className="mx-auto max-w-2xl text-center">
-            <h2 className="text-2xl font-bold text-charcoal">
-              Start with a fixed-price engagement
-            </h2>
-            <p className="mt-3 text-gray-600">
-              Placeholder Stripe buy buttons — replace href and data attributes
-              with live Stripe Buy Button embeds.
-            </p>
-          </div>
+          <TradeSectionHeader
+            label="Engage"
+            title="Start with a fixed-price engagement"
+            description="Placeholder Stripe buy buttons — replace href and data attributes with live Stripe Buy Button embeds."
+          />
           <div className="mt-10 grid gap-6 sm:grid-cols-3">
-            {[
-              { label: "Diagnostic", price: 497, id: "diagnostic" },
-              { label: "Health Check", price: 1497, id: "health_check" },
-              { label: "Quick Connect", price: 2997, id: "quick_connect" },
-            ].map((item) => (
-              <div key={item.id} className="card text-center">
-                <h3 className="text-lg font-semibold text-charcoal">
-                  {item.label}
-                </h3>
-                <p className="mt-2 text-2xl font-bold text-brandBlue">
+            {featuredBuy.map((item) => (
+              <div
+                key={item.id}
+                className="glass-card border-gold/20 p-6 text-center transition hover:border-gold/40"
+              >
+                <h3 className="text-lg font-semibold text-white">{item.label}</h3>
+                <p className="mt-2 text-3xl font-bold text-gold">
                   ${item.price.toLocaleString()}
                 </p>
                 <a
                   href="#buy"
-                  className="btn-primary mt-6 w-full"
+                  className="btn-gold mt-6 w-full"
                   data-stripe-buy-button=""
                   data-stripe-product={item.label}
                   data-stripe-amount={item.price}
@@ -166,21 +165,19 @@ export default function TradePage() {
         </div>
       </section>
 
-      {/* Case Study */}
-      <section id="case-study" className="bg-gray-50">
-        <div className="container-narrow section-padding px-4 sm:px-6 lg:px-8">
+      <section id="case-study" className="section-padding border-t border-white/5">
+        <div className="container-narrow px-4 sm:px-6 lg:px-8">
+          <TradeSectionHeader
+            label="Case Study"
+            title="Garner Roofing"
+            align="left"
+          />
           <div className="mx-auto max-w-3xl">
-            <p className="text-sm font-semibold uppercase tracking-wide text-teal">
-              Case Study
-            </p>
-            <h2 className="mt-2 text-3xl font-bold text-charcoal">
-              Garner Roofing
-            </h2>
-            <p className="mt-4 text-gray-600 leading-relaxed">
-              Garner Roofing came to us with a ServiceTitan instance flagged
-              at-risk by their TitanAdvisor score. Dispatchers were working
-              around the system, field techs skipped mobile workflows, and
-              reporting data didn&apos;t match reality.
+            <p className="mt-4 text-white/65 leading-relaxed">
+              Garner Roofing came to us with a ServiceTitan instance flagged at-risk
+              by their TitanAdvisor score. Dispatchers were working around the system,
+              field techs skipped mobile workflows, and reporting data didn&apos;t match
+              reality.
             </p>
 
             <div className="mt-8 grid gap-4 sm:grid-cols-3">
@@ -189,43 +186,40 @@ export default function TradePage() {
                 { metric: "30+", label: "Active users onboarded" },
                 { metric: "98%", label: "Mobile adoption (field team)" },
               ].map((stat) => (
-                <div key={stat.label} className="card text-center">
-                  <p className="text-3xl font-bold text-brandBlue">
-                    {stat.metric}
-                  </p>
-                  <p className="mt-1 text-sm text-gray-600">{stat.label}</p>
+                <div
+                  key={stat.label}
+                  className="glass-card border-gold/20 p-6 text-center"
+                >
+                  <p className="text-3xl font-bold text-gold">{stat.metric}</p>
+                  <p className="mt-1 text-sm text-white/55">{stat.label}</p>
                 </div>
               ))}
             </div>
 
-            <div className="mt-8 card">
-              <h3 className="font-semibold text-charcoal">What we did</h3>
-              <ul className="mt-4 space-y-2 text-sm text-gray-600">
+            <div className="glass-card mt-8 p-6">
+              <h3 className="font-semibold text-white">What we did</h3>
+              <ul className="mt-4 space-y-2 text-sm text-white/65">
                 <li>• Health Check to map every workflow gap and integration failure</li>
                 <li>• Rebuilt dispatch board rules and job-type automations</li>
                 <li>• Fixed Pricebook Pro sync issues with their supplier catalog</li>
                 <li>• Three role-based training sprints (dispatch, CSR, field)</li>
                 <li>• Weekly check-ins for 8 weeks post-implementation</li>
               </ul>
-              <p className="mt-4 text-sm text-gray-500 italic">
-                Results reflect this single client engagement. Outcomes vary by
-                team size, starting system health, and leadership buy-in.
+              <p className="mt-4 text-sm italic text-white/40">
+                Results reflect this single client engagement. Outcomes vary by team
+                size, starting system health, and leadership buy-in.
               </p>
             </div>
           </div>
         </div>
       </section>
 
-      {/* Services Grid */}
-      <section id="services" className="bg-white">
-        <div className="container-narrow section-padding px-4 sm:px-6 lg:px-8">
-          <div className="mx-auto max-w-2xl text-center">
-            <h2 className="text-3xl font-bold text-charcoal">Our Services</h2>
-            <p className="mt-4 text-gray-600">
-              Fixed-price engagements designed for contractors who need results,
-              not endless consulting hours.
-            </p>
-          </div>
+      <section id="services" className="section-padding border-t border-white/5 bg-vault-900/30">
+        <div className="container-narrow px-4 sm:px-6 lg:px-8">
+          <TradeSectionHeader
+            title="Our Services"
+            description="Fixed-price engagements designed for contractors who need results, not endless consulting hours."
+          />
           <div className="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
             {services.map((service) => (
               <ServiceCard key={service.name} {...service} />
@@ -234,11 +228,10 @@ export default function TradePage() {
         </div>
       </section>
 
-      {/* Guarantee */}
-      <section className="bg-brandBlue">
-        <div className="container-narrow section-padding px-4 sm:px-6 lg:px-8">
-          <div className="mx-auto max-w-2xl text-center text-white">
-            <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-gold/20">
+      <section className="section-padding border-t border-gold/20 bg-trade-gradient">
+        <div className="container-narrow px-4 sm:px-6 lg:px-8">
+          <div className="glass-card mx-auto max-w-2xl border-gold/30 p-8 text-center sm:p-10">
+            <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full border border-gold/40 bg-gold/10">
               <svg
                 className="h-6 w-6 text-gold"
                 fill="none"
@@ -253,48 +246,39 @@ export default function TradePage() {
                 />
               </svg>
             </div>
-            <h2 className="text-2xl font-bold sm:text-3xl">
+            <h2 className="font-display text-2xl font-bold text-white sm:text-3xl">
               Our Guarantee
             </h2>
-            <p className="mt-4 text-lg text-blue-100">
-              Every Health Check comes with a simple promise: if we can&apos;t
-              find at least{" "}
-              <strong className="text-gold">3 actionable improvements</strong>,
+            <p className="mt-4 text-lg text-white/70">
+              Every Health Check comes with a simple promise: if we can&apos;t find at
+              least <strong className="text-gold">3 actionable improvements</strong>,
               you get a full refund. No hoops, no fine print.
             </p>
           </div>
         </div>
       </section>
 
-      {/* FAQ */}
-      <section id="faq" className="bg-gray-50">
-        <div className="container-narrow section-padding px-4 sm:px-6 lg:px-8">
-          <div className="mx-auto max-w-3xl">
-            <h2 className="text-3xl font-bold text-charcoal text-center">
-              Frequently Asked Questions
-            </h2>
-            <dl className="mt-12 space-y-6">
-              {faqs.map((faq) => (
-                <div key={faq.q} className="card">
-                  <dt className="font-semibold text-charcoal">{faq.q}</dt>
-                  <dd className="mt-2 text-sm text-gray-600 leading-relaxed">
-                    {faq.a}
-                  </dd>
-                </div>
-              ))}
-            </dl>
-          </div>
+      <section id="faq" className="section-padding border-t border-white/5">
+        <div className="container-narrow px-4 sm:px-6 lg:px-8">
+          <TradeSectionHeader title="Frequently Asked Questions" />
+          <dl className="mx-auto mt-12 max-w-3xl space-y-4">
+            {faqs.map((faq) => (
+              <div key={faq.q} className="glass-card p-6">
+                <dt className="font-semibold text-white">{faq.q}</dt>
+                <dd className="mt-2 text-sm leading-relaxed text-white/60">{faq.a}</dd>
+              </div>
+            ))}
+          </dl>
         </div>
       </section>
 
-      {/* CTA */}
-      <section className="bg-white">
-        <div className="container-narrow section-padding px-4 sm:px-6 lg:px-8">
+      <section className="section-padding border-t border-white/5 bg-vault-900/50">
+        <div className="container-narrow px-4 sm:px-6 lg:px-8">
           <div className="mx-auto max-w-xl text-center">
-            <h2 className="text-2xl font-bold text-charcoal">
+            <h2 className="font-display text-2xl font-bold text-white">
               Ready to get your ServiceTitan house in order?
             </h2>
-            <p className="mt-4 text-gray-600">
+            <p className="mt-4 text-white/60">
               Start with a Diagnostic or book a free 15-minute intro call.
             </p>
             <div className="mt-8 flex flex-col items-center justify-center gap-4 sm:flex-row">
@@ -306,10 +290,7 @@ export default function TradePage() {
               >
                 Book Diagnostic — $497
               </a>
-              <a
-                href="mailto:trade@keyholders.com"
-                className="btn-secondary"
-              >
+              <a href="mailto:javadkhoshnevisan@gmail.com" className="btn-secondary">
                 Schedule Intro Call
               </a>
             </div>
@@ -318,6 +299,6 @@ export default function TradePage() {
       </section>
 
       <Footer variant="trade" />
-    </>
+    </div>
   );
 }

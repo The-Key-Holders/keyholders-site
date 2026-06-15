@@ -47,12 +47,3 @@
     @apply mx-auto max-w-6xl;
   }
 }
-
-/* Trade route keeps readable light surfaces inside dark shell */
-.theme-trade .trade-surface {
-  @apply bg-offwhite text-charcoal;
-}
-
-.theme-trade .trade-surface .card {
-  @apply border-gray-100 bg-white text-charcoal;
-}

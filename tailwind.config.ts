@@ -31,6 +31,8 @@ const config: Config = {
       backgroundImage: {
         "vault-gradient":
           "radial-gradient(ellipse 80% 60% at 50% -10%, rgba(34,211,238,0.15), transparent), linear-gradient(180deg, #0a0e1a 0%, #050810 100%)",
+        "trade-gradient":
+          "radial-gradient(ellipse 70% 55% at 50% -5%, rgba(245,158,11,0.14), transparent), radial-gradient(ellipse 50% 40% at 90% 20%, rgba(34,211,238,0.06), transparent), linear-gradient(180deg, #0a0e1a 0%, #050810 100%)",
       },
       animation: {
         "pulse-glow": "pulse-glow 3s ease-in-out infinite",
