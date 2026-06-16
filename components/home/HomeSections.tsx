@@ -209,6 +209,18 @@ export function GithubSection() {
           <p className="text-sm text-white/80">76 projects across foundational, active, and stable — drift detectors, resilience toolkits, policy guardrails, and production patterns now part of the curated feed.</p>
         </div>
       </div>
+      {/* Additional on-theme banner integration in GithubSection (home) using generated vault editorial image for full bundle visuals */}
+      <div className="relative mb-6 aspect-[16/5] w-full overflow-hidden rounded-2xl border border-white/10">
+        <Image
+          src="/images/reliability-suite.jpg"
+          alt="Reliability Suite dashboard preview cinematic dark vault-950 with glowing cyan/gold keys and infra nodes, editorial"
+          fill
+          className="object-cover"
+        />
+        <div className="absolute inset-0 bg-gradient-to-t from-vault-950/80 to-transparent p-6 flex items-end">
+          <p className="text-sm text-white/80">Reliability Suite preview • Interactive simulator + full roadmap in /labs</p>
+        </div>
+      </div>
 
       <div className="grid gap-4 sm:grid-cols-2">
         {repos.map((repo) => (

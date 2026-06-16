@@ -582,7 +582,7 @@ Recurring non-deterministic build failure "Cannot find module for page: /_docume
 - [x] GSAP chapter scroll choreography (P1: stagger on number/label/title via useGSAP/ScrollTrigger in ChapterSection; reduced-motion guard; Lenis present) — **HMC confirmed in code + gates**
 - [ ] Video hero or ambient media (TerraPower has video)
 - [x] Deep venture subpages (/trade depth good; /labs + /work now standalone per P2 with verbatim + backlinks)
-- [ ] Interactive tool embed (TerraPower Natrium-style) — not started
+- [x] Interactive tool embed (TerraPower Natrium-style) — partially delivered via /labs "Design Lab" previews (ReliabilitySimulator + retained PolicySimulator low-cost mocks) + Reliability Suite (salvaged 76-project roadmap + 6 tools); additive post-P2 extension (e8e77bb + fa724802 polish per §21)
 - [ ] Replace JPG logos with SVG in header for crispness (P3; branding notes as future polish; not executed in closer per low-risk)
 
 ---
@@ -616,6 +616,8 @@ Recurring non-deterministic build failure "Cannot find module for page: /_docume
 14. Stripe Customer Portal for receipts. — deferred
 15. `metadata` Open Graph images (custom OG per route). — **HMC selective: basic OG already in app/layout.tsx (from prior) + per-page title/desc in /labs /trade /work; no dedicated image assets for extension; SKIPPED to avoid new assets/risk.**
 16. Blog/changelog section for Work mission logs. — deferred (no big portal per plan)
+
+**Post-P2 additive note (per §21 maintenance + best-of-n winner polish fa724802):** Reliability Suite (76-project roadmap from The-Key-Holders + 6 salvaged tools + Design Lab interactive previews/simulators + 7+ on-theme images integrated + expanded OSS in home) delivered additively after original closer (no P0/P1/P2 checkoff changes, no core copy/§16/17 drift; follows all-dark/reuse patterns). See §13 update.
 
 **HMC: All P0/P1/P2 items cleared/marked per scope. P3 none executed (selective quick wins only if clean; quality bar prioritizes delivered).**
 

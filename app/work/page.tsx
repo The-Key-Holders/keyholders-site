@@ -109,6 +109,18 @@ export default function WorkPage() {
                 <p className="text-sm text-white/80">Ship. Measure. Hand off. — additional cinematic context for CurrentRMS + Garner integrations</p>
               </div>
             </div>
+            {/* Additional generated on-theme image integration for Garner (enhanced /work per winner bundle; dark vault, gold key/service motifs, glass overlay + editorial caption) */}
+            <div className="relative mt-4 aspect-[16/9] w-full overflow-hidden rounded-2xl border border-white/10">
+              <Image
+                src="/images/garner-gold-service.jpg"
+                alt="Garner Roofing field-service cinematic with glowing gold key motifs in dark vault-950, editorial premium"
+                fill
+                className="object-cover"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-vault-950/80 to-transparent p-6 flex items-end">
+                <p className="text-sm text-white/80">Garner mission log • ServiceTitan recovery with vault-key editorial</p>
+              </div>
+            </div>
 
             {/* Exact work performed bullets from §16 */}
             <div className="glass-card mt-8 p-8">
@@ -192,6 +204,30 @@ export default function WorkPage() {
             />
             <div className="absolute inset-0 bg-gradient-to-t from-vault-950/70 to-transparent p-5 flex items-end">
               <p className="text-xs text-white/70">Daily sync • Idempotent • Zero-maintenance handoff</p>
+            </div>
+          </div>
+          {/* Additional image integration + overlay for CurrentRMS (per winner bundle enhanced /work) */}
+          <div className="mt-4 relative aspect-video w-full max-w-2xl overflow-hidden rounded-2xl border border-white/10 mx-auto">
+            <Image
+              src="/images/keys-interlock.jpg"
+              alt="Interlocking keys for data sync — cinematic vault-950 editorial with emerald accents"
+              fill
+              className="object-cover"
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-vault-950/70 to-transparent p-5 flex items-end">
+              <p className="text-xs text-white/70">Linked systems • Reliable handoff</p>
+            </div>
+          </div>
+          {/* Additional generated on-theme image (work-field-cinematic.jpg) co-located in CurrentRMS section (exact fill/object-cover/gradient editorial caption pattern) */}
+          <div className="mt-4 relative aspect-video w-full max-w-2xl overflow-hidden rounded-2xl border border-white/10 mx-auto">
+            <Image
+              src="/images/work-field-cinematic.jpg"
+              alt="Work field cinematic — mission log visual with key motifs in dark vault editorial"
+              fill
+              className="object-cover"
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-vault-950/70 to-transparent p-5 flex items-end">
+              <p className="text-xs text-white/70">Field ops • Cinematic context</p>
             </div>
           </div>
         </div>

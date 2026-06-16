@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { Play, Download, Shield, TrendingUp } from "lucide-react";
 
 /**
@@ -16,9 +16,19 @@ export default function ReliabilitySimulator() {
   const [drift, setDrift] = useState(18);
   const [resilience, setResilience] = useState(72);
   const [chaos, setChaos] = useState(24);
-  const [score, setScore] = useState(86);
   const [isScanning, setIsScanning] = useState(false);
   const [lastScan, setLastScan] = useState<string | null>(null);
+
+  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Cleanup timeout on unmount (robustness for demo preview; follows low-cost style of PolicySimulator)
+  useEffect(() => {
+    return () => {
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+      }
+    };
+  }, []);
 
   // Thematic score: higher resilience wins, drift + chaos penalize. Tuned for editorial feel.
   function computeScore(d: number, r: number, c: number): number {
@@ -35,11 +45,11 @@ export default function ReliabilitySimulator() {
     setIsScanning(true);
 
     // Micro "processing" delay for cinematic feel (no heavy libs)
-    setTimeout(() => {
-      const newScore = computeScore(drift, resilience, chaos);
-      setScore(newScore);
+    if (timeoutRef.current) clearTimeout(timeoutRef.current);
+    timeoutRef.current = setTimeout(() => {
       setLastScan(new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }));
       setIsScanning(false);
+      timeoutRef.current = null;
     }, 680);
   }
 
@@ -54,16 +64,20 @@ Scanned: ${lastScan || "just now"}
 Salvaged concept from The Key Holders Reliability Infrastructure Roadmap.
 Production tools: zero-downtime-migration-orchestrator, resilience-testing-toolkit + 70+ more.
 `;
-    // Simple client download (no server needed)
+    // Simple client download (no server needed); try/finally for revoke (robustness per review)
     const blob = new Blob([report], { type: "text/plain" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `reliability-preview-${Date.now()}.txt`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
+    let url: string | null = null;
+    try {
+      url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `reliability-preview-${Date.now()}.txt`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+    } finally {
+      if (url) URL.revokeObjectURL(url);
+    }
   }
 
   const scoreColor =

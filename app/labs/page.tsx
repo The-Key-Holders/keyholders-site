@@ -184,10 +184,39 @@ export default function LabsPage() {
                   </div>
                 </div>
               </div>
+              {/* Expanded Interface previews with additional generated on-theme images (dark cinematic vault-950, key/chains motifs, editorial) for full 7+ integration per winner bundle */}
+              <div className="relative aspect-video overflow-hidden rounded-2xl border border-white/10">
+                <Image
+                  src="/images/legacy-vault-cyan-key.jpg"
+                  alt="Legacy Vault cinematic with glowing cyan key macro in dark vault-950, premium editorial terrapower style"
+                  fill
+                  className="object-cover"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-vault-950/80 via-vault-950/15 to-transparent p-5 text-sm text-white/90 flex items-end">
+                  <div>
+                    <p>Legacy Vault key visualization — multi-chain timelock policies</p>
+                    <p className="mt-1 text-[10px] text-cyanGlow/80">Generated asset • Editorial vault motif</p>
+                  </div>
+                </div>
+              </div>
+              <div className="relative aspect-video overflow-hidden rounded-2xl border border-white/10">
+                <Image
+                  src="/images/key-violet-emerald.jpg"
+                  alt="Ornate key with violet and emerald glows in deep vault-950, heir/guardian preview editorial"
+                  fill
+                  className="object-cover"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-vault-950/75 via-vault-950/15 to-transparent p-5 text-sm text-white/90 flex items-end">
+                  <div>
+                    <p>Multi-chain heir keys — violet/emerald accents</p>
+                    <p className="mt-1 text-[10px] text-violetGlow/70">Generated • On-theme glows</p>
+                  </div>
+                </div>
+              </div>
             </div>
 
             {/* Creative low-cost interactive preview — Design Lab */}
-            <div className="mt-10">
+            <div className="mt-8">
               <PolicySimulator />
             </div>
           </div>
@@ -261,6 +290,7 @@ export default function LabsPage() {
             </span>
           </div>
 
+          { /* Centralized count for "76" phrasing maintenance (from roadmap salvage; minor variance elsewhere in home/sim comments left for now per smallest change) */ }
           <div className="mt-4 grid gap-8 lg:grid-cols-5 items-start">
             <div className="lg:col-span-2">
               <h2 className="font-display text-4xl font-bold tracking-tight text-white">Reliability Suite</h2>
@@ -284,8 +314,10 @@ export default function LabsPage() {
                 fill
                 className="object-cover"
               />
-              <div className="absolute inset-0 bg-gradient-to-t from-vault-950/80 via-vault-950/30 to-transparent" />
-              {/* Overlay note for new generated asset */}
+              <div className="absolute inset-0 bg-gradient-to-t from-vault-950/80 via-vault-950/30 to-transparent p-6 flex items-end">
+                <p className="text-sm text-white/80">Reliability Suite preview • Interactive simulator + salvaged 76-project roadmap in /labs</p>
+                {/* Overlay note for new generated asset (kept for traceability, aligned to bottom editorial pattern of other bundle images) */}
+              </div>
               <div className="absolute top-4 right-4 text-[10px] px-2 py-0.5 rounded bg-white/10 text-white/60">New generated • infra grid</div>
             </div>
           </div>
@@ -313,6 +345,25 @@ export default function LabsPage() {
             ))}
           </div>
           <p className="mt-6 text-[10px] text-white/35">Sourced directly from The-Key-Holders/reliability-infrastructure-roadmap + linked founder projects. All on-brand with the vault mission.</p>
+
+          {/* Additional generated on-theme image co-located in Reliability Suite (per review emphasis on visual polish inside new feature area; exact next/image + gradient overlay + "Generated asset" caption pattern reused from Legacy previews / Creative sections) */}
+          <div className="mt-6 relative aspect-video w-full overflow-hidden rounded-2xl border border-white/10">
+            <Image
+              src="/images/reliability-dashboard.jpg"
+              alt="Reliability dashboard preview cinematic dark vault-950 with glowing key/node motifs, editorial"
+              fill
+              className="object-cover"
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-vault-950/80 to-transparent p-6 flex items-end">
+              <p className="text-sm text-white/80">Reliability dashboard • Design Lab simulator context</p>
+            </div>
+            <div className="absolute top-4 right-4 text-[10px] px-2 py-0.5 rounded bg-white/10 text-white/60">Generated asset • Suite visual</div>
+          </div>
+
+          {/* Creative "Design Lab" interactive preview (ReliabilitySimulator): sliders for Drift/Resilience/Chaos, thematic score bar (cyan/emerald/gold), Run Scan micro-delay, Export mock report blob download. Glass-card, on-theme, per winner bundle. mt-8 standardized with sibling PolicySimulator preview for visual rhythm (per review). */}
+          <div className="mt-8">
+            <ReliabilitySimulator />
+          </div>
         </div>
       </section>
 
