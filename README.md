@@ -61,6 +61,15 @@ Optional: `NEXT_PUBLIC_SITE_URL=https://keyholders-site.vercel.app` for redirect
 
 **GitHub:** [github.com/The-Key-Holders/keyholders-site](https://github.com/The-Key-Holders/keyholders-site)
 
+## Changelog & Versioning
+New in ecosystem: root `CHANGELOG.md` (advanced format w/ version header, Added/Changed/Fixed, manual entries + auto commit template) + `/changelog` page.
+- Styled with glass-card, btn-*, section-padding, all-dark.
+- Client search + version filter (React state), GitHub commit/release links, "Add manual entry" form (logs + PR suggest).
+- Reuses lib (getChangelog). Integrates file-versions, future error log links, unit tests.
+- Agent personas ([changelog-maintainer]): append via PRs or GitHub MCP tools.
+- Link added to Work section on home. See full in CHANGELOG.md and app/changelog/page.tsx. (Additive, no P0/P1/P2 impact.)
+- /github: standalone curated OSS page for ecosystem (salvaged repos via grok_com_github; showcases file-versions, changelog, Reliability Suite). Linked from overlay, labs, home.
+
 ## Deploy to Vercel
 
 Production: pushes to `master` auto-deploy to Vercel project `keyholders-site` (team: `cupofjavads-projects`).
@@ -95,7 +104,8 @@ See `app/api/webhooks/stripe/route.ts` header comments and handoff §8 for detai
 
 Product catalog + amounts are canonical in `lib/trade-products.ts`. All SKUs use one-time `mode: "payment"`.
 
-For full architecture, env checklist, operational steps, and future considerations (e.g. Price IDs, portal), read **docs/MODEL_HANDOFF.md §8**.
+For full architecture, env checklist, operational steps, and future considerations (e.g. Price IDs, portal), read **docs/MODEL_HANDOFF.md §8**.  
+Advanced structured error logging (levels+context, Vercel+Supabase, agent queryLogs/logger for personas/auto-analysis) added in lib/utils (see source + .env.example).
 
 ## Components
 
@@ -119,6 +129,17 @@ For full architecture, env checklist, operational steps, and future consideratio
 | CheckoutFeedback       | (see above)                               | Client banner for Stripe redirect states |
 
 See full repo layout in handoff §6.
+
+## File Version Tracking (ecosystem)
+Advanced tracking added (lib/file-versions.ts + /api/versions + display in /work):
+- Tracks repos/files with commit hashes, semver, history (seeded via GitHub MCP list_commits/get_commit).
+- Local file storage (source in repo; queryable via import or GET /api/versions?id=...).
+- History/diff views via direct GitHub links; integrates changelog + error logging (see lib/utils.ts logger + file-versions logWithFileVersion).
+- Agents/personas: import or fetch for error context, [historian] etc.
+- Pattern: copy lib/file-versions.ts + note in other projects (keyholders-site as hub; geeksnextdoor etc).
+- All-dark theme, exact additive reuse (glass-card, emerald for work, cn utils pattern).
+
+See /work "File & Repo Versions", app/api/versions/route.ts, lib/file-versions.ts.
 
 ## Brand Colors & Design
 

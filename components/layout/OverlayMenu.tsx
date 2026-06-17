@@ -41,7 +41,7 @@ const ventures = [
 const explore = [
   { label: "Hub", href: "/" },
   { label: "Founders", href: "/#founders" },
-  { label: "Open Source", href: "/#github" },
+  { label: "GitHub", href: "/github" },
   { label: "Connect", href: "/#connect" },
 ];
 

@@ -1,4 +1,5 @@
 import { tradeProducts, type TradeProductId } from "@/lib/trade-products";
+import { logger } from "@/lib/utils";
 import { NextResponse } from "next/server";
 import Stripe from "stripe";
 
@@ -60,7 +61,7 @@ export async function POST(request: Request) {
 
     return NextResponse.json({ url: session.url });
   } catch (err) {
-    console.error("Stripe checkout error:", err);
+    logger.error("Stripe checkout error", { err, productId });
     return NextResponse.json(
       { error: "Could not create checkout session" },
       { status: 500 }

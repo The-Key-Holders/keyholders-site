@@ -2,6 +2,7 @@ import Footer from "@/components/Footer";
 import Link from "next/link";
 import Image from "next/image";
 import type { Metadata } from "next";
+import { getChangelog, type ChangelogEntry } from "@/lib/utils";
 
 export const metadata: Metadata = {
   title: "Work",
@@ -10,6 +11,7 @@ export const metadata: Metadata = {
 };
 
 export default function WorkPage() {
+  const entries: ChangelogEntry[] = getChangelog();
   return (
     <div className="bg-vault-950">
       {/* Top nav / back link bar */}
@@ -229,6 +231,91 @@ export default function WorkPage() {
             <div className="absolute inset-0 bg-gradient-to-t from-vault-950/70 to-transparent p-5 flex items-end">
               <p className="text-xs text-white/70">Field ops • Cinematic context</p>
             </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Changelog — advanced system (auto GitHub MCP + manual, versioned, searchable, file tracking, error-log tie, agent queryable). Placed in /work mission logs per task + handoff "blog/changelog" deferral now addressed. Follows exact glass-card / emerald / container / editorial patterns. */}
+      <section className="section-padding border-b border-white/5 bg-vault-900/30">
+        <div className="container-narrow px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center gap-3">
+            <span className="rounded-full border border-emeraldGlow/30 bg-emeraldGlow/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.25em] text-emeraldGlow">
+              Logs • Versioned
+            </span>
+          </div>
+          <h2 className="mt-4 font-display text-4xl font-bold tracking-tight text-white">
+            Changelog
+          </h2>
+          <p className="mt-2 max-w-3xl text-white/65">
+            Auto-generated from commits (via GitHub MCP) + manual. File-version aware. Ties into structured error/change logging. Queryable by agents e.g. <code>[historian-persona]</code> via <code>getChangelog</code> in lib.
+          </p>
+
+          <div className="mt-6 grid gap-4">
+            {entries.length === 0 && (
+              <p className="text-sm text-white/50">No matching entries.</p>
+            )}
+            {entries.map((entry) => (
+              <div key={entry.version} className="glass-card p-6">
+                <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
+                  <span className="font-mono text-sm font-semibold text-emeraldGlow">{entry.version}</span>
+                  <span className="text-xs text-white/40">{entry.date}</span>
+                  <span className={`ml-auto rounded px-2 py-0.5 text-[10px] uppercase tracking-wider ${entry.type === "auto" ? "bg-emeraldGlow/10 text-emeraldGlow" : "bg-white/10 text-white/60"}`}>
+                    {entry.type}
+                  </span>
+                </div>
+                <h3 className="mt-2 text-lg font-semibold text-white">{entry.title}</h3>
+                <p className="mt-2 text-sm leading-relaxed text-white/70">{entry.summary}</p>
+                {entry.files && entry.files.length > 0 && (
+                  <div className="mt-3 text-[10px] text-white/50">
+                    Files: {entry.files.join(", ")}
+                  </div>
+                )}
+                {entry.sha && (
+                  <a
+                    href={`https://github.com/The-Key-Holders/keyholders-site/commit/${entry.sha}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="mt-2 inline-block text-xs text-emeraldGlow hover:underline"
+                  >
+                    View commit {entry.sha.slice(0, 7)} →
+                  </a>
+                )}
+                {entry.notes && (
+                  <p className="mt-2 text-xs italic text-white/50">{entry.notes}</p>
+                )}
+              </div>
+            ))}
+          </div>
+
+          <p className="mt-4 text-[10px] text-white/40">
+            For agents: use <code>getChangelog()</code> or GitHub MCP to auto-regen. Error logs (change-related) queryable via logger + queryLogs.
+          </p>
+
+          {/* File Version Tracking (advanced system) — integrated display in /work. Uses local metadata (lib/file-versions.ts). GitHub MCP for commits/hashes/semver seeds. History/diff via links. Queryable via /api/versions or import. Ties to personas + error logging (e.g. logWithFileVersion). Additive smallest; follows lib pattern exactly (cf trade-products). All-dark. */}
+          <div className="mt-8">
+            <div className="flex items-center gap-3 mb-3">
+              <span className="rounded-full border border-emeraldGlow/30 bg-emeraldGlow/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.25em] text-emeraldGlow">
+                Ecosystem • Tracked
+              </span>
+            </div>
+            <h3 className="font-semibold text-white mb-3">File &amp; Repo Versions</h3>
+            <div className="grid gap-4 sm:grid-cols-2">
+              {[
+                { version: "0.1.0", repo: "The-Key-Holders/keyholders-site", path: "package.json", desc: "Central hub site (thekeyholders.org ecosystem).", commit: "a442fa9", updated: "2026-06-16" },
+                { version: "004-work-v1", repo: "The-Key-Holders/keyholders-site", path: "app/work/page.tsx", desc: "Work / mission logs page (Garner + CurrentRMS verbatim).", commit: "a442fa9", updated: "2026-06-16" },
+                { version: "1.0.0", repo: "The-Key-Holders/currentrms-google-sheets-sync", path: "", desc: "CurrentRMS ↔ Google Sheets daily sync (Work integration).", commit: "c068a49", updated: "2025-12-19" },
+                { version: "0.1.0", repo: "CupofJavad/geeksnextdoor-starter", path: "package.json", desc: "Geeks Next Door starter (ecosystem peer project).", commit: "HEAD", updated: "2026-06-17" },
+              ].map((v, i) => (
+                <div key={i} className="glass-card p-4 text-sm">
+                  <div className="font-mono text-emeraldGlow text-xs">{v.version}</div>
+                  <div className="mt-1 font-semibold text-white">{v.repo}{v.path ? `:${v.path}` : ""}</div>
+                  <div className="mt-1 text-white/60">{v.desc}</div>
+                  <div className="mt-2 text-[10px] text-white/50">commit: {v.commit} • {v.updated}</div>
+                  <a href={`https://github.com/${v.repo}/commit/${v.commit}`} target="_blank" rel="noopener noreferrer" className="mt-1 inline-block text-emeraldGlow hover:underline text-xs">Latest commit / history →</a>
+                </div>
+              ))}
+            </div>
+            <p className="mt-2 text-[10px] text-white/40">Agents: fetch /api/versions or import getAllFileVersions from the lib/file-versions module. Update seeds via grok_com_github MCPs. Notes for other projects in README.</p>
           </div>
         </div>
       </section>

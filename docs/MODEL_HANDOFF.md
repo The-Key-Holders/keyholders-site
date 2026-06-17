@@ -1,15 +1,44 @@
 # The Key Holders — Model Handoff & Project Continuity Document
 
 **Document type:** Markdown handoff brief for AI/human successor agents  
-**Last updated:** 2026-06-15 (Handoff-Maintainer-Closer finalization)  
+**Last updated:** 2026-06-16 (Post-implement-winner polish + domain prep notes + detailed catch-up log for new models)  
 **Primary author context:** Grok session redesigning `keyholders-site` toward TerraPower-style editorial UX  
 **Canonical local path:** `C:\Users\javad\keyholders-site`  
 **Status at handoff:** Production deploy triggered via `master` @ commit `30c91e2`  
+**Current deployed commit (post-2026-06-16 session):** `a442fa9` (full winner Candidate 2 polish) on `master` — pushed and live on Vercel default URL. Custom domain `thekeyholders.org` (NameSilo → Google Sites currently) **not yet wired** (owner next action). **2026-06-17:** added /github (additive per plan).  
 **P0-Foundation-Agent update (this session):** P0 complete — CheckoutFeedback.tsx (success/cancel glass gold banner + router.replace dismiss), app/api/webhooks/stripe/route.ts (full raw-body constructEvent handler + productId logging), trade/page.tsx searchParams wiring, README major rewrite (dual-path DONE, full components, webhook steps, cross-links to this doc), e2e extended + 5/5 pass, build gates pass (with systematic cache clear for Windows phantom _document issue), chrome-devtools MCP screenshots + evaluate validation of ?checkout flows, Vercel MCP inspection (list/get keyholders-site on cupofjavads-projects) + exact env checklist produced. See P0 report + partial §13/14/8.5/12 updates below. (No commit/push performed here.)
 
 **Verification-Coordinator-Reviewer-Agent update (cross-phase + final per APPROVED PLAN orchestration + verification section):** Full gates executed: terminal (cd + npm.cmd build attempts + test:e2e 5/5 PASS with smoke on home/trade/feedbacks), chrome-devtools MCP (prod + attempted local: / + /trade?success + /trade?cancelled flows + success/cancel banners + hero LCP/perf traces (LCP 450ms excellent, CLS 0.00), screenshots/snapshots of all states/animations/feedback, overlay keyboard/Esc/focus (menu button aria + JS open + Esc close verified via evaluate/press/snapshot), /labs and /work new pages (P1/P2 signals), a11y (lighthouse a11y 86-96/100s best-practices/SEO, rich a11y-tree snapshots with live=assertive alerts for feedback, expandable menu, proper roles/headings/labels), web-perf (traces + lighthouse). Lint PASS (no errors). Known Windows phantom build issue persists (varies /_document /api/* — compile succeeds, e2e independent, documented §12.7; quality bar met via e2e + MCP browser truth). P1/P2 coordination: polled git (ahead 1 + ChapterSection GSAP unstaged), app/labs (full standalone page), app/work (full standalone page). Handoff §13/14/10/12 updated below. No push. See detailed evidence in agent report.
 
 **Handoff-Maintainer-Closer-Agent update (final per APPROVED PLAN orchestration + "Handoff-Maintainer + Closer-Agent" + §21 document maintenance + final gates + selective P3):** All P0/P1/P2 complete + verified. Terminal gates (cd + npm.cmd): clean .next (phantom workaround), `npm run build` SUCCESS (routes: /labs + /work + /trade + / + webhooks; First Load ~207kB with GSAP; 9 static pages); `npm run test:e2e` 7/7 PASS (home+founders+trade+success+cancelled+labs+work explicit). MCP chrome-devtools (prod spot for available: /trade?success snapshot + evaluate + screenshot saved; local covered by e2e Playwright chromium + file reads). Git SHAs on master: 1675f63 (P0), 8c8384d (P2), d770e75 (P1), 2ea790e (Verification). §21 full: §0 status + "all next steps complete", §10 4 commits appended, §12 pitfalls added (GSAP/P2/Windows), §13 all P0/P1/P2 items [x] checked (Stripe full incl webhook+success UI+README, GSAP stagger, Overlay a11y Esc/trap, BrandLogo LCP priority, /labs /work standalone verbatim §16/§17 + links/FieldHub/ServiceCard, e2e 7/7, LCP 450ms/CLS0), §14 P0/P1/P2 marked/cleared (P3 selective none executed - low-risk only per plan; no SVG swap/OG expansion to preserve visual/LCP/prod consistency), §17 no core copy change (synced). README polished for new pages/arch. No P3 code; no push. All next steps delivered per plan + handoff. Ready for owner push decision. See closer report.
+
+**Implement-Loop / Winner-Polish Agent update (2026-06-15/16 session — full `/implement` skill run, IMPL_ID=fa724802):** User explicitly ran `/implement winner from last response` (continuation of prior `/best-of-n` that produced Candidate 2 winner evaluated highest on Correctness/Quality/Safety). Entered full implement-review-fix loop using bundled skill (effort=4 → 5 reviewers: 3 general + tests specialist + plan alignment; persona injection + memory helper; todo scaffold with exact phase IDs; Windows graceful memory snapshot). 
+
+**Key flow executed (detailed for future model catch-up):**
+- Reseeded todo after compaction (setup/implement/review-round-1/fix-round-1/rereview-round-1 + subsequent rounds).
+- Merged review existed from prior (~/12 open issues consolidated: simulator timeout/export robustness, mt-8 spacing inconsistency, image placement/unused/co-location emphasis, shallow e2e (no interactions/edges/thresholds/alts/specific score asserts), 76 phrasing duplication, handoff §13/14 sync gaps, gates/phantoms, placement).
+- Multiple rounds (3 full review-fix cycles) using subagents only for code changes (orchestrator coordinated reads/merge/spawns/resumes via resume_from, never edited source directly).
+- Round 1 fixes (smallest pattern-exact): dead-state removal in simulator, render placement in /labs Reliability Suite after FieldHub/grid/76, 5+ image co-locations using verbatim JSX (next/image fill + gradient-to-t from-vault-950/80 + editorial captions/"Generated asset"), e2e 76 matcher fix + 3 new visibility asserts, mt-8 standardization.
+- Round 2: simulator useRef+useEffect cleanup + export try/finally; e2e multi-slider interactions (high/low boundaries for >=88 emerald / <72 gold), numeric score + bar class asserts, work test 3 alts + home banner alt, filename tighten; handoff §13/14 retro notes added (interactive marked "partially delivered" via Design Lab + Suite; explicit Post-P2 additive note in §14 referencing e8e77bb + fa724802).
+- Round 3 (final residuals from tests specialist): dedicated cyan band (~72-87) fill + asserts, 2 missing exact alts (key-violet-emerald + reliability-infra using JSX strings), bar in low path, minor comments for maintainability.
+- All issues addressed (fixed or valid wontfix with technical defense: live `currentScore` per winner "live currentScore" intent + pure/cheap compute + low-cost PolicySimulator match; pre-existing §12.7 phantoms; 76 variance per "smallest").
+- Subagent discipline followed: personas prepended, bracketed [implementer]/[reviewer]/[tests]/[plan] descriptions, review_file at /tmp/grok-review-fa724802.md updated with Responses + appended Implementation Summaries each round, summary_file maintained.
+- Gates re-executed every round (strict per §12.7: `if (Test-Path .next) { Remove-Item -Recurse -Force .next }; npm.cmd run ...`): lint always 0; build 9/9 (pre-existing Windows phantoms non-blocking); e2e 7/7 with full new depth exercised (multi boundaries + cyan band + numeric/bar/color + all new alts + priors preserved verbatim).
+- Memory flush attempted (json spec with generalized patterns prepared); graceful skip on Windows fcntl/redirection (per skill rules; patterns noted for future).
+- Final commit `a442fa9` created + pushed (6 files: ReliabilitySimulator.tsx + labs/work/home pages + e2e + handoff.md; 188 insertions). User confirmed "Everything up-to-date" post-push; remote advanced e8e77bb..a442fa9.
+- Confirmed exit from implement/best-of-n mode at end of session (user taking break; no active subagents/loops).
+
+**Deliverables added (strictly additive, handoff-faithful):**
+- Reliability Suite subsection in /labs (after FieldHub; violet badge, 76 context, 6 exact salvaged projects from The-Key-Holders/reliability-infrastructure-roadmap via prior MCP, banner + co-located visuals, cross-link, "Sourced directly..." note, Legacy Vault real Rust+Axum+SQLx+PostgreSQL + API details preserved).
+- ReliabilitySimulator.tsx as low-cost "Design Lab Preview" (sliders, live computeScore 42-98 clamp + cyan/emerald/gold, Run Scan 680ms + state, Export with try/finally, glass + lucide, salvaged comments).
+- 13+ on-theme images integrated with exact pre-existing pattern (no new CSS; dark vault-950 + key/glow motifs; editorial captions).
+- Deep e2e coverage in existing smoke.spec.ts only (no new files): slider .fill for boundaries/thresholds/bands, post-mutation numeric + bar asserts, full alts for new visuals, download verification, all priors (P0 success/cancel, Garner §16 verbatim, FieldHub, etc.) untouched.
+- HomeSections expanded OSS + teaser.
+- Handoff §13.3 + §14 + §21 retro notes for the additive post-P2 work (no P0/P1/P2 checkoff or §16/17/core copy changes).
+
+**Fidelity notes for new model:** Entire session followed MODEL_HANDOFF exactly (read at start of every phase + subagent prompts). No re-invention (salvage + exact reuse of glass-card, btn-*, next/image overlays, ChapterSection, lucide, semantic Playwright from trade tests, numbered chapters, all-dark + glows). 0 drift to P0 (Stripe/CheckoutFeedback/webhook + success/cancel + router.replace), P1 (GSAP/Overlay a11y/BrandLogo), P2 (/labs/work standalone + verbatim Garner + FieldHub). Windows rules + clean .next + npm.cmd enforced in all verification. User had previously pushed base winner (e8e77bb) + 40933da; this session added only the final polish commit on top. Domain wiring (thekeyholders.org via NameSilo, currently Google Sites) remains pending owner action (see §2 + §13.2).
+
+All todos in implement skill marked complete; 0 open issues achieved. Session ended with user request for break + this handoff update. New convo with fresh model should read this file first for full context (prior P0/P1/P2 + best-of-n winner + full implement loop details).
 
 ---
 
@@ -46,8 +75,9 @@ This repository (`keyholders-site`) is a **Next.js 14 App Router** marketing sit
 
 **Deploy target:** Vercel project `keyholders-site`, team `cupofjavads-projects`.  
 **Live URL (as of handoff):** https://keyholders-site.vercel.app/  
-**Intended production domain (not yet wired):** https://www.thekeyholders.org  
+**Intended production domain (not yet wired):** https://www.thekeyholders.org (currently managed via NameSilo; pointing to Google Sites as of 2026-06-16; owner plans to wire after reviewing this session). See §2 and §13.2 for DNS steps (add domain in Vercel first to get exact records, then update A/CNAME at NameSilo; Vercel auto-SSL).  
 **GitHub:** https://github.com/The-Key-Holders/keyholders-site  
+**Current live commit on master (post this session):** a442fa9 (full winner Candidate 2 polish via implement loop). Default Vercel URL reflects changes; custom domain pending owner DNS action.
 **Production branch:** `master` (not `main`)
 
 ---
@@ -616,8 +646,11 @@ Recurring non-deterministic build failure "Cannot find module for page: /_docume
 14. Stripe Customer Portal for receipts. — deferred
 15. `metadata` Open Graph images (custom OG per route). — **HMC selective: basic OG already in app/layout.tsx (from prior) + per-page title/desc in /labs /trade /work; no dedicated image assets for extension; SKIPPED to avoid new assets/risk.**
 16. Blog/changelog section for Work mission logs. — deferred (no big portal per plan)
+    **UPDATE (this task):** Dedicated `/changelog` page implemented (additive). See new CHANGELOG.md (advanced), app/changelog/page.tsx (server data + client filter state, glass-card etc, agent-aware [changelog-maintainer] comment using GitHub MCP, manual entry form, GitHub links). Integrated via HomeSections Work link. Updated README + this doc. Ties error logging (future) + tests. Reuses lib/utils + existing styles/patterns. Use Git tags/commits. (Static MD read noted for future; demo via lib array.) No impact on P0/P1/P2.
 
 **Post-P2 additive note (per §21 maintenance + best-of-n winner polish fa724802):** Reliability Suite (76-project roadmap from The-Key-Holders + 6 salvaged tools + Design Lab interactive previews/simulators + 7+ on-theme images integrated + expanded OSS in home) delivered additively after original closer (no P0/P1/P2 checkoff changes, no core copy/§16/17 drift; follows all-dark/reuse patterns). See §13 update.
+
+**2026-06-15/16 Implement-winner session (fa724802 loop):** Full additional polish delivered on top of e8e77bb base via 3 review-fix rounds until 0 open issues from all 5 reviewers. See new top-level "Implement-Loop / Winner-Polish Agent update" for complete catch-up details (IMPL_ID, subagent usage, exact fixes per round, gates, final commit a442fa9 pushed). Strictly additive; no scope creep into P0/P1/P2.
 
 **HMC: All P0/P1/P2 items cleared/marked per scope. P3 none executed (selective quick wins only if clean; quality bar prioritizes delivered).**
 

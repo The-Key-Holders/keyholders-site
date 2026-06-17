@@ -1,7 +1,7 @@
 "use client";
 
 import { getBuyButtonId, nameToProductId, type TradeProductId } from "@/lib/trade-products";
-import { cn } from "@/lib/utils";
+import { cn, logger } from "@/lib/utils";
 import { useEffect, useRef, useState } from "react";
 
 interface CheckoutButtonProps {
@@ -73,6 +73,7 @@ export default function CheckoutButton({
   async function handleCheckout() {
     if (!productId) {
       setError("Product not configured");
+      logger.warn("Checkout invoked without productId");
       return;
     }
 
@@ -95,7 +96,9 @@ export default function CheckoutButton({
         window.location.href = data.url;
       }
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Checkout failed");
+      const msg = e instanceof Error ? e.message : "Checkout failed";
+      setError(msg);
+      logger.error("Checkout failed", { error: msg, productId });
     } finally {
       setLoading(false);
     }

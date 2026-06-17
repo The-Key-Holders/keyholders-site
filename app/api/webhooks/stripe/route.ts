@@ -3,6 +3,7 @@ import { NextResponse } from "next/server";
 import Stripe from "stripe";
 
 import { tradeProducts } from "@/lib/trade-products";
+import { logger } from "@/lib/utils";
 
 /**
  * Reuses the exact getStripe() helper pattern + 503 "not configured" error style
@@ -50,9 +51,10 @@ export async function POST(request: Request) {
   try {
     event = stripe.webhooks.constructEvent(body, signature, webhookSecret);
   } catch (err) {
-    console.error("[STRIPE WEBHOOK] Signature verification failed:", err);
+    logger.error("[STRIPE WEBHOOK] Signature verification failed", { err });
     // Return 400 for bad signature (Stripe will not retry indefinitely in some cases);
     // plan allows 400/500 "as appropriate" while success paths always ack with 200.
+    // Tied to changelog: change-related errors tracked in CHANGELOG_DATA (v0.7.0+) + queryable via logger/queryLogs for [historian-persona].
     return NextResponse.json({ error: "Invalid signature" }, { status: 400 });
   }
 
@@ -65,7 +67,7 @@ export async function POST(request: Request) {
     // productId comes from the metadata we attach in the Checkout Session creation
     const productId = session.metadata?.productId as keyof typeof tradeProducts | undefined;
 
-    console.log("[STRIPE WEBHOOK] checkout.session.completed", {
+    logger.info("[STRIPE WEBHOOK] checkout.session.completed", {
       eventId: event.id,
       sessionId: session.id,
       productId,

@@ -63,7 +63,7 @@ export default function LabsPage() {
             >
               FieldHub repo
             </a>
-            <Link href="/#github" className="btn-secondary">
+            <Link href="/github" className="btn-secondary">
               All curated repos
             </Link>
           </div>
@@ -431,7 +431,7 @@ export default function LabsPage() {
               >
                 CupofJavad on GitHub
               </a>
-              <Link href="/#github" className="btn-secondary">
+              <Link href="/github" className="btn-secondary">
                 See all repos
               </Link>
             </div>

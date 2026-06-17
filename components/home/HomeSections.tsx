@@ -117,6 +117,13 @@ export function WorkSection() {
           </span>
         </a>
       </div>
+
+      {/* Additive link to dedicated /changelog (new page). Follows existing Link + emerald patterns. */}
+      <div className="mt-4">
+        <Link href="/changelog" className="text-sm text-emeraldGlow hover:underline">
+          Full Changelog (searchable + manual entry) →
+        </Link>
+      </div>
     </ChapterSection>
   );
 }
@@ -240,6 +247,10 @@ export function GithubSection() {
         ))}
       </div>
       <p className="mt-8">
+        <Link href="/github" className="text-sm font-semibold text-cyanGlow hover:underline">
+          Full curated list + ecosystem tools →
+        </Link>
+        <span className="mx-2 text-white/20">•</span>
         <a
           href="https://github.com/The-Key-Holders"
           target="_blank"
