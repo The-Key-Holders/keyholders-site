@@ -84,6 +84,7 @@ function mapCallSummaryColumns(header: unknown[]): Record<string, number> {
   header.forEach((raw, idx) => {
     const s = cellStr(raw).toLowerCase();
     if (!s) return;
+    if (s === "date") cols.label = idx;
     if (s.includes("average call duration")) cols.avgDuration = idx;
     else if (s === "911" || s === "911.0" || (s.startsWith("911") && !s.includes("abdn") && !s.includes("total")))
       cols.answered ??= idx;
