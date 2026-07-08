@@ -1,0 +1,23 @@
+{
+  "description": "Erlang B table excerpt at P=0.01 from Chapter III Funding Manual",
+  "entries": [
+    {"erlangs_max": 0.46, "positions": 3},
+    {"erlangs_max": 0.87, "positions": 4},
+    {"erlangs_max": 1.36, "positions": 5},
+    {"erlangs_max": 1.91, "positions": 6},
+    {"erlangs_max": 2.50, "positions": 7},
+    {"erlangs_max": 3.13, "positions": 8},
+    {"erlangs_max": 3.78, "positions": 9},
+    {"erlangs_max": 4.46, "positions": 10},
+    {"erlangs_max": 5.16, "positions": 11},
+    {"erlangs_max": 5.88, "positions": 12},
+    {"erlangs_max": 6.61, "positions": 13},
+    {"erlangs_max": 7.35, "positions": 14},
+    {"erlangs_max": 8.11, "positions": 15},
+    {"erlangs_max": 8.88, "positions": 16},
+    {"erlangs_max": 9.66, "positions": 17},
+    {"erlangs_max": 10.45, "positions": 18},
+    {"erlangs_max": 11.25, "positions": 19},
+    {"erlangs_max": 12.06, "positions": 20}
+  ]
+}

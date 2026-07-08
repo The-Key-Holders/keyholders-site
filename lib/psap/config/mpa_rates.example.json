@@ -1,0 +1,12 @@
+{
+  "on_premise": {
+    "base_system_cost": 285000,
+    "per_position_cost": 18500,
+    "backroom_cost": 45000
+  },
+  "cloud": {
+    "base_system_cost": 95000,
+    "per_position_monthly_annualized": 14400,
+    "backroom_cost": 22000
+  }
+}
