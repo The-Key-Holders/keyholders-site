@@ -81,7 +81,14 @@ describe("FOR Engine", () => {
     expect(result.markdown).toMatch(/Section IV/);
     expect(result.markdown).toMatch(/substandard/i);
     expect(result.html).toMatch(/<!DOCTYPE html>/i);
+    expect(result.html).toMatch(/<table class="data"/i);
     expect(result.sections.length).toBeGreaterThanOrEqual(8);
+    expect(result.files.some((f) => f.filename.includes("COMBINED_Binder"))).toBe(true);
+    expect(result.files.some((f) => f.filename.includes("00_Cover_Page"))).toBe(true);
+    expect(result.files.some((f) => f.filename.includes("01_Section_I"))).toBe(true);
+    const cover = result.files.find((f) => f.filename.includes("00_Cover_Page"));
+    expect(cover?.content).toMatch(/seal/i);
+    expect(cover?.content).toMatch(/Prepared for/i);
   });
 
   it("suggests five-year estimate from ongoing × 5 + cpe", () => {

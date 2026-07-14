@@ -87,14 +87,17 @@ test.describe("FOR Assembly Engine", () => {
     await expect(page).toHaveURL(/\/advisor-tools\/login/);
   });
 
-  test("demo package assembles and offers downloads", async ({ page }) => {
+  test("demo package assembles and offers per-section and combined downloads", async ({ page }) => {
     await page.goto("/advisor-tools/for-engine");
     await page.getByRole("button", { name: /Load demo PSAP/i }).click();
     await page.getByRole("button", { name: /Assemble FOR package/i }).click();
-    await expect(page.getByRole("button", { name: /Download package\.md/i })).toBeVisible({
+    await expect(page.getByRole("button", { name: /Download all files/i })).toBeVisible({
       timeout: 10_000,
     });
-    await expect(page.getByRole("button", { name: /Download package\.html/i })).toBeVisible();
+    await expect(page.getByText(/COMBINED_Binder\.html/i)).toBeVisible();
+    await expect(page.getByText(/00_Cover_Page\.html/i)).toBeVisible();
+    await expect(page.getByText(/01_Section_I_Fiscal_Review\.html/i)).toBeVisible();
+    await expect(page.getByText(/07_FOR_Summary\.html/i)).toBeVisible();
     await expect(page.getByText(/Demo City Police Department/i).first()).toBeVisible();
   });
 });

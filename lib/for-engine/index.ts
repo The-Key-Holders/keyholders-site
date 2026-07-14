@@ -1,15 +1,23 @@
 import { emptyForPackage, ENGINE_VERSION, suggestFiveYearEstimate } from "./defaults";
 import {
+  buildExportFiles,
   buildFullHtmlDocument,
   buildFullMarkdown,
   renderAllSections,
+  type ExportFile,
 } from "./render";
 import type { ForPackage, PackageValidation, RenderedSection } from "./types";
 import { validateForPackage } from "./validate";
 
 export { ENGINE_VERSION, emptyForPackage, suggestFiveYearEstimate };
-export type { ForPackage, PackageValidation, RenderedSection };
-export { validateForPackage, renderAllSections, buildFullMarkdown, buildFullHtmlDocument };
+export type { ForPackage, PackageValidation, RenderedSection, ExportFile };
+export {
+  validateForPackage,
+  renderAllSections,
+  buildFullMarkdown,
+  buildFullHtmlDocument,
+  buildExportFiles,
+};
 
 export function assembleForPackage(
   pkg: ForPackage,
@@ -21,6 +29,7 @@ export function assembleForPackage(
   markdown: string;
   html: string;
   json: string;
+  files: ExportFile[];
 } {
   const assembled: ForPackage = {
     ...pkg,
@@ -48,5 +57,6 @@ export function assembleForPackage(
     markdown: buildFullMarkdown(assembled),
     html: buildFullHtmlDocument(assembled),
     json: JSON.stringify(assembled, null, 2),
+    files: buildExportFiles(assembled),
   };
 }

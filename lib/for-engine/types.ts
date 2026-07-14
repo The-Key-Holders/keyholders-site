@@ -101,6 +101,8 @@ export type SectionId =
 export type RenderedSection = {
   id: SectionId;
   title: string;
+  /** Suggested download filename for this section HTML */
+  filename: string;
   markdown: string;
   html: string;
 };

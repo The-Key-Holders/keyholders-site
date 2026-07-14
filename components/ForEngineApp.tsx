@@ -4,6 +4,7 @@ import {
   assembleForPackage,
   emptyForPackage,
   suggestFiveYearEstimate,
+  type ExportFile,
   type ForPackage,
 } from "@/lib/for-engine";
 import Link from "next/link";
@@ -62,7 +63,7 @@ export default function ForEngineApp() {
   const [pkg, setPkg] = useState<ForPackage>(() => emptyForPackage());
   const [assembledMd, setAssembledMd] = useState<string | null>(null);
   const [assembledHtml, setAssembledHtml] = useState<string | null>(null);
-  const [assembledJson, setAssembledJson] = useState<string | null>(null);
+  const [exportFiles, setExportFiles] = useState<ExportFile[]>([]);
   const [validationMsg, setValidationMsg] = useState<string>("");
 
   const previewFiveYear = useMemo(() => suggestFiveYearEstimate(pkg), [pkg]);
@@ -97,13 +98,21 @@ export default function ForEngineApp() {
     if (!result.validation.ok) {
       setAssembledMd(null);
       setAssembledHtml(null);
-      setAssembledJson(null);
+      setExportFiles([]);
       return;
     }
     setPkg(result.package);
     setAssembledMd(result.markdown);
     setAssembledHtml(result.html);
-    setAssembledJson(result.json);
+    setExportFiles(result.files);
+  }
+
+  async function downloadAll() {
+    for (const f of exportFiles) {
+      downloadBlob(f.filename, f.content, f.mime);
+      // Stagger downloads so browsers don't drop files
+      await new Promise((r) => setTimeout(r, 180));
+    }
   }
 
   function loadDemo() {
@@ -176,7 +185,7 @@ export default function ForEngineApp() {
     setValidationMsg("");
     setAssembledMd(null);
     setAssembledHtml(null);
-    setAssembledJson(null);
+    setExportFiles([]);
   }
 
   const stepIndex = STEPS.findIndex((s) => s.id === step);
@@ -642,8 +651,10 @@ export default function ForEngineApp() {
           {step === "package" && (
             <div className="space-y-4">
               <p className="text-sm text-white/65">
-                Generate draft Markdown, print-ready HTML, and JSON. Summary is assembled from
-                sections I–VI (write order per Branch prep: complete sections first, then summarize).
+                Generates a <strong className="text-white/80">combined binder HTML</strong> plus{" "}
+                <strong className="text-white/80">one HTML file per section</strong> (Cover, I–VI,
+                Summary, Checklist, Findings), plus Markdown + JSON — matching how completed packages
+                (e.g. Roseville PD FOR) store separate section docs.
               </p>
               <button type="button" className="btn-primary" onClick={assemble}>
                 Assemble FOR package
@@ -653,47 +664,29 @@ export default function ForEngineApp() {
                   {validationMsg}
                 </pre>
               )}
-              {assembledMd && (
-                <div className="flex flex-wrap gap-2">
-                  <button
-                    type="button"
-                    className="btn-secondary text-xs"
-                    onClick={() =>
-                      downloadBlob(
-                        `FOR_${pkg.cover.psapName.replace(/\W+/g, "_") || "draft"}.md`,
-                        assembledMd,
-                        "text/markdown"
-                      )
-                    }
-                  >
-                    Download package.md
+              {exportFiles.length > 0 && (
+                <div className="space-y-3">
+                  <button type="button" className="btn-primary text-xs" onClick={() => void downloadAll()}>
+                    Download all files ({exportFiles.length})
                   </button>
-                  <button
-                    type="button"
-                    className="btn-secondary text-xs"
-                    onClick={() =>
-                      downloadBlob(
-                        `FOR_${pkg.cover.psapName.replace(/\W+/g, "_") || "draft"}.html`,
-                        assembledHtml || "",
-                        "text/html"
-                      )
-                    }
-                  >
-                    Download package.html
-                  </button>
-                  <button
-                    type="button"
-                    className="btn-secondary text-xs"
-                    onClick={() =>
-                      downloadBlob(
-                        `FOR_${pkg.cover.psapName.replace(/\W+/g, "_") || "draft"}.json`,
-                        assembledJson || "",
-                        "application/json"
-                      )
-                    }
-                  >
-                    Download package.json
-                  </button>
+                  <ul className="max-h-64 space-y-1.5 overflow-y-auto rounded-lg border border-white/10 bg-vault-950/40 p-3 text-xs">
+                    {exportFiles.map((f) => (
+                      <li key={f.filename} className="flex items-center justify-between gap-2">
+                        <span className="truncate font-mono text-white/70">{f.filename}</span>
+                        <button
+                          type="button"
+                          className="shrink-0 rounded border border-cyanGlow/30 px-2 py-0.5 text-cyanGlow hover:bg-cyanGlow/10"
+                          onClick={() => downloadBlob(f.filename, f.content, f.mime)}
+                        >
+                          Download
+                        </button>
+                      </li>
+                    ))}
+                  </ul>
+                  <p className="text-[11px] text-white/40">
+                    Open combined binder or any section HTML in a browser → Print → Save as PDF for
+                    binder pages. Tables use real HTML (not markdown pipes).
+                  </p>
                 </div>
               )}
             </div>
