@@ -10,6 +10,8 @@
     "test": "vitest run",
     "test:unit": "vitest run",
     "test:e2e": "playwright test",
+    "test:e2e:site": "playwright test e2e/site-navigation.spec.ts",
+    "test:e2e:tools": "playwright test e2e/advisor-tools.spec.ts e2e/advisor-tools-full.spec.ts",
     "test:all": "vitest run && playwright test"
   },
   "dependencies": {
