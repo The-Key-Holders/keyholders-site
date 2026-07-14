@@ -1,16 +1,19 @@
-import { SUPPORT_SYSTEM_PROMPT, sanitizeHistory } from "@/lib/support-agent";
+import { PUBLIC_SITE_SYSTEM_CONTEXT } from "@/lib/public-site-agent";
 import { NextResponse } from "next/server";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
+const TASKADE_PROMPT_URL = "https://www.taskade.com/api/v2/promptAgent";
 const MAX_MESSAGE = 2_000;
-const DEFAULT_MODEL = process.env.XAI_MODEL?.trim() || "grok-4.5";
+const MAX_HISTORY = 12;
+
+type ChatMessage = { role: "user" | "assistant"; content: string };
 
 /** Simple in-memory rate limit per IP (best-effort on serverless). */
 const hits = new Map<string, { count: number; reset: number }>();
 const RATE_WINDOW_MS = 60_000;
-const RATE_MAX = 20;
+const RATE_MAX = 24;
 
 function clientIp(req: Request): string {
   const xf = req.headers.get("x-forwarded-for");
@@ -30,36 +33,67 @@ function rateLimit(ip: string): boolean {
   return true;
 }
 
+function getTaskadeConfig() {
+  const apiKey =
+    process.env.TASKADE_API_KEY?.trim() || process.env.TASKADE_ACCESS_TOKEN?.trim();
+  const spaceId = process.env.TASKADE_SPACE_ID?.trim() || "912rDhsLvyDzJQ5r";
+  const agentId =
+    process.env.TASKADE_PUBLIC_AGENT_ID?.trim() ||
+    process.env.TASKADE_AGENT_ID?.trim() ||
+    "01KXFEPH8H7ZSKHPF2H02XKDAB";
+  return { apiKey, spaceId, agentId };
+}
+
+function buildPrompt(message: string, history: ChatMessage[]): string {
+  const recent = history.slice(-MAX_HISTORY);
+  const lines = recent.map((m) => {
+    const who = m.role === "user" ? "User" : "Assistant";
+    return `${who}: ${m.content.trim()}`;
+  });
+  return [
+    PUBLIC_SITE_SYSTEM_CONTEXT,
+    "",
+    "Continue this public site guide conversation.",
+    recent.length ? "Conversation so far:" : "",
+    ...lines,
+    "",
+    `User: ${message.trim()}`,
+    "Assistant:",
+  ]
+    .filter(Boolean)
+    .join("\n");
+}
+
 export async function GET() {
-  const key = process.env.XAI_API_KEY?.trim();
+  const { apiKey, agentId } = getTaskadeConfig();
   return NextResponse.json({
-    configured: Boolean(key),
-    model: key ? DEFAULT_MODEL : null,
-    provider: "xAI Grok",
+    configured: Boolean(apiKey),
+    provider: "Taskade",
+    agentId: apiKey ? agentId : null,
+    scope: "public-site",
   });
 }
 
 export async function POST(request: Request) {
-  const apiKey = process.env.XAI_API_KEY?.trim();
+  const { apiKey, spaceId, agentId } = getTaskadeConfig();
   if (!apiKey) {
     return NextResponse.json(
       {
         error:
-          "Public support agent is not configured yet (server missing XAI_API_KEY).",
+          "Public site agent is not configured (set TASKADE_API_KEY on the server).",
       },
       { status: 503 }
     );
   }
 
-  const ip = clientIp(request);
-  if (!rateLimit(ip)) {
+  if (!rateLimit(clientIp(request))) {
     return NextResponse.json(
       { error: "Too many messages. Please wait a minute and try again." },
       { status: 429 }
     );
   }
 
-  let body: { message?: string; history?: unknown } = {};
+  let body: { message?: string; history?: ChatMessage[] } = {};
   try {
     body = await request.json();
   } catch {
@@ -77,44 +111,58 @@ export async function POST(request: Request) {
     );
   }
 
-  const history = sanitizeHistory(body.history);
-  const messages = [
-    { role: "system" as const, content: SUPPORT_SYSTEM_PROMPT },
-    ...history.map((m) => ({ role: m.role, content: m.content })),
-    { role: "user" as const, content: message },
-  ];
+  const history = Array.isArray(body.history)
+    ? body.history
+        .filter(
+          (m): m is ChatMessage =>
+            !!m &&
+            (m.role === "user" || m.role === "assistant") &&
+            typeof m.content === "string" &&
+            m.content.trim().length > 0
+        )
+        .slice(-MAX_HISTORY)
+        .map((m) => ({
+          role: m.role,
+          content: m.content.slice(0, MAX_MESSAGE),
+        }))
+    : [];
+
+  const prompt = buildPrompt(message, history);
 
   try {
-    const res = await fetch("https://api.x.ai/v1/chat/completions", {
+    const res = await fetch(TASKADE_PROMPT_URL, {
       method: "POST",
       headers: {
         Authorization: `Bearer ${apiKey}`,
+        Accept: "application/json",
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({
-        model: DEFAULT_MODEL,
-        messages,
-        temperature: 0.5,
-        max_tokens: 1200,
-      }),
+      body: JSON.stringify({ spaceId, agentId, prompt }),
     });
 
     const data = (await res.json().catch(() => ({}))) as {
-      choices?: { message?: { content?: string } }[];
-      error?: { message?: string };
+      ok?: boolean;
+      summary?: string;
       message?: string;
+      error?: string;
+      item?: { summary?: string; content?: string };
     };
 
     if (!res.ok) {
       const detail =
-        data.error?.message || data.message || `xAI error (${res.status})`;
+        data.message || data.error || `Taskade promptAgent failed (${res.status})`;
       return NextResponse.json({ error: detail }, { status: 502 });
     }
 
-    const reply = data.choices?.[0]?.message?.content?.trim() || "";
+    const reply =
+      (typeof data.summary === "string" && data.summary.trim()) ||
+      (typeof data.item?.summary === "string" && data.item.summary.trim()) ||
+      (typeof data.item?.content === "string" && data.item.content.trim()) ||
+      "";
+
     if (!reply) {
       return NextResponse.json(
-        { error: "Empty reply from Grok. Try again." },
+        { error: "Agent returned an empty reply. Try again in a moment." },
         { status: 502 }
       );
     }
@@ -122,10 +170,11 @@ export async function POST(request: Request) {
     return NextResponse.json({
       ok: true,
       reply,
-      model: DEFAULT_MODEL,
+      provider: "Taskade",
+      agentId,
     });
   } catch (err) {
-    const msg = err instanceof Error ? err.message : "Upstream error";
+    const msg = err instanceof Error ? err.message : "Upstream agent error";
     return NextResponse.json({ error: msg }, { status: 502 });
   }
 }

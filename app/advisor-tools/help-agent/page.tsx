@@ -4,7 +4,7 @@ import type { Metadata } from "next";
 export const metadata: Metadata = {
   title: "New Hire + Automation Help Agent",
   description:
-    "Password-gated chat with the New Hire + Automation Tool Help agent — onboarding and Advisor Tools coaching.",
+    "Password-gated Grok coach for onboarding and Advisor Tools — new hire docs and automation how-tos.",
   robots: { index: false, follow: false },
 };
 

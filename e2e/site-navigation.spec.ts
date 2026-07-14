@@ -49,8 +49,8 @@ test.describe("Desktop header navigation", () => {
     // Support is public — no password
     await page.getByRole("navigation").getByRole("link", { name: "Support", exact: true }).click();
     await expect(page).toHaveURL(/\/support/);
-    await expect(page.getByRole("heading", { name: /Key Holders Support/i })).toBeVisible();
-    await expect(page.getByText(/powered by Grok/i).first()).toBeVisible();
+    await expect(page.getByRole("heading", { name: /Key Holders Site Guide/i })).toBeVisible();
+    await expect(page.getByText(/powered by Taskade/i).first()).toBeVisible();
 
     // Tools is gated — should land on login
     await page.getByRole("navigation").getByRole("link", { name: "Tools", exact: true }).click();
@@ -66,6 +66,19 @@ test.describe("Desktop header navigation", () => {
     await page.goto("/support");
     await expect(page.getByLabel(/Message/i)).toBeVisible();
     await expect(page.getByRole("button", { name: /Send/i })).toBeVisible();
+  });
+
+  test("Taskade site guide widget appears on public pages but not on gated tools login", async ({
+    page,
+  }) => {
+    await page.goto("/");
+    await expect(page.getByRole("button", { name: /Open site guide chat|Site Guide/i })).toBeVisible();
+
+    await page.goto("/projects");
+    await expect(page.getByRole("button", { name: /Open site guide chat|Site Guide/i })).toBeVisible();
+
+    await page.goto("/advisor-tools/login");
+    await expect(page.getByRole("button", { name: /Open site guide chat|Site Guide/i })).toHaveCount(0);
   });
 
   test("nav Connect scrolls to connect section on home", async ({ page }) => {

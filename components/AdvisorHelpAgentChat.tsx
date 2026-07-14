@@ -1,23 +1,17 @@
 "use client";
 
+import { ADVISOR_HELP_STARTERS } from "@/lib/advisor-help-agent";
 import Link from "next/link";
 import { FormEvent, useEffect, useRef, useState } from "react";
 
 type ChatMessage = { role: "user" | "assistant"; content: string };
-
-const STARTERS = [
-  "What should I do on day one as a new Funding Advisor?",
-  "How do I unlock Advisor Tools and open the allotment engine?",
-  "Walk me through Invoice ↔ TD-288 reconciliation traffic lights.",
-  "Where are New_Hire and Advisor_Docs folders and what belongs in each?",
-];
 
 export default function AdvisorHelpAgentChat() {
   const [messages, setMessages] = useState<ChatMessage[]>([
     {
       role: "assistant",
       content:
-        "Hi — I'm the **New Hire + Automation Tool Help** agent. I only run inside this password-protected hub (not a public Taskade link). Ask about onboarding steps, Chapter III orientation themes, or how to use allotment / invoice / FOR tools.",
+        "Hi — I'm the **New Hire + Automation Tool Help** agent (Grok). I only run inside this password-protected hub. Ask about onboarding, Chapter III / TD-288 themes, allotment, invoice reconciliation, or FOR process coaching.",
     },
   ]);
   const [input, setInput] = useState("");
@@ -53,7 +47,6 @@ export default function AdvisorHelpAgentChat() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           message,
-          // Exclude the static welcome for cleaner Taskade context
           history: nextHistory.filter(
             (m, i) => !(i === 0 && m.role === "assistant")
           ),
@@ -67,7 +60,7 @@ export default function AdvisorHelpAgentChat() {
           {
             role: "assistant",
             content:
-              "I couldn't reach the help agent just now. Check that the server has Taskade credentials configured, then try again.",
+              "I couldn't reach the help agent just now. Check that XAI_API_KEY is configured on the server, then try again.",
           },
         ]);
         return;
@@ -105,25 +98,28 @@ export default function AdvisorHelpAgentChat() {
         <span>Help agent</span>
       </p>
       <p className="mt-4 text-sm font-medium uppercase tracking-widest text-cyanGlow/80">
-        Restricted · password gate
+        Restricted · Grok · password gate
       </p>
       <h1 className="mt-2 font-display text-3xl font-bold text-white sm:text-4xl">
         New Hire + Automation Help
       </h1>
       <p className="mt-3 max-w-2xl text-sm leading-relaxed text-white/65">
-        Private Taskade agent chat, proxied through this site. No public Taskade agent page — only
-        users who unlock Advisor Tools can talk here.
+        Private Grok coach for onboarding and Advisor Tools. Public portfolio questions belong on{" "}
+        <Link href="/support" className="text-cyanGlow hover:underline">
+          /support
+        </Link>{" "}
+        (Taskade site guide).
       </p>
 
       {configured === false && (
         <div className="mt-4 rounded-xl border border-rose-400/40 bg-rose-500/10 px-4 py-3 text-sm text-rose-100">
-          Server is missing <code className="text-rose-50">TASKADE_API_KEY</code>. An admin needs to
-          set it on Vercel (and redeploy) before chat works.
+          Server is missing <code className="text-rose-50">XAI_API_KEY</code>. An admin needs to set
+          it on Vercel (and redeploy) before chat works.
         </div>
       )}
 
       <div className="mt-4 flex flex-wrap gap-2">
-        {STARTERS.map((s) => (
+        {ADVISOR_HELP_STARTERS.map((s) => (
           <button
             key={s}
             type="button"
@@ -155,15 +151,12 @@ export default function AdvisorHelpAgentChat() {
             </div>
           ))}
           {loading && (
-            <div className="text-sm text-white/45">Agent is thinking…</div>
+            <div className="text-sm text-white/45">Grok is thinking…</div>
           )}
           <div ref={bottomRef} />
         </div>
 
-        <form
-          onSubmit={onSubmit}
-          className="border-t border-white/10 p-3 sm:p-4"
-        >
+        <form onSubmit={onSubmit} className="border-t border-white/10 p-3 sm:p-4">
           {error && (
             <div className="mb-2 rounded-lg border border-rose-400/30 bg-rose-500/10 px-3 py-2 text-xs text-rose-100">
               {error}
@@ -197,7 +190,7 @@ export default function AdvisorHelpAgentChat() {
             </button>
           </div>
           <p className="mt-2 text-[11px] text-white/40">
-            Enter to send · Shift+Enter for newline · Sanitized guidance only; not a system of record
+            Password-gated · Grok · sanitized guidance only · not a system of record
           </p>
         </form>
       </div>

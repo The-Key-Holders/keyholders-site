@@ -21,8 +21,8 @@ const TOOLS: ToolCard[] = [
     status: "live",
     title: "New Hire + Automation Help Agent",
     blurb:
-      "Private chat coach for onboarding and Advisor Tools how-tos. Taskade-backed, available only inside this password gate (no public agent link).",
-    tags: ["New hire", "Chat", "Taskade"],
+      "Private Grok coach for onboarding and Advisor Tools how-tos. Available only inside this password gate.",
+    tags: ["New hire", "Chat", "Grok"],
   },
   {
     href: "/psap-allotment",

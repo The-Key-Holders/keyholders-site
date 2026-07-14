@@ -64,6 +64,7 @@ test.describe("Advisor Tools Hub", () => {
     await expect(page).toHaveURL(/\/advisor-tools\/help-agent/);
     await expect(page.getByRole("heading", { name: /New Hire \+ Automation Help/i })).toBeVisible();
     await expect(page.getByText(/password-protected hub/i)).toBeVisible();
+    await expect(page.getByText(/Grok/i).first()).toBeVisible();
     await expect(page.getByLabel(/Message/i)).toBeVisible();
   });
 });

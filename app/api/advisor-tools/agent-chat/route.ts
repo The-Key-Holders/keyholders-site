@@ -1,51 +1,32 @@
+import { ADVISOR_HELP_SYSTEM_PROMPT } from "@/lib/advisor-help-agent";
 import { NextResponse } from "next/server";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
-const TASKADE_PROMPT_URL = "https://www.taskade.com/api/v2/promptAgent";
-const MAX_MESSAGE_LEN = 4_000;
+const MAX_MESSAGE = 4_000;
 const MAX_HISTORY = 12;
+const DEFAULT_MODEL = process.env.XAI_MODEL?.trim() || "grok-4.5";
 
 type ChatMessage = { role: "user" | "assistant"; content: string };
 
-function getTaskadeConfig() {
-  const apiKey =
-    process.env.TASKADE_API_KEY?.trim() || process.env.TASKADE_ACCESS_TOKEN?.trim();
-  const spaceId = process.env.TASKADE_SPACE_ID?.trim() || "912rDhsLvyDzJQ5r";
-  const agentId =
-    process.env.TASKADE_AGENT_ID?.trim() || "01KXFEPH8H7ZSKHPF2H02XKDAB";
-  return { apiKey, spaceId, agentId };
-}
-
-function buildPrompt(message: string, history: ChatMessage[]): string {
-  const recent = history.slice(-MAX_HISTORY);
-  if (recent.length === 0) return message.trim();
-
-  const lines = recent.map((m) => {
-    const who = m.role === "user" ? "User" : "Assistant";
-    return `${who}: ${m.content.trim()}`;
+export async function GET() {
+  const key = process.env.XAI_API_KEY?.trim();
+  return NextResponse.json({
+    configured: Boolean(key),
+    provider: "xAI Grok",
+    model: key ? DEFAULT_MODEL : null,
+    scope: "password-gated-advisor-help",
   });
-  return [
-    "Continue this private Advisor Tools help conversation.",
-    "Stay in role as the New Hire + Automation Tool Help Agent.",
-    "Do not claim you are publicly available; this chat is only for password-gated Advisor Tools users.",
-    "",
-    "Conversation so far:",
-    ...lines,
-    "",
-    `User: ${message.trim()}`,
-    "Assistant:",
-  ].join("\n");
 }
 
 export async function POST(request: Request) {
-  const { apiKey, spaceId, agentId } = getTaskadeConfig();
+  const apiKey = process.env.XAI_API_KEY?.trim();
   if (!apiKey) {
     return NextResponse.json(
       {
         error:
-          "Help agent is not configured (set TASKADE_API_KEY or TASKADE_ACCESS_TOKEN on the server).",
+          "Advisor help agent is not configured (set XAI_API_KEY on the server).",
       },
       { status: 503 }
     );
@@ -62,9 +43,9 @@ export async function POST(request: Request) {
   if (!message) {
     return NextResponse.json({ error: "Message is required" }, { status: 400 });
   }
-  if (message.length > MAX_MESSAGE_LEN) {
+  if (message.length > MAX_MESSAGE) {
     return NextResponse.json(
-      { error: `Message too long (max ${MAX_MESSAGE_LEN} characters)` },
+      { error: `Message too long (max ${MAX_MESSAGE} characters)` },
       { status: 400 }
     );
   }
@@ -78,51 +59,50 @@ export async function POST(request: Request) {
             typeof m.content === "string" &&
             m.content.trim().length > 0
         )
+        .slice(-MAX_HISTORY)
         .map((m) => ({
           role: m.role,
-          content: m.content.slice(0, MAX_MESSAGE_LEN),
+          content: m.content.slice(0, MAX_MESSAGE),
         }))
     : [];
 
-  const prompt = buildPrompt(message, history);
+  const messages = [
+    { role: "system" as const, content: ADVISOR_HELP_SYSTEM_PROMPT },
+    ...history.map((m) => ({ role: m.role, content: m.content })),
+    { role: "user" as const, content: message },
+  ];
 
   try {
-    const res = await fetch(TASKADE_PROMPT_URL, {
+    const res = await fetch("https://api.x.ai/v1/chat/completions", {
       method: "POST",
       headers: {
         Authorization: `Bearer ${apiKey}`,
-        Accept: "application/json",
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ spaceId, agentId, prompt }),
+      body: JSON.stringify({
+        model: DEFAULT_MODEL,
+        messages,
+        temperature: 0.4,
+        max_tokens: 1600,
+      }),
     });
 
     const data = (await res.json().catch(() => ({}))) as {
-      ok?: boolean;
-      summary?: string;
+      choices?: { message?: { content?: string } }[];
+      error?: { message?: string };
       message?: string;
-      error?: string;
-      item?: { summary?: string; content?: string };
     };
 
     if (!res.ok) {
       const detail =
-        data.message || data.error || `Taskade promptAgent failed (${res.status})`;
-      return NextResponse.json(
-        { error: detail },
-        { status: res.status === 401 || res.status === 403 ? 502 : 502 }
-      );
+        data.error?.message || data.message || `xAI error (${res.status})`;
+      return NextResponse.json({ error: detail }, { status: 502 });
     }
 
-    const reply =
-      (typeof data.summary === "string" && data.summary.trim()) ||
-      (typeof data.item?.summary === "string" && data.item.summary.trim()) ||
-      (typeof data.item?.content === "string" && data.item.content.trim()) ||
-      "";
-
+    const reply = data.choices?.[0]?.message?.content?.trim() || "";
     if (!reply) {
       return NextResponse.json(
-        { error: "Agent returned an empty reply. Try again in a moment." },
+        { error: "Empty reply from Grok. Try again." },
         { status: 502 }
       );
     }
@@ -130,19 +110,11 @@ export async function POST(request: Request) {
     return NextResponse.json({
       ok: true,
       reply,
-      agentId,
+      model: DEFAULT_MODEL,
+      provider: "xAI Grok",
     });
   } catch (err) {
-    const msg = err instanceof Error ? err.message : "Upstream agent error";
+    const msg = err instanceof Error ? err.message : "Upstream error";
     return NextResponse.json({ error: msg }, { status: 502 });
   }
-}
-
-export async function GET() {
-  const { apiKey, agentId } = getTaskadeConfig();
-  return NextResponse.json({
-    configured: Boolean(apiKey),
-    agentId: apiKey ? agentId : null,
-    // Never expose the token
-  });
 }

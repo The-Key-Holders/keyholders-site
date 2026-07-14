@@ -1,6 +1,6 @@
 "use client";
 
-import { SUPPORT_STARTERS } from "@/lib/support-agent";
+import { PUBLIC_SITE_STARTERS } from "@/lib/public-site-agent";
 import Link from "next/link";
 import { FormEvent, useEffect, useRef, useState } from "react";
 
@@ -11,7 +11,7 @@ export default function PublicSupportChat() {
     {
       role: "assistant",
       content:
-        "Hi — I'm the **Key Holders Support Agent** (powered by Grok). I can help with the public site, Geeks Next Door, Trade services, and how to reach Javad. For password-protected Advisor Tools, authorized users should unlock **/advisor-tools** separately.",
+        "Hi — I'm the **Key Holders Site Guide** (Taskade). I help with the public portfolio, Geeks Next Door, Trade, and how to reach Javad. Password-protected Advisor Tools are separate — authorized users unlock **/advisor-tools** after login.",
     },
   ]);
   const [input, setInput] = useState("");
@@ -59,7 +59,7 @@ export default function PublicSupportChat() {
             role: "assistant",
             content:
               data.error ||
-              "I couldn't reach Grok just now. Please try again shortly, or email javadkhoshnevisan@gmail.com.",
+              "I couldn't reach the site guide just now. Please try again shortly, or email javadkhoshnevisan@gmail.com.",
           },
         ]);
         return;
@@ -97,20 +97,20 @@ export default function PublicSupportChat() {
         <span>Support</span>
       </p>
       <p className="mt-4 text-sm font-medium uppercase tracking-widest text-cyanGlow/80">
-        Public · powered by Grok
+        Public · powered by Taskade
       </p>
       <h1 className="mt-2 font-display text-3xl font-bold text-white sm:text-4xl">
-        Key Holders Support
+        Key Holders Site Guide
       </h1>
       <p className="mt-3 max-w-2xl text-sm leading-relaxed text-white/65">
         Ask about the portfolio, Geeks Next Door, Trade, or how to get in touch. This chat is public — no
-        password. Internal Advisor Tools coaching stays behind the Tools login.
+        password. Internal Advisor coaching stays behind the Tools login (Grok help agent).
       </p>
 
       {configured === false && (
         <div className="mt-4 rounded-xl border border-amber-400/35 bg-amber-500/10 px-4 py-3 text-sm text-amber-50/90">
-          Grok is almost ready — an admin still needs to set{" "}
-          <code className="text-amber-50">XAI_API_KEY</code> on the server. Until then, email{" "}
+          Taskade is almost ready — an admin still needs to set{" "}
+          <code className="text-amber-50">TASKADE_API_KEY</code> on the server. Until then, email{" "}
           <a className="underline" href="mailto:javadkhoshnevisan@gmail.com">
             javadkhoshnevisan@gmail.com
           </a>
@@ -119,7 +119,7 @@ export default function PublicSupportChat() {
       )}
 
       <div className="mt-4 flex flex-wrap gap-2">
-        {SUPPORT_STARTERS.map((s) => (
+        {PUBLIC_SITE_STARTERS.map((s) => (
           <button
             key={s}
             type="button"
@@ -150,7 +150,7 @@ export default function PublicSupportChat() {
               </div>
             </div>
           ))}
-          {loading && <div className="text-sm text-white/45">Grok is thinking…</div>}
+          {loading && <div className="text-sm text-white/45">Taskade is thinking…</div>}
           <div ref={bottomRef} />
         </div>
 
@@ -188,7 +188,7 @@ export default function PublicSupportChat() {
             </button>
           </div>
           <p className="mt-2 text-[11px] text-white/40">
-            Public chat · rate-limited · not for confidential Advisor data
+            Public Taskade chat · rate-limited · not for confidential Advisor data
           </p>
         </form>
       </div>

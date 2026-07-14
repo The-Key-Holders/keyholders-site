@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { DM_Sans, Syne } from "next/font/google";
 import Header from "@/components/Header";
+import SiteChatWidget from "@/components/SiteChatWidget";
 import SmoothScroll from "@/components/providers/SmoothScroll";
 import "./globals.css";
 
@@ -55,6 +56,8 @@ export default function RootLayout({
         <SmoothScroll>
           <Header />
           <main>{children}</main>
+          {/* Taskade public site guide — hidden on password-gated Advisor Tools paths */}
+          <SiteChatWidget />
         </SmoothScroll>
       </body>
     </html>
