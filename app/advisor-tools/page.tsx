@@ -41,12 +41,12 @@ const TOOLS: ToolCard[] = [
     tags: ["Fiscal", "TD-288", "SLA"],
   },
   {
-    href: "/advisor-tools#roadmap",
-    status: "planned",
+    href: "/advisor-tools/for-engine",
+    status: "live",
     title: "FOR Assembly Engine",
     blurb:
-      "Planned next: assemble Fiscal & Operational Review packages from ECaTS + section templates (Cover / Summary / Section IV MVP).",
-    tags: ["FOR", "ECaTS", "Coming soon"],
+      "Assemble Fiscal & Operational Review draft packages (Cover → Sections I–VI → Summary → checklist) with HTML/MD/JSON export.",
+    tags: ["FOR", "ECaTS", "Package"],
   },
   {
     href: "/advisor-tools#roadmap",

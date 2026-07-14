@@ -103,12 +103,13 @@ export const projects: Project[] = [
   {
     id: "for-engine",
     name: "FOR Assembly Engine",
-    summary: "Fiscal & Operational Review draft assembly from ECaTS (planned next).",
+    summary:
+      "Password-gated Fiscal & Operational Review draft package builder — Cover through Section VI + Summary export.",
     kind: "tool",
-    status: "planned",
-    href: "/advisor-tools#roadmap",
+    status: "live",
+    href: "/advisor-tools/for-engine",
     gated: true,
-    tags: ["FOR", "Coming soon"],
+    tags: ["FOR", "PSAP", "Report"],
     featured: true,
   },
   {

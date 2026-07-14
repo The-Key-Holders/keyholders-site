@@ -48,7 +48,7 @@ test.describe("Advisor Tools Hub", () => {
     await expect(page.getByRole("heading", { name: /New Hire \+ Automation Help Agent/i })).toBeVisible();
     await expect(page.getByRole("heading", { name: "PSAP Allotment Engine" })).toBeVisible();
     await expect(page.getByRole("heading", { name: "Invoice ↔ TD-288 Reconciler" })).toBeVisible();
-    await expect(page.getByRole("heading", { name: "FOR Assembly Engine" })).toBeVisible();
+    await expect(page.getByRole("heading", { name: /FOR Assembly Engine/i })).toBeVisible();
   });
 
   test("hub navigates to invoice reconciler", async ({ page }) => {
@@ -66,6 +66,36 @@ test.describe("Advisor Tools Hub", () => {
     await expect(page.getByText(/password-protected hub/i)).toBeVisible();
     await expect(page.getByText(/Grok/i).first()).toBeVisible();
     await expect(page.getByLabel(/Message/i)).toBeVisible();
+  });
+
+  test("hub navigates to FOR Assembly Engine", async ({ page }) => {
+    await page.goto("/advisor-tools");
+    await page.locator('a[href="/advisor-tools/for-engine"]').click();
+    await expect(page).toHaveURL(/\/advisor-tools\/for-engine/);
+    await expect(page.getByRole("heading", { name: /FOR Assembly Engine/i })).toBeVisible();
+  });
+});
+
+test.describe("FOR Assembly Engine", () => {
+  test.beforeEach(async ({ page }) => {
+    await loginAdvisorTools(page);
+  });
+
+  test("unauthenticated visitor is redirected from for-engine", async ({ page, context }) => {
+    await context.clearCookies();
+    await page.goto("/advisor-tools/for-engine");
+    await expect(page).toHaveURL(/\/advisor-tools\/login/);
+  });
+
+  test("demo package assembles and offers downloads", async ({ page }) => {
+    await page.goto("/advisor-tools/for-engine");
+    await page.getByRole("button", { name: /Load demo PSAP/i }).click();
+    await page.getByRole("button", { name: /Assemble FOR package/i }).click();
+    await expect(page.getByRole("button", { name: /Download package\.md/i })).toBeVisible({
+      timeout: 10_000,
+    });
+    await expect(page.getByRole("button", { name: /Download package\.html/i })).toBeVisible();
+    await expect(page.getByText(/Demo City Police Department/i).first()).toBeVisible();
   });
 });
 
