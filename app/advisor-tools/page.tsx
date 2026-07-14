@@ -59,11 +59,21 @@ const STATUS_STYLE = {
 export default function AdvisorToolsHubPage() {
   return (
     <div className="mx-auto max-w-5xl px-4 py-12 sm:px-6">
-      <p className="text-sm font-medium uppercase tracking-widest text-cyanGlow/80">The Keyholders · Cal OES</p>
+      <p className="text-sm text-white/45">
+        <Link href="/projects" className="text-cyanGlow hover:underline">
+          Projects
+        </Link>
+        <span className="mx-2">/</span>
+        <span>Professional tools</span>
+      </p>
+      <p className="mt-4 text-sm font-medium uppercase tracking-widest text-cyanGlow/80">
+        The Key Holders · Cal OES
+      </p>
       <h1 className="mt-2 font-display text-4xl font-bold text-white">Advisor Tools Hub</h1>
       <p className="mt-4 max-w-2xl text-lg text-white/65">
-        Browser-based automations for Javad’s Funding Advisor role — usable from any environment with a modern
-        browser. Each tool is fully tested in desktop form first; web ports ship when parity is solid.
+        Password-protected automations for the Funding Advisor role — part of the same Key Holders portfolio as
+        Trade, labs, and Geeks Next Door. Desktop twins live in the process-automations workspace; web ports ship
+        here when parity is solid.
       </p>
 
       <div className="mt-4 rounded-xl border border-amber-400/25 bg-amber-500/10 px-4 py-3 text-sm text-amber-50/90">

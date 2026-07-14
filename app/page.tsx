@@ -5,7 +5,8 @@ import {
   AboutSection,
   ContactSection,
   GithubSection,
-  LabsSection,
+  PortfolioSection,
+  ProjectsSection,
   WorkSection,
 } from "@/components/home/HomeSections";
 
@@ -17,7 +18,8 @@ export default function HomePage() {
   return (
     <>
       <VaultHero />
-      <LabsSection />
+      <PortfolioSection />
+      <ProjectsSection />
       <WorkSection />
       <GithubSection />
       <AboutSection />

@@ -1,5 +1,6 @@
 "use client";
 
+import BrandLogo from "@/components/BrandLogo";
 import { useRouter, useSearchParams } from "next/navigation";
 import { FormEvent, Suspense, useState } from "react";
 
@@ -39,6 +40,9 @@ function LoginForm() {
 
   return (
     <div className="mx-auto flex min-h-[70vh] max-w-md flex-col justify-center px-4 py-12">
+      <div className="mb-8 flex justify-center">
+        <BrandLogo variant="parent" size="header" />
+      </div>
       <p className="text-sm font-medium uppercase tracking-widest text-cyanGlow/80">Restricted</p>
       <h1 className="mt-2 font-display text-3xl font-bold text-white">Advisor Tools Login</h1>
       <p className="mt-3 text-sm text-white/65">

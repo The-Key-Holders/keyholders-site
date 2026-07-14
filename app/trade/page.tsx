@@ -3,6 +3,7 @@ import ServiceCard from "@/components/ServiceCard";
 import TradeHero from "@/components/TradeHero";
 import TradeSectionHeader from "@/components/trade/TradeSectionHeader";
 import type { Metadata } from "next";
+import Link from "next/link";
 
 export const metadata: Metadata = {
   title: "Key Holders Trade",
@@ -131,6 +132,21 @@ export default function TradePage() {
   return (
     <div className="bg-vault-950">
       <TradeHero />
+
+      <div className="border-t border-white/5 bg-vault-900/60 px-4 py-4 text-center text-sm text-white/55">
+        Part of{" "}
+        <Link href="/" className="text-cyanGlow hover:underline">
+          The Key Holders
+        </Link>
+        {" · "}
+        <Link href="/projects" className="text-cyanGlow hover:underline">
+          All projects
+        </Link>
+        {" · "}
+        <Link href="/advisor-tools" className="text-emeraldGlow hover:underline">
+          Advisor tools
+        </Link>
+      </div>
 
       <section id="buy" className="border-t border-white/5 bg-vault-900/40">
         <div className="container-narrow section-padding px-4 sm:px-6 lg:px-8">

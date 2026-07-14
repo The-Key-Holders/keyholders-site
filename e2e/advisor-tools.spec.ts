@@ -105,3 +105,17 @@ test.describe("Invoice TD-288 Reconciler web app", () => {
     await expect(page.getByRole("heading", { name: /PSAP Allotment Engine/i })).toBeVisible();
   });
 });
+
+test.describe("Portfolio cohesion", () => {
+  test("homepage projects section mentions Advisor Tools", async ({ page }) => {
+    await page.goto("/");
+    await expect(page.getByRole("heading", { name: /One portfolio, many keys/i })).toBeVisible();
+    await expect(page.getByRole("heading", { name: /Advisor Tools Hub/i })).toBeVisible();
+  });
+
+  test("projects page lists catalog", async ({ page }) => {
+    await page.goto("/projects");
+    await expect(page.getByRole("heading", { name: "Projects" })).toBeVisible();
+    await expect(page.getByRole("heading", { name: /Invoice ↔ TD-288 Reconciler/i })).toBeVisible();
+  });
+});

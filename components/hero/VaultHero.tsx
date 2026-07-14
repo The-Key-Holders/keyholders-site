@@ -12,6 +12,7 @@ import {
   useSpring,
   useTransform,
 } from "framer-motion";
+import Link from "next/link";
 import { useRef, useState } from "react";
 
 export default function VaultHero() {
@@ -66,9 +67,9 @@ export default function VaultHero() {
             initial={reduceMotion ? false : { opacity: 0, scale: 0.92 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 0.8, ease: "easeOut" }}
-            className="mb-8"
+            className="mb-6 flex justify-center"
           >
-            <BrandLogo variant="parent" className="brightness-110 contrast-110" />
+            <BrandLogo variant="parent" size="hero" />
           </motion.div>
 
           <motion.p
@@ -77,7 +78,7 @@ export default function VaultHero() {
             transition={{ delay: 0.15, duration: 0.6 }}
             className="text-xs font-semibold uppercase tracking-[0.35em] text-cyanGlow/80"
           >
-            The Key Holders
+            Venture hub · tools · labs
           </motion.p>
 
           <motion.h1
@@ -98,9 +99,26 @@ export default function VaultHero() {
             transition={{ delay: 0.38, duration: 0.7 }}
             className="mt-6 max-w-2xl text-base text-white/70 sm:text-lg"
           >
-            A high-tech venture hub — consumer tech, contractor integrations, labs,
-            and shipped work. Scroll to turn the key.
+            Consumer tech, contractor platforms, professional Advisor Tools, and open labs —
+            one portfolio under The Key Holders.
           </motion.p>
+
+          <motion.div
+            initial={reduceMotion ? false : { opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.48, duration: 0.6 }}
+            className="mt-8 flex flex-wrap items-center justify-center gap-3"
+          >
+            <Link href="/projects" className="btn-primary text-sm">
+              Explore projects
+            </Link>
+            <Link href="/trade" className="btn-secondary text-sm">
+              Trade services
+            </Link>
+            <Link href="/advisor-tools" className="btn-secondary text-sm">
+              Advisor tools
+            </Link>
+          </motion.div>
         </motion.div>
 
         <motion.div

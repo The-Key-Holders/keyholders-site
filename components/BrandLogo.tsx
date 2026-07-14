@@ -1,53 +1,59 @@
-import Image from "next/image";
+import BrandMark from "@/components/brand/BrandMark";
+import BrandWordmark from "@/components/brand/BrandWordmark";
+import { cn } from "@/lib/utils";
 import Link from "next/link";
 
 type BrandVariant = "parent" | "trade";
 
 interface BrandLogoProps {
   variant: BrandVariant;
-  /** Use on dark backgrounds (trade hero/footer) */
+  /** @deprecated Ignored — logos are theme-native on dark backgrounds */
   onDark?: boolean;
   className?: string;
+  /** header | hero | footer | compact */
+  size?: "header" | "hero" | "footer" | "compact";
 }
 
-const config = {
-  parent: {
-    src: "/branding/parent-lockup.jpg",
-    alt: "The Key Holders",
-    href: "/",
-    height: 40,
-    width: 200,
-  },
-  trade: {
-    src: "/branding/trade-lockup.jpg",
-    alt: "Key Holders Trade",
-    href: "/trade",
-    height: 44,
-    width: 220,
-  },
+const sizeToWordmark = {
+  compact: "sm",
+  header: "md",
+  footer: "lg",
+  hero: "xl",
 } as const;
 
+/**
+ * Primary brand link. Transparent SVG system — no white lockup JPGs.
+ */
 export default function BrandLogo({
   variant,
-  onDark = false,
   className = "",
+  size = "header",
 }: BrandLogoProps) {
-  const { src, alt, href, height, width } = config[variant];
+  const href = variant === "trade" ? "/trade" : "/";
+  const alt = variant === "trade" ? "Key Holders Trade" : "The Key Holders";
+
+  if (size === "compact") {
+    return (
+      <Link
+        href={href}
+        className={cn("inline-flex shrink-0 items-center transition hover:opacity-90", className)}
+        aria-label={alt}
+      >
+        <BrandMark size="md" title={alt} />
+      </Link>
+    );
+  }
 
   return (
     <Link
       href={href}
-      className={`inline-flex shrink-0 items-center rounded-lg transition opacity-100 hover:opacity-90 ${onDark ? "bg-white/95 px-2 py-1" : ""} ${className}`}
+      className={cn(
+        "inline-flex shrink-0 items-center rounded-lg transition hover:opacity-90",
+        className
+      )}
       aria-label={alt}
     >
-      <Image
-        src={src}
-        alt={alt}
-        width={width}
-        height={height}
-        className="h-9 w-auto sm:h-10"
-        priority={variant === "parent"}
-      />
+      <BrandWordmark variant={variant} size={sizeToWordmark[size]} />
     </Link>
   );
 }

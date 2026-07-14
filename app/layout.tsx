@@ -39,8 +39,8 @@ export const metadata: Metadata = {
     description: "High-tech venture hub for digital life services.",
   },
   icons: {
-    icon: "/branding/parent-lockup.jpg",
-    apple: "/branding/parent-lockup.jpg",
+    icon: "/branding/v2/favicon.svg",
+    apple: "/branding/v2/favicon.svg",
   },
 };
 

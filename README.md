@@ -4,10 +4,17 @@ Next.js 14 App Router site for **The Key Holders** (consumer trust hub) and **Ke
 
 ## Structure
 
-| Route     | Brand              | Purpose                              |
-|-----------|--------------------|--------------------------------------|
-| `/`       | The Key Holders    | Consumer homepage, links to Geeks Next Door |
-| `/trade`  | Key Holders Trade  | B2B landing page with Stripe SKUs    |
+| Route | Brand | Purpose |
+|-------|-------|---------|
+| `/` | The Key Holders | Portfolio hub (ventures, tools, labs) |
+| `/projects` | The Key Holders | Full project catalog (`lib/projects.ts`) |
+| `/trade` | Key Holders Trade | B2B ServiceTitan / Stripe services |
+| `/advisor-tools/*` | Professional tools | Password-gated Advisor automations |
+| `/psap-allotment` | Professional tools | CPE allotment engine (gated) |
+
+**Brand:** transparent SVG logos in `components/brand/*` (vault-native; no white lockup board).
+
+**Ship a project:** add/update `lib/projects.ts` — homepage, `/projects`, and footer stay in sync.
 
 ## Quick Start
 
