@@ -25,5 +25,10 @@ export default defineConfig({
         url: baseURL,
         reuseExistingServer: !process.env.CI,
         timeout: 120_000,
+        env: {
+          ...process.env,
+          ADVISOR_TOOLS_PASSWORD:
+            process.env.ADVISOR_TOOLS_PASSWORD || "CalOES-911-AdvisorHub-2026",
+        },
       },
 });

@@ -69,7 +69,7 @@ export default function AdvisorToolsHubPage() {
       <div className="mt-4 rounded-xl border border-amber-400/25 bg-amber-500/10 px-4 py-3 text-sm text-amber-50/90">
         <strong>Important:</strong> These tools support advisor review only. They do not submit to Fi$Cal, send
         official letters, or replace Branch policy judgment. Do not upload confidential state data you are not
-        authorized to process in a browser.
+        authorized to process in a browser. Access is password-gated for authorized users only.
       </div>
 
       <div className="mt-10 grid gap-5 sm:grid-cols-2">

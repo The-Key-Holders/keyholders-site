@@ -7,7 +7,35 @@ const SAMPLE = `PSAP	Tracking	Amount	Notes
 3009 Huntington Beach PD	29501-OP	104229.00	CPE INSTALL
 3103 Placer County SO	25908	1200.50	MA North`;
 
+const ADVISOR_PASSWORD = process.env.ADVISOR_TOOLS_PASSWORD || "CalOES-911-AdvisorHub-2026";
+
+async function loginAdvisorTools(page: import("@playwright/test").Page) {
+  await page.goto("/advisor-tools/login");
+  await page.getByLabel(/Password/i).fill(ADVISOR_PASSWORD);
+  await page.getByRole("button", { name: /Unlock tools/i }).click();
+  await expect(page).not.toHaveURL(/\/login/, { timeout: 15_000 });
+}
+
+test.describe("Advisor Tools auth gate", () => {
+  test("unauthenticated visitor is redirected to login", async ({ page }) => {
+    await page.goto("/advisor-tools");
+    await expect(page).toHaveURL(/\/advisor-tools\/login/);
+    await expect(page.getByRole("heading", { name: /Advisor Tools Login/i })).toBeVisible();
+  });
+
+  test("wrong password is rejected", async ({ page }) => {
+    await page.goto("/advisor-tools/login");
+    await page.getByLabel(/Password/i).fill("definitely-wrong-password");
+    await page.getByRole("button", { name: /Unlock tools/i }).click();
+    await expect(page.getByText(/Incorrect password/i)).toBeVisible();
+  });
+});
+
 test.describe("Advisor Tools Hub", () => {
+  test.beforeEach(async ({ page }) => {
+    await loginAdvisorTools(page);
+  });
+
   test("hub lists live and beta tools", async ({ page }) => {
     await page.goto("/advisor-tools");
     await expect(page.getByRole("heading", { name: "Advisor Tools Hub" })).toBeVisible();
@@ -25,6 +53,10 @@ test.describe("Advisor Tools Hub", () => {
 });
 
 test.describe("Invoice TD-288 Reconciler web app", () => {
+  test.beforeEach(async ({ page }) => {
+    await loginAdvisorTools(page);
+  });
+
   test("runs sample batch with TD-288 filename fixtures and shows traffic lights", async ({
     page,
   }) => {
