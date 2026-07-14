@@ -10,7 +10,7 @@ const navLinks = [
   { href: "/#labs", label: "Labs" },
   { href: "/#work", label: "Work" },
   { href: "/trade", label: "Trade" },
-  { href: "/psap-allotment", label: "PSAP Tool" },
+  { href: "/advisor-tools", label: "Advisor Tools" },
   { href: "/#connect", label: "Connect" },
 ];
 

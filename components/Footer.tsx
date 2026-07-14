@@ -55,6 +55,9 @@ export default function Footer({ variant = "parent" }: FooterProps) {
             <Link href="/trade" className="transition hover:text-gold">
               Trade
             </Link>
+            <Link href="/advisor-tools" className="transition hover:text-cyanGlow">
+              Advisor Tools
+            </Link>
             <a
               href="https://www.thegeeksnextdoor.com"
               target="_blank"
