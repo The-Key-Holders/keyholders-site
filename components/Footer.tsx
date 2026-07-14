@@ -33,6 +33,9 @@ export default function Footer({ variant = "parent" }: FooterProps) {
               <Link href="/trade#services" className="transition hover:text-gold">
                 Services
               </Link>
+              <Link href="/support" className="transition hover:text-cyanGlow">
+                Support
+              </Link>
               <Link href="/advisor-tools" className="transition hover:text-emeraldGlow">
                 Tools
               </Link>
@@ -106,6 +109,11 @@ export default function Footer({ variant = "parent" }: FooterProps) {
               <li>
                 <Link href="/projects" className="hover:text-cyanGlow">
                   All projects
+                </Link>
+              </li>
+              <li>
+                <Link href="/support" className="hover:text-cyanGlow">
+                  Support (Grok)
                 </Link>
               </li>
               <li>

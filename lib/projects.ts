@@ -89,6 +89,18 @@ export const projects: Project[] = [
     featured: true,
   },
   {
+    id: "public-support",
+    name: "Key Holders Support (Grok)",
+    summary:
+      "Public Grok-powered site concierge for portfolio, Trade, and Geeks Next Door — no password.",
+    kind: "tool",
+    status: "live",
+    href: "/support",
+    gated: false,
+    tags: ["Grok", "Chat", "Public"],
+    featured: true,
+  },
+  {
     id: "for-engine",
     name: "FOR Assembly Engine",
     summary: "Fiscal & Operational Review draft assembly from ECaTS (planned next).",

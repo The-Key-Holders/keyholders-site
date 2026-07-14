@@ -15,7 +15,7 @@ async function expectNoBrokenImages(page: Page) {
 }
 
 test.describe("Public pages load", () => {
-  for (const path of ["/", "/projects", "/trade"] as const) {
+  for (const path of ["/", "/projects", "/trade", "/support"] as const) {
     test(`${path} returns 200 and has main landmark content`, async ({ page }) => {
       const res = await page.goto(path);
       expect(res?.ok() || res?.status() === 304).toBeTruthy();
@@ -35,7 +35,7 @@ test.describe("Desktop header navigation", () => {
     await expect(page).toHaveURL("/");
   });
 
-  test("nav: Home → Projects → Trade → Tools (gated) → back", async ({ page }) => {
+  test("nav: Home → Projects → Trade → Support (public) → Tools (gated) → back", async ({ page }) => {
     await page.goto("/");
 
     await page.getByRole("navigation").getByRole("link", { name: "Projects", exact: true }).click();
@@ -46,6 +46,12 @@ test.describe("Desktop header navigation", () => {
     await expect(page).toHaveURL(/\/trade/);
     await expect(page.getByText(/ServiceTitan|contractor|Engage|Diagnostic/i).first()).toBeVisible();
 
+    // Support is public — no password
+    await page.getByRole("navigation").getByRole("link", { name: "Support", exact: true }).click();
+    await expect(page).toHaveURL(/\/support/);
+    await expect(page.getByRole("heading", { name: /Key Holders Support/i })).toBeVisible();
+    await expect(page.getByText(/powered by Grok/i).first()).toBeVisible();
+
     // Tools is gated — should land on login
     await page.getByRole("navigation").getByRole("link", { name: "Tools", exact: true }).click();
     await expect(page).toHaveURL(/\/advisor-tools\/login/);
@@ -54,6 +60,12 @@ test.describe("Desktop header navigation", () => {
     // Brand logo on login returns home
     await page.getByRole("banner").getByRole("link", { name: /The Key Holders/i }).click();
     await expect(page).toHaveURL(/\/$/);
+  });
+
+  test("public support chat UI is available without login", async ({ page }) => {
+    await page.goto("/support");
+    await expect(page.getByLabel(/Message/i)).toBeVisible();
+    await expect(page.getByRole("button", { name: /Send/i })).toBeVisible();
   });
 
   test("nav Connect scrolls to connect section on home", async ({ page }) => {
