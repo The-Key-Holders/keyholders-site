@@ -12,8 +12,14 @@ const ADVISOR_PASSWORD = process.env.ADVISOR_TOOLS_PASSWORD || "CalOES-911-Advis
 async function loginAdvisorTools(page: import("@playwright/test").Page) {
   await page.goto("/advisor-tools/login");
   await page.getByLabel(/Password/i).fill(ADVISOR_PASSWORD);
+  const responsePromise = page.waitForResponse(
+    (r) => r.url().includes("/api/advisor-tools/auth") && r.request().method() === "POST"
+  );
   await page.getByRole("button", { name: /Unlock tools/i }).click();
-  await expect(page).not.toHaveURL(/\/login/, { timeout: 15_000 });
+  const res = await responsePromise;
+  expect(res.status(), `auth API status; body may indicate password/env mismatch`).toBe(200);
+  // Login page uses full navigation after Set-Cookie; wait for hub (or any non-login path).
+  await page.waitForURL((url) => !url.pathname.includes("/login"), { timeout: 20_000 });
 }
 
 test.describe("Advisor Tools auth gate", () => {

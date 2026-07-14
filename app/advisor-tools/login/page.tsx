@@ -1,11 +1,10 @@
 "use client";
 
 import BrandLogo from "@/components/BrandLogo";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import { FormEvent, Suspense, useState } from "react";
 
 function LoginForm() {
-  const router = useRouter();
   const params = useSearchParams();
   const next = params.get("next") || "/advisor-tools";
   const configError = params.get("error") === "not_configured";
@@ -29,8 +28,11 @@ function LoginForm() {
         setError(data.error || "Login failed");
         return;
       }
-      router.replace(next.startsWith("/") ? next : "/advisor-tools");
-      router.refresh();
+      // Full navigation so the new HttpOnly cookie is always sent to middleware.
+      // Soft App Router transitions can race and get redirected back to login.
+      const dest = next.startsWith("/") ? next : "/advisor-tools";
+      window.location.assign(dest);
+      return;
     } catch {
       setError("Network error");
     } finally {
