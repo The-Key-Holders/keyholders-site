@@ -3,7 +3,14 @@ import type { NextRequest } from "next/server";
 
 const COOKIE = "advisor_tools_auth";
 
-const PROTECTED = ["/advisor-tools", "/psap-allotment", "/api/psap-allotment", "/api/invoice-reconcile"];
+const PROTECTED = [
+  "/advisor-tools",
+  "/psap-allotment",
+  "/api/psap-allotment",
+  "/api/invoice-reconcile",
+  // Agent chat API is gated; /api/advisor-tools/auth stays public via PUBLIC list
+  "/api/advisor-tools",
+];
 const PUBLIC = ["/advisor-tools/login", "/api/advisor-tools/auth"];
 
 function isPublic(pathname: string): boolean {
@@ -77,5 +84,7 @@ export const config = {
     "/api/psap-allotment/:path*",
     "/api/invoice-reconcile",
     "/api/invoice-reconcile/:path*",
+    "/api/advisor-tools",
+    "/api/advisor-tools/:path*",
   ],
 };

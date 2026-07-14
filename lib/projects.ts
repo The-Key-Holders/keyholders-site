@@ -77,6 +77,18 @@ export const projects: Project[] = [
     featured: true,
   },
   {
+    id: "help-agent",
+    name: "New Hire + Automation Help Agent",
+    summary:
+      "Password-gated chat coach for onboarding and Advisor Tools — private Taskade agent, no public link.",
+    kind: "tool",
+    status: "live",
+    href: "/advisor-tools/help-agent",
+    gated: true,
+    tags: ["New hire", "Chat", "Taskade"],
+    featured: true,
+  },
+  {
     id: "for-engine",
     name: "FOR Assembly Engine",
     summary: "Fiscal & Operational Review draft assembly from ECaTS (planned next).",

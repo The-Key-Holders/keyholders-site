@@ -17,6 +17,14 @@ type ToolCard = {
 
 const TOOLS: ToolCard[] = [
   {
+    href: "/advisor-tools/help-agent",
+    status: "live",
+    title: "New Hire + Automation Help Agent",
+    blurb:
+      "Private chat coach for onboarding and Advisor Tools how-tos. Taskade-backed, available only inside this password gate (no public agent link).",
+    tags: ["New hire", "Chat", "Taskade"],
+  },
+  {
     href: "/psap-allotment",
     status: "live",
     title: "PSAP Allotment Engine",
