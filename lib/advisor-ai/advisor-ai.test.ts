@@ -5,6 +5,7 @@ import {
   ADVISOR_AI_STARTERS,
   composeAdvisorAiSystemPrompt,
 } from "./index";
+import { retrieveManualContext } from "./retrieve";
 
 describe("CA 9-1-1 Advisor AI prompt pack", () => {
   it("has a version string", () => {
@@ -45,5 +46,15 @@ describe("CA 9-1-1 Advisor AI prompt pack", () => {
     expect(joined).toMatch(/FOR/i);
     expect(joined).toMatch(/Reimbursement/i);
     expect(joined).toMatch(/GIS/i);
+  });
+
+  it("retrieves Manual context for CPE allotment queries when corpus present", () => {
+    const ctx = retrieveManualContext(
+      "How do I calculate CPE Fixed Allotment funding Level Four busy hour Erlangs?",
+      3
+    );
+    // Corpus should be present after markitdown conversion into knowledge/manual-md
+    expect(ctx.length).toBeGreaterThan(100);
+    expect(ctx.toLowerCase()).toMatch(/chapter|funding|allotment|erlang|cpe|9-1-1/i);
   });
 });

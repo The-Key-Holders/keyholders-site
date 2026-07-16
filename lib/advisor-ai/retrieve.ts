@@ -7,13 +7,13 @@ import { readFileSync, readdirSync, existsSync } from "fs";
 import path from "path";
 
 const DEFAULT_MD_DIRS = [
-  path.join(process.env.USERPROFILE || "", ".grok", "data", "advisor-ai", "manual-md"),
+  // Repo-bundled Manual markdown (preferred for deploys that include knowledge/)
   path.join(process.cwd(), "lib", "advisor-ai", "knowledge", "manual-md"),
-  // Kit extracts if present on build machine
+  // Local operator corpus (dev machine after PDF conversion)
+  path.join(process.env.USERPROFILE || "", ".grok", "data", "advisor-ai", "manual-md"),
+  // Kit reference markdown if present
   path.join(
-    "C:",
-    "Users",
-    "javad",
+    process.env.USERPROFILE || "C:\\Users\\javad",
     "CalOES_ITA_NewHire_Kit_2026",
     "reference"
   ),
