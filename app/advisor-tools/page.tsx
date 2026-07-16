@@ -17,6 +17,14 @@ type ToolCard = {
 
 const TOOLS: ToolCard[] = [
   {
+    href: "/advisor-tools/advisor-ai",
+    status: "live",
+    title: "CA 9-1-1 Advisor AI",
+    blurb:
+      "Full Advisor persona (Grok): PSAP funding, Chapter III processes, FOR prep, NG9-1-1, forms, and Manual-grounded walkthroughs. Complements human Advisors — separate from New Hire + Tool Help.",
+    tags: ["Funding", "Manual", "FOR", "Grok"],
+  },
+  {
     href: "/advisor-tools/help-agent",
     status: "live",
     title: "New Hire + Automation Help Agent",
@@ -136,13 +144,14 @@ export default function AdvisorToolsHubPage() {
             <strong className="text-white/90">Done (desktop + web):</strong> PSAP Allotment Engine
           </li>
           <li>
-            <strong className="text-white/90">Done (desktop) · Beta (web):</strong> Invoice ↔ TD-288 Reconciler
+            <strong className="text-white/90">Done (web):</strong> Invoice ↔ TD-288 Reconciler · FOR Assembly Engine
           </li>
           <li>
-            <strong className="text-white/90">Next:</strong> FOR Assembly Engine (desktop MVP → web hub card)
+            <strong className="text-white/90">Done (web):</strong> CA 9-1-1 Advisor AI (full Advisor persona) —
+            separate from New Hire + Automation Help
           </li>
           <li>CPE package / residual gate tools</li>
-          <li>Optional: Allotment v2 (Top Busiest Hours + Erlang import)</li>
+          <li>Optional: Allotment v2 desktop parity on web (pinned until product-ready)</li>
         </ol>
         <p className="mt-4 text-xs text-white/45">
           Source workspace: local <code className="text-white/60">caloes-process-automations</code> with version
