@@ -21,8 +21,8 @@ export default function AdvisorLookupPage() {
   }, [q]);
 
   return (
-    <div className={portal.page}>
-      <p className={portal.badge}>Sample data</p>
+    <div className="pb-10">
+      <p className={portal.badge}>Sample data · anytime tool</p>
       <h1 className={`${portal.h1} mt-2`}>Find my Advisor</h1>
       <p className={portal.lead}>
         Search by county, name, or email. This directory is <strong>sample data</strong> — replace

@@ -37,7 +37,7 @@ export default function InvoiceCheckerPage() {
     setFlags((f) => ({ ...f, [k]: v }));
 
   return (
-    <div className={portal.page}>
+    <div className="pb-10">
       <h1 className={portal.h1}>Invoice readiness checker</h1>
       <p className={portal.lead}>
         Attachment 14/15 field checklist. Incomplete invoices delay payment and create Advisor

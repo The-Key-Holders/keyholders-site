@@ -83,4 +83,15 @@ test.describe("PSAP portal", () => {
     await expect(page.getByText(/Site Guide here \(Taskade\)/i)).toHaveCount(0);
     await expect(page.getByRole("button", { name: /PSAP Support AI/i })).toBeVisible();
   });
+
+  test("start here explains purpose, free beta, and Vault Keywright", async ({ page }) => {
+    await login(page, "/psap-portal/start");
+    await expect(page.getByRole("heading", { name: /Welcome to the PSAP Funding/i })).toBeVisible();
+    await expect(page.getByText(/Why this is free right now/i)).toBeVisible();
+    await expect(page.getByText(/beta stage/i)).toBeVisible();
+    await expect(page.getByText(/invited by someone close to the developer/i)).toBeVisible();
+    await expect(page.getByRole("heading", { name: /Vault Keywright/i })).toBeVisible();
+    await expect(page.getByText(/CPE project path/i)).toBeVisible();
+  });
 });
+

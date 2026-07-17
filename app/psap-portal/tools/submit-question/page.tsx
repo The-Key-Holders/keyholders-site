@@ -38,7 +38,7 @@ export default function SubmitQuestionPage() {
   }
 
   return (
-    <div className={portal.page}>
+    <div className="pb-10">
       <h1 className={portal.h1}>Submit a question</h1>
       <p className={portal.lead}>
         Structured intake reduces free-form email chaos. Prefer FAQs, wizards, and the Grok agent

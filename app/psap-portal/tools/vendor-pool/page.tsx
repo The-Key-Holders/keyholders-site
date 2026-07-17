@@ -6,7 +6,7 @@ export default function VendorPoolPage() {
   const vendors = getVendors();
 
   return (
-    <div className={portal.page}>
+    <div className="pb-10">
       <h1 className={portal.h1}>Vendor pool &amp; evaluation</h1>
       <p className={portal.lead}>
         Under RFP 26-16743, direct-path CPE purchases use the awarded statewide contractor pool —

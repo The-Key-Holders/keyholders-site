@@ -44,7 +44,7 @@ export default function AdvanceNotificationWizardPage() {
   const steps = ["Eligibility", "Fiscal year", "Cloud vs On-Prem", "Contact", "Summary"];
 
   return (
-    <div className={portal.page}>
+    <div className="pb-10">
       <h1 className={portal.h1}>Advance Notification prep</h1>
       <p className={portal.lead}>
         Attachment 11 themes: give PSAPs time to evaluate contractors and signal Cloud vs On-Prem +

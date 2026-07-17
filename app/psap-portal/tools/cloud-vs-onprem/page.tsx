@@ -17,7 +17,7 @@ export default function CloudVsOnPremPage() {
   }
 
   return (
-    <div className={portal.page}>
+    <div className="pb-10">
       <h1 className={portal.h1}>Cloud vs On-Prem</h1>
       <p className={portal.lead}>
         New SOW: native cloud/data-center <strong>or</strong> on-premise — not both at one PSAP.

@@ -26,7 +26,7 @@ export default function Td288CheckerPage() {
     setForm((f) => ({ ...f, [k]: v }));
 
   return (
-    <div className={portal.page}>
+    <div className="pb-10">
       <h1 className={portal.h1}>TD-288 package checker</h1>
       <p className={portal.lead}>
         Confirm funding-package readiness before the Branch issues a Commitment to Fund. Guidance

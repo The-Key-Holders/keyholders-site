@@ -38,7 +38,7 @@ export default function SowCheckerPage() {
     setForm((f) => ({ ...f, [k]: v }));
 
   return (
-    <div className={portal.page}>
+    <div className="pb-10">
       <h1 className={portal.h1}>SOW completeness checker</h1>
       <p className={portal.lead}>
         Attachment 16 structure for RFP 26-16743 engagements. Model-aware requirements reduce
