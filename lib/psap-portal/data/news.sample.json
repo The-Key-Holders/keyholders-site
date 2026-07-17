@@ -1,0 +1,26 @@
+[
+  {
+    "id": "news-001",
+    "title": "CPE RFP 26-16743 released — prepare for new MPA",
+    "body": "Cal OES released RFP 26-16743 for statewide 9-1-1 Call Processing Equipment (cloud or on-premise). Estimated award/start mid-August 2026 (solicitation estimates). PSAPs should continue Chapter III funding processes, use Advance Notification, and plan Cloud vs On-Prem evaluation. After award, new purchases use authorized contractors under the new MPA — not historical 2020 price sheets.",
+    "date": "2026-04-27",
+    "tags": ["contracts", "CPE", "transition"],
+    "published": true
+  },
+  {
+    "id": "news-002",
+    "title": "How Advisors’ role is changing (share with your PSAP)",
+    "body": "Under the new contract, Advisors focus less on ad-hoc vendor vetting and more on: directing PSAPs to the awarded pool, processing standardized Advance Notifications (Cloud vs On-Prem), SOW completeness (Attachment 16), TD-288 packages, and invoice compliance (Attachments 14/15). Use the portal wizards and checkers before emailing your Advisor.",
+    "date": "2026-07-16",
+    "tags": ["process", "advisors", "education"],
+    "published": true
+  },
+  {
+    "id": "news-003",
+    "title": "CPE contract awarded — authorized contractors",
+    "body": "PLACEHOLDER: Fill award date, effective date, and authorized contractor list when Branch announces. Then publish this item and update the Vendor Pool sample data via Admin → Export/Import.",
+    "date": "2026-08-07",
+    "tags": ["contracts", "post-award"],
+    "published": false
+  }
+]

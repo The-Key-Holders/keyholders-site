@@ -17,6 +17,14 @@ type ToolCard = {
 
 const TOOLS: ToolCard[] = [
   {
+    href: "/psap-portal",
+    status: "live",
+    title: "PSAP Funding Support Portal",
+    blurb:
+      "Transition hub for RFP 26-16743: Grok PSAP agent, Advance Notification / SOW / invoice checkers, TD-288 package gate, Advisor lookup, news admin, and structured questions — built to cut Advisor email volume.",
+    tags: ["CPE", "RFP 26-16743", "Grok", "PSAP"],
+  },
+  {
     href: "/advisor-tools/advisor-ai",
     status: "live",
     title: "CA 9-1-1 Advisor AI",

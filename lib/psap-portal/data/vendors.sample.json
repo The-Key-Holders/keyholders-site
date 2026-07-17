@@ -1,0 +1,23 @@
+[
+  {
+    "id": "vnd-pending-1",
+    "name": "Post-award contractor (placeholder A)",
+    "models": ["pending"],
+    "status": "placeholder",
+    "notes": "Replace with awarded RFP 26-16743 contractors when Branch publishes the list. Direct-path funding requires authorized MPA contractors only."
+  },
+  {
+    "id": "vnd-pending-2",
+    "name": "Post-award contractor (placeholder B)",
+    "models": ["pending"],
+    "status": "placeholder",
+    "notes": "Cloud and/or on-prem flags will be set after award."
+  },
+  {
+    "id": "vnd-pending-3",
+    "name": "Post-award contractor (placeholder C)",
+    "models": ["pending"],
+    "status": "placeholder",
+    "notes": "Do not treat historical 2020 MPA vendor marketing lists as current."
+  }
+]

@@ -1,0 +1,82 @@
+[
+  {
+    "id": "adv-01",
+    "name": "Sample Advisor — North Bay",
+    "email": "advisor.northbay@example.caloes.invalid",
+    "phone": "(916) 555-0101",
+    "counties": ["Marin", "Sonoma", "Napa", "Solano"],
+    "notes": "SAMPLE DATA — replace via Admin export/import after award."
+  },
+  {
+    "id": "adv-02",
+    "name": "Sample Advisor — Bay Area East",
+    "email": "advisor.eastbay@example.caloes.invalid",
+    "phone": "(916) 555-0102",
+    "counties": ["Alameda", "Contra Costa"],
+    "notes": "SAMPLE DATA"
+  },
+  {
+    "id": "adv-03",
+    "name": "Sample Advisor — LA Metro A",
+    "email": "advisor.lametroa@example.caloes.invalid",
+    "phone": "(916) 555-0103",
+    "counties": ["Los Angeles"],
+    "notes": "SAMPLE — large county may have multiple Advisors in live data."
+  },
+  {
+    "id": "adv-04",
+    "name": "Sample Advisor — Orange / Inland",
+    "email": "advisor.ocsb@example.caloes.invalid",
+    "phone": "(916) 555-0104",
+    "counties": ["Orange", "San Bernardino", "Riverside"],
+    "notes": "SAMPLE DATA"
+  },
+  {
+    "id": "adv-05",
+    "name": "Sample Advisor — San Diego / Imperial",
+    "email": "advisor.sd@example.caloes.invalid",
+    "phone": "(916) 555-0105",
+    "counties": ["San Diego", "Imperial"],
+    "notes": "SAMPLE DATA"
+  },
+  {
+    "id": "adv-06",
+    "name": "Sample Advisor — Central Valley",
+    "email": "advisor.valley@example.caloes.invalid",
+    "phone": "(916) 555-0106",
+    "counties": ["Fresno", "Kern", "Tulare", "Kings", "Madera"],
+    "notes": "SAMPLE DATA"
+  },
+  {
+    "id": "adv-07",
+    "name": "Sample Advisor — Sac / Gold Country",
+    "email": "advisor.sac@example.caloes.invalid",
+    "phone": "(916) 555-0107",
+    "counties": ["Sacramento", "El Dorado", "Placer", "Yolo"],
+    "notes": "SAMPLE DATA"
+  },
+  {
+    "id": "adv-08",
+    "name": "Sample Advisor — North State",
+    "email": "advisor.north@example.caloes.invalid",
+    "phone": "(916) 555-0108",
+    "counties": ["Humboldt", "Del Norte", "Shasta", "Siskiyou", "Trinity"],
+    "notes": "SAMPLE DATA"
+  },
+  {
+    "id": "adv-09",
+    "name": "Sample Advisor — Statewide CHP liaison",
+    "email": "advisor.chp@example.caloes.invalid",
+    "phone": "(916) 555-0109",
+    "counties": ["CHP (Statewide)"],
+    "notes": "SAMPLE — statewide entity placeholder."
+  },
+  {
+    "id": "adv-10",
+    "name": "Sample Advisor — Cal FIRE liaison",
+    "email": "advisor.calfire@example.caloes.invalid",
+    "phone": "(916) 555-0110",
+    "counties": ["Cal Fire (Statewide)"],
+    "notes": "SAMPLE DATA"
+  }
+]

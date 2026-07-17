@@ -10,7 +10,8 @@ type ChatMessage = { role: "user" | "assistant"; content: string };
 function isGatedPath(pathname: string): boolean {
   return (
     pathname.startsWith("/advisor-tools") ||
-    pathname.startsWith("/psap-allotment")
+    pathname.startsWith("/psap-allotment") ||
+    pathname.startsWith("/psap-portal")
   );
 }
 

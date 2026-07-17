@@ -7,7 +7,9 @@ export const ADVISOR_AUTH_COOKIE = "advisor_tools_auth";
 export const ADVISOR_PROTECTED_PREFIXES = [
   "/advisor-tools",
   "/psap-allotment",
+  "/psap-portal",
   "/api/psap-allotment",
+  "/api/psap-portal",
   "/api/invoice-reconcile",
 ] as const;
 

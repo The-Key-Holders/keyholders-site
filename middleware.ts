@@ -6,7 +6,9 @@ const COOKIE = "advisor_tools_auth";
 const PROTECTED = [
   "/advisor-tools",
   "/psap-allotment",
+  "/psap-portal",
   "/api/psap-allotment",
+  "/api/psap-portal",
   "/api/invoice-reconcile",
   // Agent chat API is gated; /api/advisor-tools/auth stays public via PUBLIC list
   "/api/advisor-tools",
@@ -80,8 +82,12 @@ export const config = {
     "/advisor-tools/:path*",
     "/psap-allotment",
     "/psap-allotment/:path*",
+    "/psap-portal",
+    "/psap-portal/:path*",
     "/api/psap-allotment",
     "/api/psap-allotment/:path*",
+    "/api/psap-portal",
+    "/api/psap-portal/:path*",
     "/api/invoice-reconcile",
     "/api/invoice-reconcile/:path*",
     "/api/advisor-tools",
