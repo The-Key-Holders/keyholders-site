@@ -1,0 +1,322 @@
+# Ultimate 9-1-1 Funding/Compliance Advisor Process Map
+**Post-Award Phase | RFP 26-16743 | Effective September 2026+**
+
+**Purpose**: This single integrated process map merges all internal processes, external/internal requests, pain points, mitigation strategies, tasks/sub-tasks, timelines, and forms into one cohesive operational framework for CA 9-1-1 Branch County Funding/Compliance Advisors.
+
+---
+
+## High-Level Process Flow Overview
+PSAP submits Advance Notification (E1)
+↓
+Process 1: Funding Notification & Allotment (TD e-288 created)
+↓
+PSAP engages Awarded Vendor → Draft SOW submitted (E2)
+↓
+Process 2: SOW Review & Approval
+↓
+Process 3: TD e-288 Finalization / Linking
+↓
+Project Execution (ongoing Process 6: Status Reporting)
+↓
+Change Orders as needed (E3 → Process 4)
+↓
+Installation → Testing → Acceptance (Process 7: TD284)
+↓
+Invoicing (Process 5) + Training (Process 9)
+↓
+Post-Acceptance MACs (Process 8)
+↓
+Process 10: Project Closeout & Archiving
+
+
+
+**Key Cross-Cutting Elements**:
+- **Central Documents**: Advance Notification (Att. 11), TD e-288, SOW (Att. 16), TD284, Invoice Template (Att. 14/15)
+- **Highest Volume Pain Points**: SOW compliance, Invoice rejections, Change order delays, TD e-288 backlog
+- **Primary Triggers**: External Requests from PSAPs/Vendors
+
+---
+
+## Phase 1: Funding Initiation
+
+### Process 1: Advance CPE Funding Notification Processing & Allotment Issuance
+
+**Description**: Receive, review, and process the standardized Advance Notification form to determine and issue funding allotment via TD e-288.
+
+**Primary Trigger**:
+- **External Request E1**: PSAP submits completed Advance Notification for CPE Funding form (Attachment 11) — Cloud or On-Prem selection.
+
+**Key Tasks & Sub-Tasks**:
+1. **Intake & Logging**
+   - Receive form via email from PSAP
+   - Log into internal tracker with date/time, PSAP name, County, solution type (Cloud/On-Prem)
+2. **Completeness & Eligibility Review**
+   - Verify all required fields completed
+   - Confirm PSAP eligibility and fiscal year alignment
+   - Validate Cloud vs On-Prem selection is clear
+3. **Allotment Determination**
+   - Calculate/review allotment amount per funding guidelines
+   - Identify any conditions or restrictions
+4. **TD e-288 Creation**
+   - Create new TD e-288 record
+   - Link to PSAP and fiscal year
+   - Notify PSAP of allotment decision and next steps (vendor evaluation window)
+5. **Documentation & Handoff**
+   - Update county tracker
+   - Send formal notification to PSAP with TD e-288 reference
+
+**Pain Points & Mitigation Strategies** (where they occur in this process):
+
+| Pain Point | Location in Process | Mitigation Strategy (Critical Elements) |
+|------------|---------------------|-----------------------------------------|
+| **4. Incomplete/Non-Compliant Advance Notification Forms** | Intake & Review | • Use fillable PDF with required-field indicators<br>• Provide one-pager "How to Complete" guide with examples<br>• Add quick admin completeness check before advisor review<br>• Include Cloud vs On-Prem decision guidance attachment |
+| **11. Initial Workload Spike** | Entire process (first 3-6 months) | • Implement admin triage for completeness<br>• Set realistic turnaround SLAs and communicate them<br>• Temporarily surge resources for first 90-120 days<br>• Prioritize by fiscal urgency |
+| **5. Cloud vs On-Prem Confusion** | Allotment Determination | • Attach one-page Cloud vs On-Prem comparison matrix<br>• Use standardized decision-support questions |
+
+**Key Forms & Documents**:
+- Advance Notification for CPE Funding (Attachment 11)
+- TD e-288 (new record creation)
+- Internal Allotment Log / County Tracker
+
+**Typical Timeline**:
+- Acknowledgment: 1-2 business days
+- Full review + allotment decision: 5-10 business days
+- TD e-288 creation: Same day as decision
+
+---
+
+## Phase 2: Project Planning & Approval
+
+### Process 2: SOW Review, Coordination & Approval
+
+**Description**: Review draft Statement of Work from vendor/PSAP against Attachment 16 template for completeness, pricing alignment, and technical soundness.
+
+**Primary Triggers**:
+- **External Request E2**: PSAP or Vendor submits draft SOW for review/approval.
+
+**Key Tasks & Sub-Tasks**:
+1. **Initial Receipt & Logging**
+2. **Completeness Check** (against all 13 subsections of Attachment 16)
+3. **Pricing & Scope Validation** (cross-check with awarded Exhibit C rates)
+4. **Technical/Integration Review** (coordinate with NG9-1-1 team if needed)
+5. **Comments / Approval Issuance**
+6. **Link to TD e-288** and update project tracker
+
+**Pain Points & Mitigation Strategies**:
+
+| Pain Point | Location in Process | Mitigation Strategy (Critical Elements) |
+|------------|---------------------|-----------------------------------------|
+| **1. SOW Template Compliance Issues** | Completeness Check | • Mandate 1-page SOW Completeness Checklist<br>• Provide 2-3 pre-filled example SOWs (Cloud/On-Prem)<br>• Mandatory short vendor training within 30 days of award<br>• Offer optional pre-submission review |
+| **8. Pricing/Scope Misalignment** | Pricing Validation | • Require reference to specific Exhibit C line items<br>• Add quick internal cross-check step<br>• Return non-compliant SOWs within 48 hours |
+| **10. Integration Gaps Discovered Late** | Technical Review | • Require early "Integration Discovery Workshop"<br>• Document known limitations in SOW<br>• Build library of common integration issues/solutions |
+| **16. New Vendors Unfamiliar with Processes** | Entire process | • Include "Working with Cal OES" orientation in vendor onboarding<br>• Assign primary advisor contact for first 3-6 months |
+
+**Key Forms & Documents**:
+- Sample SOW Template (Attachment 16)
+- Vendor draft SOW + detailed quote (from Exhibit C)
+- SOW Completeness Checklist (new internal tool)
+- TD e-288 reference
+
+**Typical Timeline**:
+- Initial review: 3-5 business days
+- Full coordination & approval: 7-15 business days
+
+---
+
+### Process 3: TD e-288 Management, Tracking & Amendment
+
+**Description**: Create, maintain, amend, and reconcile the central funding authorization/tracking document (TD e-288).
+
+**Key Tasks & Sub-Tasks**:
+1. Create initial TD e-288 upon allotment
+2. Link to specific PSAP project and vendor
+3. Monitor spend vs approved total
+4. Process amendments (especially from approved change orders)
+5. Provide status updates to PSAP/Vendor upon request
+6. Reconcile with paid invoices during closeout
+
+**Pain Points & Mitigation Strategies**:
+
+| Pain Point | Location in Process | Mitigation Strategy (Critical Elements) |
+|------------|---------------------|-----------------------------------------|
+| **6. TD e-288 Backlog** | Creation & Amendment | • Standardized intake form with required fields<br>• Shared visible TD e-288 Tracker with aging<br>• Internal SLAs (new = 2 days, amendments = 3 days)<br>• Pre-populate data from Advance Notification |
+| **3. Change Order Bottleneck** | Amendment step | • Use standardized Change Order Form<br>• Define approval thresholds for expedited processing<br>• Maintain shared Change Order Tracker |
+
+**Key Forms & Documents**:
+- TD e-288 (core document)
+- Change Order documentation
+- Invoice copies (for reconciliation)
+
+**Typical Timeline**:
+- Initial creation: Same day as allotment decision
+- Amendments: 2-5 business days after change order approval
+
+---
+
+## Phase 3: Execution & Change Management
+
+### Process 4: Change Order Review & CA 9-1-1 Branch Approval
+
+**Description**: Review, assess impact, and formally approve (or reject) changes to scope, cost, or timeline.
+
+**Primary Trigger**:
+- **External Request E3**: Vendor submits Change Order Request (requires Branch approval).
+
+**Key Tasks & Sub-Tasks**:
+1. Receive and log Change Order Request
+2. Assess impact on scope, cost, timeline, and funding
+3. Coordinate review/concurrence with PSAP
+4. Approve, reject, or negotiate
+5. Update TD e-288 if additional funding required
+6. Distribute approved document to all parties
+
+**Pain Points & Mitigation Strategies**:
+
+| Pain Point | Location in Process | Mitigation Strategy (Critical Elements) |
+|------------|---------------------|-----------------------------------------|
+| **3. Change Order Bottleneck** | Entire process | • Standardized Change Order Form with impact fields<br>• Define clear approval thresholds (<5% cost = expedited)<br>• Shared tracker with aging + published 48-72hr SLA<br>• Train advisors on fast decision frameworks |
+| **12. Unclear Escalation Paths** | Dispute resolution | • Create 3-step escalation matrix with timeframes<br>• Document common dispute types + resolution approaches |
+| **13. Post-Acceptance MAC Scope Creep** | Classification step | • Define clear Minor MAC vs Major Change criteria<br>• Create MAC Request Log reviewed monthly |
+
+**Key Forms & Documents**:
+- Vendor Change Order Form + Branch approval record
+- Original approved SOW
+- Updated TD e-288 (if funding changes)
+
+**Typical Timeline**:
+- Simple changes: 3-7 business days
+- Complex changes: 7-14 business days
+
+---
+
+### Process 6: Project Timeline Monitoring & Status Reporting (Cross-Cutting)
+
+**Description**: Maintain accurate project status across all active CPE projects and respond to internal/external status requests.
+
+**Key Tasks & Sub-Tasks**:
+1. Maintain/update county-level project tracker
+2. Flag risks and delays
+3. Produce internal status reports for supervisor/leadership
+4. Respond to ad-hoc status requests from PSAPs or other branches
+5. Escalate systemic issues
+
+**Pain Points & Mitigation Strategies**:
+
+| Pain Point | Location in Process | Mitigation Strategy (Critical Elements) |
+|------------|---------------------|-----------------------------------------|
+| **15. Maintaining Accurate Real-Time Tracking** | Daily/Weekly updates | • Standardize county tracker template with weekly update cadence<br>• Assign data steward responsibility + monthly quality checks<br>• Explore low-code dashboard tools |
+| **11. Workload Spike** | High-volume periods | • Prioritize by urgency<br>• Use surge capacity when needed |
+
+**Key Forms & Documents**:
+- Internal Project Status Tracker / Dashboard
+- Monthly Status Report template
+
+---
+
+## Phase 4: Delivery, Acceptance & Closeout
+
+### Process 5: Invoice Verification, Triage & Payment Coordination
+
+**Description**: Review invoices for compliance with template and approved funding before payment.
+
+**Pain Points & Mitigation Strategies** (heavily concentrated here):
+
+| Pain Point | Location in Process | Mitigation Strategy (Critical Elements) |
+|------------|---------------------|-----------------------------------------|
+| **2. Invoice Rejections & Payment Delays** | Verification step | • One-page Invoice Quick Reference Guide for vendors<br>• Internal Invoice Validation Checklist<br>• Optional pre-submission review<br>• Weekly "Top 5 Mistakes" summaries to vendors |
+| **6. TD e-288 Reconciliation** | Cross-check step | • Use shared TD e-288 Tracker<br>• Reconcile remaining balance before approval |
+
+**Key Forms & Documents**:
+- CPE Service Invoice Template (Attachment 15)
+- Invoice Instructions (Attachment 14)
+- TD e-288
+- Approved SOW + Change Orders
+- TD284 (for final payments)
+
+**Typical Timeline**:
+- Initial triage: 1-2 business days
+- Verification & issue resolution: 3-7 business days
+
+---
+
+### Process 7: Acceptance Testing Coordination (TD284)
+
+**Description**: Ensure proper use of TD284 checklist and formal acceptance sign-off.
+
+**Pain Points**:
+- Sign-off delays (Pain Point 7)
+- Integration issues surfacing during testing (Pain Point 10)
+
+**Mitigation**: Include "Recommended Review Timeline" in SOW; require early integration workshops; track average sign-off time by county.
+
+**Key Forms**:
+- System Acceptance Checklist (TD284)
+- Formal Acceptance Sign-off
+
+---
+
+### Process 8: Post-Acceptance MACs Handling
+
+**Description**: Manage Moves/Adds/Changes after formal acceptance.
+
+**Pain Points**:
+- **13. MAC Scope Creep** — Mitigate with clear Minor vs Major criteria and MAC Request Log.
+
+---
+
+### Process 9: Training Coordination & Documentation
+
+**Description**: Ensure training is delivered and properly documented per SOW section k.
+
+**Pain Points**:
+- **14. Training Documentation Gaps** — Mitigate with mandatory Training Completion & Sign-off Form + 5-day submission requirement.
+
+---
+
+### Process 10: Project Closeout, Archiving & Compliance Preparation
+
+**Description**: Final verification that all deliverables are complete and project file is audit-ready.
+
+**Key Tasks**:
+1. Verify all deliverables complete
+2. Confirm final invoice paid and reconciled
+3. Collect and archive complete project file
+4. Update county history/master tracker
+5. Prepare for audits
+6. Close TD e-288 as "Complete"
+
+**Pain Points & Mitigation Strategies**:
+
+| Pain Point | Location in Process | Mitigation Strategy (Critical Elements) |
+|------------|---------------------|-----------------------------------------|
+| **18. Audit Trail & Record Completeness Gaps** | Archiving step | • Standardized Project File Checklist<br>• Random 10% file audits in year one<br>• Require "file complete" sign-off before closing project |
+| **19. Confidentiality Compliance** | Onboarding & closeout | • Require signed statements before new personnel start<br>• Maintain central log per project |
+
+**Key Forms & Documents**:
+- Full Project File Checklist
+- Final Invoice + Payment Record
+- TD284 Acceptance
+- Closeout Checklist (internal)
+- Archive index / retention log
+
+---
+
+## Summary of All Mapped Requests & Pain Points
+
+All **External Requests (E1–E6)** and **Internal Requests (I1–I3)** from previous analysis are mapped above to their primary triggering processes.
+
+All **Top 20 Pain Points** are integrated into the processes where they most commonly occur, with mitigation strategies included.
+
+**Most Critical Cross-Cutting Documents**:
+- Advance Notification (Att. 11)
+- TD e-288
+- SOW (based on Att. 16)
+- TD284
+- Invoice Template (Att. 14/15)
+- Change Order Form + Approval Record
+
+---
+
+**Usage Note**: This map is designed to serve as both a training/onboarding tool and an operational reference. It can be converted into a visual flowchart, SharePoint process library, or internal dashboard.
+
+**Version**: Merged & Synthesized — July 2026 (Post-Award Framework)
