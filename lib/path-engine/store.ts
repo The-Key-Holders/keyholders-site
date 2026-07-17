@@ -39,8 +39,20 @@ function clone<T>(v: T): T {
   return JSON.parse(JSON.stringify(v)) as T;
 }
 
+function normalizeSnapshot(snap: OpsSnapshot): OpsSnapshot {
+  if (!snap.accessRequests) snap.accessRequests = [];
+  if (!snap.magicTokens) snap.magicTokens = [];
+  if (!snap.toolRuns) snap.toolRuns = [];
+  // Ensure demo PSAP is assignment-scoped if old snapshot
+  const psapUser = snap.users?.find((u) => u.id === "user_psap_demo");
+  if (psapUser && (!psapUser.psapIds || !psapUser.psapIds.length)) {
+    psapUser.psapIds = ["psap_roseville"];
+  }
+  return snap;
+}
+
 function seedFresh(): OpsSnapshot {
-  const snap = buildSeedSnapshot();
+  const snap = normalizeSnapshot(buildSeedSnapshot());
   seedDemoPaths(snap);
   return snap;
 }
@@ -59,7 +71,7 @@ export async function ensureOpsStore(): Promise<void> {
       }
       const persisted = await loadPersistedSnapshot();
       if (persisted && Array.isArray(persisted.paths)) {
-        glob.__pathOpsStore = persisted;
+        glob.__pathOpsStore = normalizeSnapshot(persisted);
       } else {
         glob.__pathOpsStore = seedFresh();
         await savePersistedSnapshot(glob.__pathOpsStore);
@@ -79,10 +91,27 @@ export function getSnapshot(): OpsSnapshot {
   return glob.__pathOpsStore;
 }
 
-function persistSoon(): void {
+export function persistSoon(): void {
   if (useMemoryOnly()) return;
   const snap = getSnapshot();
   void savePersistedSnapshot(clone(snap));
+}
+
+export function mutateSnapshot(fn: (snap: OpsSnapshot) => void): void {
+  const snap = getSnapshot();
+  fn(snap);
+  persistSoon();
+}
+
+export function getUserById(id: string): User | undefined {
+  const u = getSnapshot().users.find((x) => x.id === id);
+  return u ? clone(u) : undefined;
+}
+
+export function getUserByEmail(email: string): User | undefined {
+  const needle = email.trim().toLowerCase();
+  const u = getSnapshot().users.find((x) => x.email.toLowerCase() === needle);
+  return u ? clone(u) : undefined;
 }
 
 export function resetOpsStore(): void {
@@ -126,9 +155,11 @@ export function createPathFromType(
   const processes: Process[] = [];
   const tasks: Task[] = [];
 
-  for (const pt of [...pathType.processes].sort((a, b) => a.sortOrder - b.sortOrder)) {
+  const ordered = [...pathType.processes].sort((a, b) => a.sortOrder - b.sortOrder);
+  const firstRequired = ordered.find((p) => p.required) ?? ordered[0];
+  for (const pt of ordered) {
     const processId = newId("proc");
-    const isFirst = pt.sortOrder === 1;
+    const isFirst = firstRequired ? pt.code === firstRequired.code : false;
     processes.push({
       id: processId,
       pathId,
@@ -161,10 +192,12 @@ export function createPathFromType(
 }
 
 function seedDemoPaths(snap: OpsSnapshot): void {
-  const pt = snap.pathTypes[0];
-  if (!pt) return;
+  const cloud = snap.pathTypes.find((p) => p.code.includes("cloud")) ?? snap.pathTypes[0];
+  const onprem = snap.pathTypes.find((p) => p.code.includes("onprem"));
+  if (!cloud) return;
+
   for (const psap of snap.psaps) {
-    const { path, processes, tasks } = createPathFromType(snap, psap.id, pt);
+    const { path, processes, tasks } = createPathFromType(snap, psap.id, cloud);
     snap.paths.push(path);
     snap.processes.push(...processes);
     snap.tasks.push(...tasks);
@@ -175,10 +208,64 @@ function seedDemoPaths(snap: OpsSnapshot): void {
       actorRole: "admin",
       actorName: "Portal Admin",
       kind: "path.created",
-      summary: `Path opened for ${psap.name} (${pt.name})`,
+      summary: `Path opened for ${psap.name} (${cloud.name})`,
       createdAt: path.openedAt,
     });
   }
+
+  // Second scenario type for Sample Valley
+  if (onprem) {
+    const sample = snap.psaps.find((p) => p.id === "psap_sample");
+    if (sample) {
+      const { path, processes, tasks } = createPathFromType(snap, sample.id, onprem);
+      snap.paths.push(path);
+      snap.processes.push(...processes);
+      snap.tasks.push(...tasks);
+      snap.activity.push({
+        id: newId("act"),
+        pathId: path.id,
+        actorUserId: "user_admin_demo",
+        actorRole: "admin",
+        actorName: "Portal Admin",
+        kind: "path.created",
+        summary: `Path opened for ${sample.name} (${onprem.name})`,
+        createdAt: path.openedAt,
+      });
+    }
+  }
+}
+
+export function recordToolRun(input: {
+  toolCode: string;
+  pathId?: string;
+  processId?: string;
+  result: unknown;
+  status?: string;
+  createdByUserId: string;
+}): void {
+  mutateSnapshot((snap) => {
+    if (!snap.toolRuns) snap.toolRuns = [];
+    snap.toolRuns.push({
+      id: newId("trun"),
+      toolCode: input.toolCode,
+      pathId: input.pathId,
+      processId: input.processId,
+      result: input.result,
+      status: input.status,
+      createdByUserId: input.createdByUserId,
+      createdAt: nowIso(),
+    });
+  });
+}
+
+export function listToolRuns(filter?: {
+  pathId?: string;
+  processId?: string;
+}): import("./types").ToolRun[] {
+  let rows = clone(getSnapshot().toolRuns ?? []);
+  if (filter?.pathId) rows = rows.filter((r) => r.pathId === filter.pathId);
+  if (filter?.processId) rows = rows.filter((r) => r.processId === filter.processId);
+  return rows.sort((a, b) => b.createdAt.localeCompare(a.createdAt));
 }
 
 export function listUsers(): User[] {

@@ -1,5 +1,5 @@
 import { listAssignments } from "./store";
-import type { Actor, Role } from "./types";
+import type { Actor, Role, User } from "./types";
 
 export function assignedPsapIds(advisorUserId: string): Set<string> {
   return new Set(
@@ -9,22 +9,40 @@ export function assignedPsapIds(advisorUserId: string): Set<string> {
   );
 }
 
-/** Can this actor see/write this PSAP's paths? */
-export function canAccessPsap(actor: Actor, psapId: string): boolean {
-  if (actor.role === "admin") return true;
-  if (actor.role === "psap") {
-    // Demo Slice 1: PSAP staff can access all demo PSAPs (single beta tenant).
-    // Later: bind user→psap membership.
-    return true;
+/** PSAPs this actor may see/write. */
+export function visiblePsapIds(actor: Actor): Set<string> {
+  if (actor.role === "admin") {
+    // admin: all — caller expands via listPsaps when needed
+    return new Set(["*"]);
   }
   if (actor.role === "advisor") {
-    return assignedPsapIds(actor.userId).has(psapId);
+    return assignedPsapIds(actor.userId);
   }
-  return false;
+  // psap: membership only
+  return new Set(actor.psapIds ?? []);
+}
+
+export function canAccessPsap(actor: Actor, psapId: string): boolean {
+  if (actor.role === "admin") return true;
+  return visiblePsapIds(actor).has(psapId);
 }
 
 export function canOverride(actor: Actor): boolean {
   return actor.role === "advisor" || actor.role === "admin";
+}
+
+export function canApproveAccess(actor: Actor): boolean {
+  return actor.role === "admin";
+}
+
+export function userToActor(user: User): Actor {
+  return {
+    userId: user.id,
+    role: user.role,
+    displayName: user.displayName,
+    email: user.email,
+    psapIds: user.psapIds,
+  };
 }
 
 export function demoUserForRole(role: Role): Actor {
@@ -33,16 +51,20 @@ export function demoUserForRole(role: Role): Actor {
       userId: "user_advisor_demo",
       role: "advisor",
       displayName: "Demo Advisor",
+      email: "advisor.demo@example.com",
     },
     psap: {
       userId: "user_psap_demo",
       role: "psap",
       displayName: "Demo PSAP Staff",
+      email: "psap.demo@example.com",
+      psapIds: ["psap_roseville"],
     },
     admin: {
       userId: "user_admin_demo",
       role: "admin",
       displayName: "Portal Admin",
+      email: "admin.demo@example.com",
     },
   };
   return map[role];

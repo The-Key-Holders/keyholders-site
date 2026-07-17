@@ -19,6 +19,18 @@ export default function MarkProcessComplete() {
     setBusy(true);
     setMsg(null);
     try {
+      // Persist tool context before complete
+      await fetch("/api/psap-portal/ops/tool-runs", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          toolCode: "mark-complete-cta",
+          pathId: pathId || undefined,
+          processId,
+          status: "complete_requested",
+          result: { source: "MarkProcessComplete" },
+        }),
+      });
       const res = await fetch(
         `/api/psap-portal/ops/processes/${processId}/complete`,
         { method: "POST" }

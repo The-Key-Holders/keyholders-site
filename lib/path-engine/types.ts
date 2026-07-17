@@ -16,6 +16,46 @@ export type User = {
   email: string;
   displayName: string;
   role: Role;
+  /** PSAP membership for role=psap (assignment-scoped visibility) */
+  psapIds?: string[];
+  active?: boolean;
+  createdAt?: string;
+};
+
+export type AccessRequestStatus = "pending" | "approved" | "denied";
+
+export type AccessRequest = {
+  id: string;
+  email: string;
+  displayName: string;
+  roleRequested: Role;
+  psapId?: string;
+  psapName?: string;
+  county?: string;
+  note?: string;
+  status: AccessRequestStatus;
+  createdAt: string;
+  decidedAt?: string;
+  decidedByUserId?: string;
+  magicLinkToken?: string;
+};
+
+export type MagicToken = {
+  token: string;
+  userId: string;
+  expiresAt: string;
+  usedAt?: string;
+};
+
+export type ToolRun = {
+  id: string;
+  toolCode: string;
+  pathId?: string;
+  processId?: string;
+  result: unknown;
+  status?: string;
+  createdByUserId: string;
+  createdAt: string;
 };
 
 export type Psap = {
@@ -160,12 +200,40 @@ export type OpsSnapshot = {
   activity: ActivityEvent[];
   overrides: Override[];
   audit: AuditEvent[];
+  accessRequests?: AccessRequest[];
+  magicTokens?: MagicToken[];
+  toolRuns?: ToolRun[];
 };
 
 export type Actor = {
   userId: string;
   role: Role;
   displayName: string;
+  email?: string;
+  psapIds?: string[];
+};
+
+export type PathfinderStep = {
+  processCode: string;
+  processId?: string;
+  name: string;
+  status: ProcessStatus | "n/a";
+  bucketCode: string;
+  toolHref?: string;
+  isCurrent: boolean;
+  isNextAction: boolean;
+};
+
+export type PathfinderResult = {
+  pathId: string;
+  psapName: string;
+  pathTypeName: string;
+  effectiveBucket: string;
+  bucketLabel: string;
+  pathStatus: PathStatus;
+  nextAction: PathfinderStep | null;
+  steps: PathfinderStep[];
+  tips: string[];
 };
 
 export type DashboardMetrics = {

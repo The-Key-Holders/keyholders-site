@@ -188,6 +188,29 @@ test.describe("PSAP portal", () => {
       d1.processes.find((p: { templateCode: string }) => p.templateCode === "adv_notice").status
     ).toBe("completed");
   });
+
+  test("pathfinder and access request flow", async ({ page }) => {
+    await login(page, "/psap-portal");
+    await enterAsPsap(page);
+
+    await page.goto("/psap-portal/pathfinder");
+    await expect(page.getByTestId("pathfinder-page")).toBeVisible();
+    await expect(page.getByTestId("pathfinder-summary")).toBeVisible({ timeout: 15_000 });
+
+    await page.goto("/psap-portal/access");
+    await page.locator('input[name="email"]').fill("e2e.access@example.com");
+    await page.locator('input[name="displayName"]').fill("E2E Access User");
+    await page.locator('input[name="psapName"]').fill("Roseville PD");
+    await page.getByTestId("access-submit").click();
+    await expect(page.getByTestId("access-msg")).toContainText(/submitted/i);
+
+    await page.request.post("/api/psap-portal/ops/session", { data: { role: "admin" } });
+    await page.evaluate(() => localStorage.setItem("psap-portal-persona-v1", "admin"));
+    await page.goto("/psap-portal/admin");
+    await expect(page.getByTestId("admin-access-panel")).toBeVisible();
+    await page.getByRole("button", { name: /Approve \+ magic link/i }).first().click();
+    await expect(page.getByTestId("magic-link")).toBeVisible({ timeout: 10_000 });
+  });
 });
 
 

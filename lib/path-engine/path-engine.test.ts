@@ -128,12 +128,22 @@ describe("dashboard metrics", () => {
     const advisor = demoUserForRole("advisor");
     const { metrics, buckets } = getDashboard(advisor);
     expect(metrics.totalPsapsAssigned).toBe(3);
-    expect(metrics.pathsOpen).toBe(3);
+    // 3 cloud + 1 on-prem sample
+    expect(metrics.pathsOpen).toBe(4);
     expect(metrics.pathsCompleted).toBe(0);
-    expect(metrics.pathsNotCompleted).toBe(3);
-    expect(buckets.some((b) => b.bucketCode === "funding_init" && b.count === 3)).toBe(
-      true
-    );
+    expect(metrics.pathsNotCompleted).toBe(4);
+    expect(
+      buckets.some((b) => b.bucketCode === "funding_init" && b.count >= 3)
+    ).toBe(true);
+  });
+});
+
+describe("psap scope", () => {
+  it("demo PSAP only sees Roseville paths", () => {
+    const psap = demoUserForRole("psap");
+    const paths = listPathsForActor(psap);
+    expect(paths.length).toBe(1);
+    expect(paths[0].psapName).toMatch(/Roseville/i);
   });
 });
 

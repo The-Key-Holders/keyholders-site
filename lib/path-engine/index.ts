@@ -8,8 +8,12 @@ export {
   getSnapshot,
   listPsaps,
   listPaths,
+  recordToolRun,
+  listToolRuns,
 } from "./store";
 export { withOpsStore } from "./with-store";
+export * from "./access";
+export * from "./pathfinder";
 export { computeBucketCode, effectiveBucketCode } from "./buckets";
 export {
   completeProcess,

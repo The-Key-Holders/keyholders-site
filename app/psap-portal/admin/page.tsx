@@ -1,5 +1,6 @@
 "use client";
 
+import AdminAccessPanel from "@/components/psap-portal/AdminAccessPanel";
 import { portal } from "@/lib/psap-portal/ui";
 import type { AdvisorRecord, NewsItem, QuestionRecord } from "@/lib/psap-portal/types";
 import Link from "next/link";
@@ -101,12 +102,14 @@ export default function AdminPage() {
     <div className={portal.page}>
       <h1 className={portal.h1}>Admin</h1>
       <p className={portal.lead}>
-        News, question inbox, and sample Advisor directory. Mutations are in-memory on serverless —
-        use <strong>Export JSON</strong> and re-commit seeds (or Import on next session) to persist.
+        Access approvals, news, question inbox, and sample Advisor directory. Path ops persist via
+        Neon/file when configured; news/questions still use in-memory overlay + Export/Import.
       </p>
       {msg && <p className={`${portal.alertCyan} mt-4`}>{msg}</p>}
 
-      <div className="mt-6 flex flex-wrap gap-2">
+      <AdminAccessPanel />
+
+      <div className="mt-10 flex flex-wrap gap-2">
         <button type="button" className={portal.btnPrimary} onClick={() => void exportData()}>
           Export JSON
         </button>

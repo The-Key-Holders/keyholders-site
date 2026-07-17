@@ -19,14 +19,17 @@ export default function PsapHomePage() {
       </p>
 
       <div className="mt-6 flex flex-wrap gap-2">
-        <Link href="/psap-portal/tools/advance-notification-wizard" className={portal.btnPrimary}>
+        <Link href="/psap-portal/pathfinder" className={portal.btnPrimary}>
+          Pathfinder — what next?
+        </Link>
+        <Link href="/psap-portal/tools/advance-notification-wizard" className={portal.btnSecondary}>
           Start Advance Notification prep
         </Link>
         <Link href="/psap-portal/tools/cloud-vs-onprem" className={portal.btnSecondary}>
           Cloud vs On-Prem
         </Link>
-        <Link href="/psap-portal/tools/submit-question" className={portal.btnSecondary}>
-          Ask a question
+        <Link href="/psap-portal/access" className={portal.btnSecondary}>
+          Request access
         </Link>
       </div>
 

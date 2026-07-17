@@ -11,17 +11,16 @@ const NAV: Record<PortalPersona, { primary: LinkItem[]; more: LinkItem[] }> = {
   psap: {
     primary: [
       { href: "/psap-portal/psap", label: "PSAP home", exact: true },
+      { href: "/psap-portal/pathfinder", label: "Pathfinder" },
       { href: "/psap-portal/start", label: "Start here" },
       { href: "/psap-portal/tools", label: "Tools path" },
       { href: "/psap-portal/faqs", label: "FAQs" },
-      { href: "/psap-portal/news", label: "News" },
     ],
     more: [
+      { href: "/psap-portal/news", label: "News" },
       { href: "/psap-portal/contracts", label: "Contracts" },
       { href: "/psap-portal/funding", label: "Funding" },
-      { href: "/psap-portal/processes", label: "Process order" },
-      { href: "/psap-portal/support", label: "Support" },
-      { href: "/psap-portal/documents", label: "Documents" },
+      { href: "/psap-portal/access", label: "Request access" },
       { href: "/psap-portal/tools/advisor-lookup", label: "My Advisor" },
       { href: "/psap-portal/tools/submit-question", label: "Ask a question" },
     ],
@@ -29,18 +28,18 @@ const NAV: Record<PortalPersona, { primary: LinkItem[]; more: LinkItem[] }> = {
   advisor: {
     primary: [
       { href: "/psap-portal/advisor/dashboard", label: "Ops dashboard" },
+      { href: "/psap-portal/pathfinder", label: "Pathfinder" },
       { href: "/psap-portal/advisor", label: "Content desk", exact: true },
       { href: "/psap-portal/advisor/process-map", label: "Process map" },
       { href: "/psap-portal/advisor/pain-points", label: "Pain points" },
-      { href: "/psap-portal/advisor/requests", label: "Requests" },
       { href: "/psap-portal/tools", label: "QC tools" },
     ],
     more: [
+      { href: "/psap-portal/advisor/requests", label: "Requests" },
       { href: "/psap-portal/news", label: "News" },
       { href: "/psap-portal/tools/advisor-lookup", label: "Directory" },
-      { href: "/psap-portal/admin", label: "Questions inbox" },
+      { href: "/psap-portal/admin", label: "Admin / access" },
       { href: "/psap-allotment", label: "Allotment Engine" },
-      { href: "/advisor-tools/invoice-reconciler", label: "Invoice reconciler" },
       { href: "/advisor-tools", label: "Advisor Tools hub" },
     ],
   },

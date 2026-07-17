@@ -1,5 +1,9 @@
-import { PORTAL_ROLE_COOKIE, isRole } from "@/lib/path-engine/session";
 import { demoUserForRole } from "@/lib/path-engine/authz";
+import {
+  PORTAL_ROLE_COOKIE,
+  PORTAL_USER_COOKIE,
+  isRole,
+} from "@/lib/path-engine/session";
 import { NextResponse } from "next/server";
 
 export const runtime = "nodejs";
@@ -17,13 +21,21 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "role must be psap|advisor|admin" }, { status: 400 });
   }
   const actor = demoUserForRole(body.role);
-  const res = NextResponse.json({ ok: true, role: body.role, actor });
+  const res = NextResponse.json({ ok: true, role: body.role, actor, mode: "demo" });
   res.cookies.set(PORTAL_ROLE_COOKIE, body.role, {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
     sameSite: "lax",
     path: "/",
     maxAge: MAX_AGE,
+  });
+  // Clear magic-link user so demo persona takes effect
+  res.cookies.set(PORTAL_USER_COOKIE, "", {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "lax",
+    path: "/",
+    maxAge: 0,
   });
   return res;
 }

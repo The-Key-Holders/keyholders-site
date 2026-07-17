@@ -1,5 +1,10 @@
 import { effectiveBucketCode, bucketLabel } from "./buckets";
-import { canAccessPsap, canOverride, demoUserForRole } from "./authz";
+import {
+  canAccessPsap,
+  canOverride,
+  demoUserForRole,
+  visiblePsapIds,
+} from "./authz";
 import {
   getActiveOverride,
   getActivityForPath,
@@ -10,7 +15,6 @@ import {
   getTasksForPath,
   listPaths,
   listPsaps,
-  listAssignments,
   listAllProcesses,
   replacePathState,
 } from "./store";
@@ -33,22 +37,17 @@ export function actorFromRole(role: Role): Actor {
   return demoUserForRole(role);
 }
 
+function allowedPsapIdSet(actor: Actor): Set<string> {
+  const vis = visiblePsapIds(actor);
+  if (vis.has("*")) return new Set(listPsaps().map((p) => p.id));
+  return vis;
+}
+
 export function getDashboard(actor: Actor): {
   metrics: DashboardMetrics;
   buckets: BucketCount[];
 } {
-  const psaps = listPsaps();
-  const assignments = listAssignments();
-  const allowedPsapIds =
-    actor.role === "admin"
-      ? new Set(psaps.map((p) => p.id))
-      : actor.role === "advisor"
-        ? new Set(
-            assignments
-              .filter((a) => a.advisorUserId === actor.userId)
-              .map((a) => a.psapId)
-          )
-        : new Set(psaps.map((p) => p.id));
+  const allowedPsapIds = allowedPsapIdSet(actor);
 
   const paths = listPaths().filter((p) => allowedPsapIds.has(p.psapId));
   const metrics: DashboardMetrics = {
@@ -99,17 +98,7 @@ export function listPathsForActor(
 ): Array<Path & { psapName: string; county: string; effectiveBucket: string }> {
   const psaps = listPsaps();
   const psapById = new Map(psaps.map((p) => [p.id, p]));
-  const assignments = listAssignments();
-  const allowed =
-    actor.role === "admin"
-      ? new Set(psaps.map((p) => p.id))
-      : actor.role === "advisor"
-        ? new Set(
-            assignments
-              .filter((a) => a.advisorUserId === actor.userId)
-              .map((a) => a.psapId)
-          )
-        : new Set(psaps.map((p) => p.id));
+  const allowed = allowedPsapIdSet(actor);
 
   return listPaths()
     .filter((p) => allowed.has(p.psapId))
