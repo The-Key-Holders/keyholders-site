@@ -12,11 +12,32 @@ type PathRow = {
   pathTypeName: string;
   status: string;
   effectiveBucket: string;
+  daysInBucket?: number;
+  slaBand?: string;
+};
+
+type AgingRow = {
+  pathId: string;
+  psapName: string;
+  county: string;
+  pathTypeName: string;
+  effectiveBucket: string;
+  daysInBucket: number;
+  bucketBand: string;
+  openProcessCode?: string;
+  openProcessDays?: number;
+  processBand?: string;
 };
 
 export default function AdvisorOpsDashboard() {
   const [metrics, setMetrics] = useState<DashboardMetrics | null>(null);
   const [buckets, setBuckets] = useState<BucketCount[]>([]);
+  const [aging, setAging] = useState<AgingRow[]>([]);
+  const [slaSummary, setSlaSummary] = useState<{
+    ok: number;
+    watch: number;
+    breach: number;
+  } | null>(null);
   const [drill, setDrill] = useState<{
     bucketCode: string;
     bucketLabel: string;
@@ -34,6 +55,8 @@ export default function AdvisorOpsDashboard() {
         if (!cancelled) {
           setMetrics(data.metrics);
           setBuckets(data.buckets ?? []);
+          setAging(data.aging ?? []);
+          setSlaSummary(data.slaSummary ?? null);
         }
       } catch (e) {
         if (!cancelled)
@@ -72,13 +95,22 @@ export default function AdvisorOpsDashboard() {
           <p className={portal.badgeGold}>Ops ERP · Slice 1</p>
           <h2 className={`${portal.h2} mt-2`}>Assigned workload</h2>
         </div>
-        <a
-          href="/api/psap-portal/ops/report"
-          className={portal.btnSecondary}
-          data-testid="report-csv"
-        >
-          Export CSV report
-        </a>
+        <div className="flex flex-wrap gap-2">
+          <a
+            href="/api/psap-portal/ops/report"
+            className={portal.btnSecondary}
+            data-testid="report-csv"
+          >
+            Paths CSV
+          </a>
+          <a
+            href="/api/psap-portal/ops/report?kind=sla"
+            className={portal.btnSecondary}
+            data-testid="report-sla-csv"
+          >
+            SLA aging CSV
+          </a>
+        </div>
       </div>
 
       {error && (
@@ -100,6 +132,23 @@ export default function AdvisorOpsDashboard() {
               </p>
             </div>
           ))}
+        </div>
+      )}
+
+      {slaSummary && (
+        <div className="mt-4 grid gap-3 sm:grid-cols-3" data-testid="sla-summary">
+          <div className={portal.card}>
+            <p className="text-xs uppercase text-emerald-300/80">SLA OK</p>
+            <p className="text-2xl font-bold text-emerald-300">{slaSummary.ok}</p>
+          </div>
+          <div className={portal.card}>
+            <p className="text-xs uppercase text-amber-300/80">Watch</p>
+            <p className="text-2xl font-bold text-amber-300">{slaSummary.watch}</p>
+          </div>
+          <div className={portal.card}>
+            <p className="text-xs uppercase text-red-300/80">Breach</p>
+            <p className="text-2xl font-bold text-red-300">{slaSummary.breach}</p>
+          </div>
         </div>
       )}
 
@@ -147,7 +196,12 @@ export default function AdvisorOpsDashboard() {
                     <span className="font-semibold text-white">{p.psapName}</span>
                     <span className="text-white/45"> · {p.county}</span>
                   </span>
-                  <span className="text-xs text-cyanGlow">{p.status}</span>
+                  <span className="text-xs text-cyanGlow">
+                    {p.status}
+                    {typeof p.daysInBucket === "number"
+                      ? ` · ${p.daysInBucket}d · ${p.slaBand ?? "ok"}`
+                      : ""}
+                  </span>
                 </Link>
               </li>
             ))}
@@ -155,6 +209,65 @@ export default function AdvisorOpsDashboard() {
               <li className={portal.muted}>No paths in this bucket.</li>
             )}
           </ul>
+        </section>
+      )}
+
+      {aging.length > 0 && (
+        <section className="mt-10" data-testid="sla-aging-table">
+          <h3 className={portal.h2}>Open path aging (SLA)</h3>
+          <p className={`${portal.muted} mt-1`}>
+            Targets from post-award process timelines (calendar days). Watch → approaching;
+            Breach → past target.
+          </p>
+          <div className="mt-3 overflow-x-auto">
+            <table className="w-full min-w-[640px] text-left text-sm text-white/80">
+              <thead className="text-xs uppercase text-white/40">
+                <tr>
+                  <th className="py-2 pr-2">PSAP</th>
+                  <th className="py-2 pr-2">Bucket</th>
+                  <th className="py-2 pr-2">Days</th>
+                  <th className="py-2 pr-2">Band</th>
+                  <th className="py-2 pr-2">Open process</th>
+                </tr>
+              </thead>
+              <tbody>
+                {aging.map((a) => (
+                  <tr key={a.pathId} className="border-t border-white/10">
+                    <td className="py-2 pr-2">
+                      <Link
+                        href={`/psap-portal/path/${a.pathId}`}
+                        className="text-cyanGlow hover:underline"
+                      >
+                        {a.psapName}
+                      </Link>
+                      <span className="text-white/40"> · {a.county}</span>
+                    </td>
+                    <td className="py-2 pr-2">{a.effectiveBucket}</td>
+                    <td className="py-2 pr-2">{a.daysInBucket}</td>
+                    <td className="py-2 pr-2">
+                      <span
+                        className={
+                          a.bucketBand === "breach"
+                            ? "text-red-300"
+                            : a.bucketBand === "watch"
+                              ? "text-amber-300"
+                              : "text-emerald-300"
+                        }
+                      >
+                        {a.bucketBand}
+                      </span>
+                    </td>
+                    <td className="py-2 pr-2">
+                      {a.openProcessCode ?? "—"}
+                      {typeof a.openProcessDays === "number"
+                        ? ` (${a.openProcessDays}d · ${a.processBand})`
+                        : ""}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </section>
       )}
     </div>

@@ -14,6 +14,8 @@ export {
 export { withOpsStore } from "./with-store";
 export * from "./access";
 export * from "./pathfinder";
+export * from "./sla";
+
 export { computeBucketCode, effectiveBucketCode } from "./buckets";
 export {
   completeProcess,

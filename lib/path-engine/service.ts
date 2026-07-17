@@ -23,6 +23,7 @@ import {
   reverseOverride,
   setOverride,
 } from "./transitions";
+import { bucketSla, processSla, type SlaBand } from "./sla";
 import type {
   Actor,
   BucketCount,
@@ -32,6 +33,20 @@ import type {
   Process,
   Role,
 } from "./types";
+
+export type AgingRow = {
+  pathId: string;
+  psapName: string;
+  county: string;
+  pathTypeName: string;
+  effectiveBucket: string;
+  daysInBucket: number;
+  bucketBand: SlaBand;
+  openProcessCode?: string;
+  openProcessDays?: number;
+  processBand?: SlaBand;
+  dueAt?: string;
+};
 
 export function actorFromRole(role: Role): Actor {
   return demoUserForRole(role);
@@ -46,8 +61,12 @@ function allowedPsapIdSet(actor: Actor): Set<string> {
 export function getDashboard(actor: Actor): {
   metrics: DashboardMetrics;
   buckets: BucketCount[];
+  aging: AgingRow[];
+  slaSummary: { ok: number; watch: number; breach: number };
 } {
   const allowedPsapIds = allowedPsapIdSet(actor);
+  const psaps = listPsaps();
+  const psapById = new Map(psaps.map((p) => [p.id, p]));
 
   const paths = listPaths().filter((p) => allowedPsapIds.has(p.psapId));
   const metrics: DashboardMetrics = {
@@ -62,6 +81,9 @@ export function getDashboard(actor: Actor): {
   };
 
   const bucketMap = new Map<string, BucketCount>();
+  const aging: AgingRow[] = [];
+  const slaSummary = { ok: 0, watch: 0, breach: 0 };
+
   for (const path of paths) {
     const pt = getPathType(path.pathTypeId);
     if (!pt) continue;
@@ -81,7 +103,55 @@ export function getDashboard(actor: Actor): {
         count: 1,
       });
     }
+
+    if (path.status !== "open") continue;
+    // Approx entered bucket: last activity or path openedAt
+    const enteredAt = path.openedAt;
+    const bSla = bucketSla(code, enteredAt);
+    const procs = getProcessesForPath(path.id);
+    const openProc =
+      procs.find((p) => p.status === "open") ||
+      procs.find(
+        (p) =>
+          p.required && p.status !== "completed" && p.status !== "waived"
+      );
+    const pSla = openProc
+      ? processSla(
+          openProc.templateCode,
+          openProc.startedAt || path.openedAt,
+          openProc.status
+        )
+      : null;
+    const worst: SlaBand =
+      bSla.band === "breach" || pSla?.band === "breach"
+        ? "breach"
+        : bSla.band === "watch" || pSla?.band === "watch"
+          ? "watch"
+          : "ok";
+    slaSummary[worst] += 1;
+    const psap = psapById.get(path.psapId);
+    aging.push({
+      pathId: path.id,
+      psapName: psap?.name ?? path.psapId,
+      county: psap?.county ?? "",
+      pathTypeName: path.pathTypeName,
+      effectiveBucket: code,
+      daysInBucket: bSla.daysInBucket,
+      bucketBand: bSla.band,
+      openProcessCode: openProc?.templateCode,
+      openProcessDays: pSla?.daysOpen,
+      processBand: pSla?.band,
+      dueAt: openProc?.dueAt,
+    });
   }
+
+  aging.sort((a, b) => {
+    const rank = (x: SlaBand) => (x === "breach" ? 0 : x === "watch" ? 1 : 2);
+    const ra = rank(a.bucketBand);
+    const rb = rank(b.bucketBand);
+    if (ra !== rb) return ra - rb;
+    return b.daysInBucket - a.daysInBucket;
+  });
 
   const buckets = Array.from(bucketMap.values()).sort((a, b) => {
     if (a.pathTypeCode !== b.pathTypeCode)
@@ -89,13 +159,21 @@ export function getDashboard(actor: Actor): {
     return a.sortOrder - b.sortOrder;
   });
 
-  return { metrics, buckets };
+  return { metrics, buckets, aging, slaSummary };
 }
 
 export function listPathsForActor(
   actor: Actor,
   filter?: { bucketCode?: string; pathTypeCode?: string }
-): Array<Path & { psapName: string; county: string; effectiveBucket: string }> {
+): Array<
+  Path & {
+    psapName: string;
+    county: string;
+    effectiveBucket: string;
+    daysInBucket: number;
+    slaBand: SlaBand;
+  }
+> {
   const psaps = listPsaps();
   const psapById = new Map(psaps.map((p) => [p.id, p]));
   const allowed = allowedPsapIdSet(actor);
@@ -109,11 +187,15 @@ export function listPathsForActor(
     })
     .map((p) => {
       const psap = psapById.get(p.psapId);
+      const bucket = effectiveBucketCode(p);
+      const bSla = bucketSla(bucket, p.openedAt);
       return {
         ...p,
         psapName: psap?.name ?? p.psapId,
         county: psap?.county ?? "",
-        effectiveBucket: effectiveBucketCode(p),
+        effectiveBucket: bucket,
+        daysInBucket: bSla.daysInBucket,
+        slaBand: bSla.band,
       };
     });
 }
@@ -258,6 +340,8 @@ export function buildCsvReport(actor: Actor): string {
     "path_type",
     "status",
     "bucket",
+    "days_in_bucket",
+    "sla_band",
     "override",
     "opened_at",
   ];
@@ -270,19 +354,76 @@ export function buildCsvReport(actor: Actor): string {
       r.pathTypeCode,
       r.status,
       r.effectiveBucket,
+      r.daysInBucket,
+      r.slaBand,
       r.overrideBucketCode ?? "",
       r.openedAt,
     ].map((c) => `"${String(c).replace(/"/g, '""')}"`);
     lines.push(cells.join(","));
   }
-  // Include process summary columns lightly
   const procs = listAllProcesses();
   lines.push("");
-  lines.push('"process_id","path_id","name","status","due_at"');
+  lines.push(
+    '"process_id","path_id","code","name","status","due_at","days_open","sla_band"'
+  );
   for (const p of procs) {
     if (!rows.some((r) => r.id === p.pathId)) continue;
+    const path = rows.find((r) => r.id === p.pathId);
+    const s = processSla(
+      p.templateCode,
+      p.startedAt || path?.openedAt,
+      p.status
+    );
     lines.push(
-      [p.id, p.pathId, p.name, p.status, p.dueAt ?? ""]
+      [
+        p.id,
+        p.pathId,
+        p.templateCode,
+        p.name,
+        p.status,
+        p.dueAt ?? "",
+        s?.daysOpen ?? "",
+        s?.band ?? "",
+      ]
+        .map((c) => `"${String(c).replace(/"/g, '""')}"`)
+        .join(",")
+    );
+  }
+  return lines.join("\n");
+}
+
+/** Aging-only CSV for Advisor SLA desk */
+export function buildSlaCsvReport(actor: Actor): string {
+  const { aging } = getDashboard(actor);
+  const header = [
+    "path_id",
+    "psap",
+    "county",
+    "path_type",
+    "bucket",
+    "days_in_bucket",
+    "bucket_sla",
+    "open_process",
+    "process_days",
+    "process_sla",
+    "due_at",
+  ];
+  const lines = [header.join(",")];
+  for (const a of aging) {
+    lines.push(
+      [
+        a.pathId,
+        a.psapName,
+        a.county,
+        a.pathTypeName,
+        a.effectiveBucket,
+        a.daysInBucket,
+        a.bucketBand,
+        a.openProcessCode ?? "",
+        a.openProcessDays ?? "",
+        a.processBand ?? "",
+        a.dueAt ?? "",
+      ]
         .map((c) => `"${String(c).replace(/"/g, '""')}"`)
         .join(",")
     );

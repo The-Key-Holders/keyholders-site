@@ -5,15 +5,19 @@ import { NextResponse } from "next/server";
 
 export const runtime = "nodejs";
 
-export async function GET() {
-  return withOpsStore(() => {
+export async function GET(request: Request) {
+  return withOpsStore(async () => {
     const actor = actorFromRequestCookies();
-    const csv = buildCsvReport(actor);
+    const kind = new URL(request.url).searchParams.get("kind");
+    const { buildSlaCsvReport } = await import("@/lib/path-engine/service");
+    const csv =
+      kind === "sla" ? buildSlaCsvReport(actor) : buildCsvReport(actor);
+    const filename = kind === "sla" ? "sla-aging.csv" : "assigned-paths.csv";
     return new NextResponse(csv, {
       status: 200,
       headers: {
         "Content-Type": "text/csv; charset=utf-8",
-        "Content-Disposition": 'attachment; filename="assigned-paths.csv"',
+        "Content-Disposition": `attachment; filename="${filename}"`,
       },
     });
   });
