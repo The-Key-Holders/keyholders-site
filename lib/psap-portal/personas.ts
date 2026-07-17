@@ -27,8 +27,8 @@ export const PERSONAS: Record<
     label: "Funding & Compliance Advisor",
     short: "Advisor",
     blurb:
-      "Post-award desk: process map (10 processes), top pain points + mitigations, request catalog (E1–E6 / I1–I3), SLAs, and package QC tools.",
-    home: "/psap-portal/advisor",
+      "Ops dashboard (buckets, overrides, reports) plus post-award process map, pain points, request catalog, and package QC tools.",
+    home: "/psap-portal/advisor/dashboard",
     accent: "gold",
   },
   admin: {

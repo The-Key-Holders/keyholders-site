@@ -42,14 +42,33 @@ export function PersonaProvider({ children }: { children: React.ReactNode }) {
     setReady(true);
   }, []);
 
-  const setPersona = useCallback((p: PortalPersona) => {
-    setPersonaState(p);
-    try {
-      localStorage.setItem(PERSONA_STORAGE_KEY, p);
-    } catch {
-      /* ignore */
-    }
+  const syncServerRole = useCallback((p: PortalPersona | null) => {
+    if (!p) return;
+    void fetch("/api/psap-portal/ops/session", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ role: p }),
+    }).catch(() => {
+      /* non-fatal for static browsing */
+    });
   }, []);
+
+  useEffect(() => {
+    if (ready && persona) syncServerRole(persona);
+  }, [ready, persona, syncServerRole]);
+
+  const setPersona = useCallback(
+    (p: PortalPersona) => {
+      setPersonaState(p);
+      try {
+        localStorage.setItem(PERSONA_STORAGE_KEY, p);
+      } catch {
+        /* ignore */
+      }
+      syncServerRole(p);
+    },
+    [syncServerRole]
+  );
 
   const clearPersona = useCallback(() => {
     setPersonaState(null);

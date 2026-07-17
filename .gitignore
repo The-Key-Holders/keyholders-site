@@ -31,6 +31,9 @@ yarn-error.log*
 .env
 !.env.example
 
+# local ops store fallback (when Neon unavailable)
+.data/
+
 # vercel
 .vercel
 

@@ -1,3 +1,4 @@
+import PsapPathList from "@/components/psap-portal/PsapPathList";
 import { TOP_PAIN_POINTS } from "@/lib/psap-portal/post-award-content";
 import { PROCESS_STEPS } from "@/lib/psap-portal/process-path";
 import { getNews } from "@/lib/psap-portal/store";
@@ -28,6 +29,8 @@ export default function PsapHomePage() {
           Ask a question
         </Link>
       </div>
+
+      <PsapPathList />
 
       <section className="mt-10">
         <h2 className={portal.h2}>Your ordered path</h2>

@@ -19,7 +19,10 @@ export default function AdvisorDeskPage() {
       </p>
 
       <div className="mt-6 flex flex-wrap gap-2">
-        <Link href="/psap-portal/advisor/process-map" className={portal.btnPrimary}>
+        <Link href="/psap-portal/advisor/dashboard" className={portal.btnPrimary}>
+          Ops dashboard (buckets)
+        </Link>
+        <Link href="/psap-portal/advisor/process-map" className={portal.btnSecondary}>
           Full process map (10)
         </Link>
         <Link href="/psap-portal/advisor/pain-points" className={portal.btnSecondary}>

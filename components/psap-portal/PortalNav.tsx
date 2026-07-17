@@ -28,11 +28,11 @@ const NAV: Record<PortalPersona, { primary: LinkItem[]; more: LinkItem[] }> = {
   },
   advisor: {
     primary: [
-      { href: "/psap-portal/advisor", label: "Advisor desk", exact: true },
+      { href: "/psap-portal/advisor/dashboard", label: "Ops dashboard" },
+      { href: "/psap-portal/advisor", label: "Content desk", exact: true },
       { href: "/psap-portal/advisor/process-map", label: "Process map" },
       { href: "/psap-portal/advisor/pain-points", label: "Pain points" },
       { href: "/psap-portal/advisor/requests", label: "Requests" },
-      { href: "/psap-portal/advisor/job-aids", label: "Job aids" },
       { href: "/psap-portal/tools", label: "QC tools" },
     ],
     more: [

@@ -19,12 +19,11 @@ async function login(page: import("@playwright/test").Page, next = "/psap-portal
 
 /** Role chooser at /psap-portal when no persona stored */
 async function enterAsPsap(page: import("@playwright/test").Page) {
+  await page.evaluate(() => localStorage.removeItem("psap-portal-persona-v1"));
   await page.goto("/psap-portal");
-  const chooser = page.getByTestId("role-psap");
-  if (await chooser.isVisible().catch(() => false)) {
-    await chooser.click();
-    await page.waitForURL(/\/psap-portal\/psap/, { timeout: 10_000 });
-  }
+  await page.getByTestId("role-psap").click();
+  await page.waitForURL(/\/psap-portal\/psap/, { timeout: 10_000 });
+  await page.request.post("/api/psap-portal/ops/session", { data: { role: "psap" } });
 }
 
 async function enterAsAdvisor(page: import("@playwright/test").Page) {
@@ -32,6 +31,8 @@ async function enterAsAdvisor(page: import("@playwright/test").Page) {
   await page.goto("/psap-portal");
   await page.getByTestId("role-advisor").click();
   await page.waitForURL(/\/psap-portal\/advisor/, { timeout: 10_000 });
+  // Ensure server role cookie is set for ops APIs
+  await page.waitForTimeout(300);
 }
 
 test.describe("PSAP portal", () => {
@@ -127,11 +128,65 @@ test.describe("PSAP portal", () => {
   test("advisor desk shows process map and pain points", async ({ page }) => {
     await login(page, "/psap-portal");
     await enterAsAdvisor(page);
+    await expect(
+      page.getByRole("heading", { name: /Compliance path dashboard|Funding & Compliance desk/i })
+    ).toBeVisible();
+    await page.goto("/psap-portal/advisor");
     await expect(page.getByRole("heading", { name: /Funding & Compliance desk/i })).toBeVisible();
     await page.goto("/psap-portal/advisor/process-map");
     await expect(page.getByText(/Process 1/i).first()).toBeVisible();
     await page.goto("/psap-portal/advisor/pain-points");
     await expect(page.getByText(/SOW template compliance/i).first()).toBeVisible();
+  });
+
+  test("ops path: complete process, advisor override, PSAP sees activity", async ({ page }) => {
+    await login(page, "/psap-portal");
+    await enterAsPsap(page);
+
+    await expect(page.getByTestId("psap-path-list")).toBeVisible({ timeout: 15_000 });
+
+    const pathsRes = await page.request.get("/api/psap-portal/ops/paths");
+    expect(pathsRes.ok()).toBeTruthy();
+    const { paths } = await pathsRes.json();
+    expect(paths.length).toBeGreaterThan(0);
+    const pathId = paths[0].id as string;
+
+    const detail0 = await page.request.get(`/api/psap-portal/ops/paths/${pathId}`);
+    expect(detail0.ok()).toBeTruthy();
+    const d0 = await detail0.json();
+    const adv = d0.processes.find((p: { templateCode: string }) => p.templateCode === "adv_notice");
+    expect(adv).toBeTruthy();
+
+    const completeRes = await page.request.post(
+      `/api/psap-portal/ops/processes/${adv.id}/complete`
+    );
+    expect(completeRes.ok()).toBeTruthy();
+
+    await page.request.post("/api/psap-portal/ops/session", { data: { role: "advisor" } });
+    await page.evaluate(() => localStorage.setItem("psap-portal-persona-v1", "advisor"));
+    await page.goto("/psap-portal/advisor/dashboard");
+    await expect(page.getByTestId("advisor-ops-dashboard")).toBeVisible();
+    await expect(page.getByTestId("ops-metrics")).toBeVisible();
+    await page.getByTestId("bucket-planning").click();
+    await expect(page.getByTestId("bucket-drilldown")).toBeVisible();
+
+    const ov = await page.request.post(`/api/psap-portal/ops/paths/${pathId}/override`, {
+      data: {
+        toBucketCode: "package",
+        reason: "E2E test override to package stage for Branch review",
+      },
+    });
+    expect(ov.ok()).toBeTruthy();
+
+    await page.request.post("/api/psap-portal/ops/session", { data: { role: "psap" } });
+    const detail1 = await page.request.get(`/api/psap-portal/ops/paths/${pathId}`);
+    expect(detail1.ok()).toBeTruthy();
+    const d1 = await detail1.json();
+    expect(d1.effectiveBucket).toBe("package");
+    expect(d1.activity.some((a: { kind: string }) => a.kind === "override.set")).toBe(true);
+    expect(
+      d1.processes.find((p: { templateCode: string }) => p.templateCode === "adv_notice").status
+    ).toBe("completed");
   });
 });
 
