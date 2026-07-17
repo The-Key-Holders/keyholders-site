@@ -17,16 +17,39 @@ async function login(page: import("@playwright/test").Page, next = "/psap-portal
   await page.waitForURL((url) => !url.pathname.includes("/login"), { timeout: 20_000 });
 }
 
+/** Role chooser at /psap-portal when no persona stored */
+async function enterAsPsap(page: import("@playwright/test").Page) {
+  await page.goto("/psap-portal");
+  const chooser = page.getByTestId("role-psap");
+  if (await chooser.isVisible().catch(() => false)) {
+    await chooser.click();
+    await page.waitForURL(/\/psap-portal\/psap/, { timeout: 10_000 });
+  }
+}
+
+async function enterAsAdvisor(page: import("@playwright/test").Page) {
+  await page.evaluate(() => localStorage.removeItem("psap-portal-persona-v1"));
+  await page.goto("/psap-portal");
+  await page.getByTestId("role-advisor").click();
+  await page.waitForURL(/\/psap-portal\/advisor/, { timeout: 10_000 });
+}
+
 test.describe("PSAP portal", () => {
-  test("login lands on portal home", async ({ page }) => {
+  test("role chooser and PSAP home", async ({ page }) => {
     await login(page, "/psap-portal");
-    await expect(page.getByRole("heading", { name: /hub for CPE funding/i })).toBeVisible({
-      timeout: 15000,
-    });
+    await page.evaluate(() => localStorage.removeItem("psap-portal-persona-v1"));
+    await page.goto("/psap-portal");
+    await expect(page.getByRole("heading", { name: /Who is visiting today/i })).toBeVisible();
+    await page.getByTestId("role-psap").click();
+    await expect(
+      page.getByRole("heading", { name: /Prepare packages Advisors can approve/i })
+    ).toBeVisible({ timeout: 15000 });
   });
 
   test("advisor lookup finds Alameda", async ({ page }) => {
-    await login(page, "/psap-portal/tools/advisor-lookup");
+    await login(page, "/psap-portal");
+    await enterAsPsap(page);
+    await page.goto("/psap-portal/tools/advisor-lookup");
     await page.getByTestId("advisor-search").fill("Alameda");
     await expect(page.getByTestId("advisor-results")).toContainText(/Alameda/i, {
       timeout: 10000,
@@ -34,9 +57,10 @@ test.describe("PSAP portal", () => {
   });
 
   test("TD-288 checker shows Blocked then Ready", async ({ page }) => {
-    await login(page, "/psap-portal/tools/td288-checker");
+    await login(page, "/psap-portal");
+    await enterAsPsap(page);
+    await page.goto("/psap-portal/tools/td288-checker");
     await expect(page.getByTestId("td288-result")).toContainText(/Blocked/i);
-    // Check all boxes; second pass catches residual child fields that appear after parent is checked
     for (let pass = 0; pass < 2; pass++) {
       const boxes = page.locator('label input[type="checkbox"]');
       const count = await boxes.count();
@@ -48,7 +72,9 @@ test.describe("PSAP portal", () => {
   });
 
   test("submit question creates ticket", async ({ page }) => {
-    await login(page, "/psap-portal/tools/submit-question");
+    await login(page, "/psap-portal");
+    await enterAsPsap(page);
+    await page.goto("/psap-portal/tools/submit-question");
     await page.getByPlaceholder("PSAP name").fill("E2E PSAP");
     await page.getByPlaceholder("County").fill("Alameda");
     await page.getByPlaceholder("Contact name").fill("Test User");
@@ -59,7 +85,9 @@ test.describe("PSAP portal", () => {
   });
 
   test("admin can publish news", async ({ page }) => {
-    await login(page, "/psap-portal/admin");
+    await login(page, "/psap-portal");
+    await page.evaluate(() => localStorage.setItem("psap-portal-persona-v1", "admin"));
+    await page.goto("/psap-portal/admin");
     const title = `E2E News ${Date.now()}`;
     await page.getByPlaceholder("Title").fill(title);
     await page.getByPlaceholder("Body").fill("Automated publish test body.");
@@ -80,18 +108,31 @@ test.describe("PSAP portal", () => {
 
   test("Taskade site guide not shown on portal", async ({ page }) => {
     await login(page, "/psap-portal");
+    await enterAsPsap(page);
     await expect(page.getByText(/Site Guide here \(Taskade\)/i)).toHaveCount(0);
     await expect(page.getByRole("button", { name: /PSAP Support AI/i })).toBeVisible();
   });
 
   test("start here explains purpose, free beta, and Vault Keywright", async ({ page }) => {
-    await login(page, "/psap-portal/start");
+    await login(page, "/psap-portal");
+    await enterAsPsap(page);
+    await page.goto("/psap-portal/start");
     await expect(page.getByRole("heading", { name: /Welcome to the PSAP Funding/i })).toBeVisible();
     await expect(page.getByText(/Why this is free right now/i)).toBeVisible();
     await expect(page.getByText(/beta stage/i)).toBeVisible();
     await expect(page.getByText(/invited by someone close to the developer/i)).toBeVisible();
     await expect(page.getByRole("heading", { name: /Vault Keywright/i })).toBeVisible();
-    await expect(page.getByText(/CPE project path/i)).toBeVisible();
+  });
+
+  test("advisor desk shows process map and pain points", async ({ page }) => {
+    await login(page, "/psap-portal");
+    await enterAsAdvisor(page);
+    await expect(page.getByRole("heading", { name: /Funding & Compliance desk/i })).toBeVisible();
+    await page.goto("/psap-portal/advisor/process-map");
+    await expect(page.getByText(/Process 1/i).first()).toBeVisible();
+    await page.goto("/psap-portal/advisor/pain-points");
+    await expect(page.getByText(/SOW template compliance/i).first()).toBeVisible();
   });
 });
+
 

@@ -1,5 +1,6 @@
 "use client";
 
+import { usePersona } from "@/components/psap-portal/PersonaProvider";
 import {
   HELP_TOOLS,
   PROCESS_STEPS,
@@ -10,7 +11,33 @@ import { usePathname } from "next/navigation";
 
 export default function ProcessRail({ compact = false }: { compact?: boolean }) {
   const pathname = usePathname() || "";
+  const { persona } = usePersona();
   const current = matchProcessStep(pathname);
+
+  // Advisor/Admin use different desk navigation; rail is PSAP-oriented
+  if (persona === "advisor" || persona === "admin") {
+    if (persona === "advisor") {
+      return (
+        <div className="border-b border-gold/20 bg-gold/5">
+          <div className="mx-auto flex max-w-5xl flex-wrap gap-2 px-4 py-2 text-[11px] sm:px-6">
+            <span className="font-bold uppercase tracking-wider text-gold/80">Advisor desk</span>
+            {[
+              ["/psap-portal/advisor/process-map", "Process map"],
+              ["/psap-portal/advisor/pain-points", "Pain points"],
+              ["/psap-portal/advisor/requests", "Requests"],
+              ["/psap-portal/advisor/job-aids", "Job aids"],
+              ["/psap-portal/tools", "QC tools"],
+            ].map(([h, l]) => (
+              <Link key={h} href={h} className="text-white/50 hover:text-gold">
+                {l}
+              </Link>
+            ))}
+          </div>
+        </div>
+      );
+    }
+    return null;
+  }
 
   return (
     <div

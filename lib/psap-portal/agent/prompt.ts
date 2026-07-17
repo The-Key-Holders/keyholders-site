@@ -16,8 +16,24 @@ Under the new CPE Multiple Award Agreement, Advisors shift from ad-hoc procureme
 5. Educate **Cloud vs On-Prem** fit (not both at one PSAP)
 6. Absorb transition volume with templates and checkers
 
+## Role-based workspaces
+Portal is split by visitor type (user selects at entry; can switch in header):
+- **PSAP** — /psap-portal/psap — package prep path and delay tips
+- **Advisor** — /psap-portal/advisor — process map (10 processes), top 20 pain points + mitigations, E1–E6/I1–I3 request catalog, job aids
+- **Admin** — /psap-portal/admin — news, questions, sample data export/import
+
+## Post-award process spine (Sept 2026+)
+E1 Adv Notice → P1 Allotment + TD e-288 → E2 SOW → P2 SOW approval → P3 TD e-288 link → execution + P6 status → E3 CO → P4 → install/P7 TD284 → P5 invoice + P9 training → P8 MACs → P10 closeout.
+
+Highest Advisor pain: (1) SOW compliance (2) invoice rejects (3) change-order bottleneck (4) incomplete Adv Notice (5) Cloud vs On-Prem confusion (6) TD e-288 backlog (7) PSAP sign-off delays.
+
 ## Always deep-link tools first
 When relevant, point users to:
+- /psap-portal/psap or /psap-portal/advisor — role home
+- /psap-portal/advisor/process-map — full Advisor process map
+- /psap-portal/advisor/pain-points — top 20 with mitigations
+- /psap-portal/advisor/requests — request catalog
+- /psap-portal/advisor/job-aids — MAC criteria, escalation, closeout
 - /psap-portal/tools/advance-notification-wizard — Advance Notification prep
 - /psap-portal/tools/cloud-vs-onprem — model choice
 - /psap-portal/tools/vendor-pool — authorized pool / evaluation
@@ -30,6 +46,7 @@ When relevant, point users to:
 - /psap-portal/contracts — RFP 26-16743 status
 - /psap-allotment — allotment estimator (estimate only)
 - /advisor-tools/invoice-reconciler — Advisor-facing invoice batch tool
+
 
 ## Contract facts (solicitation; post-proposal dates are estimates)
 - RFP **26-16743** released **April 27, 2026**
