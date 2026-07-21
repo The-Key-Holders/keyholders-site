@@ -14,7 +14,7 @@ const FILE_PATH =
   process.env.OPS_STORE_PATH ||
   path.join(process.cwd(), ".data", "ops-store.json");
 
-export function useMemoryOnly(): boolean {
+export function isMemoryOnlyStore(): boolean {
   return process.env.VITEST === "true" || process.env.OPS_STORE === "memory";
 }
 
@@ -23,7 +23,7 @@ export function hasDatabaseUrl(): boolean {
 }
 
 export async function loadPersistedSnapshot(): Promise<OpsSnapshot | null> {
-  if (useMemoryOnly()) return null;
+  if (isMemoryOnlyStore()) return null;
 
   if (hasDatabaseUrl()) {
     try {
@@ -49,7 +49,7 @@ export async function loadPersistedSnapshot(): Promise<OpsSnapshot | null> {
 }
 
 export async function savePersistedSnapshot(snap: OpsSnapshot): Promise<void> {
-  if (useMemoryOnly()) return;
+  if (isMemoryOnlyStore()) return;
 
   if (hasDatabaseUrl()) {
     try {
@@ -77,7 +77,7 @@ export async function savePersistedSnapshot(snap: OpsSnapshot): Promise<void> {
 
 /** Sync file save for paths where async is awkward (best-effort). */
 export function savePersistedSnapshotSync(snap: OpsSnapshot): void {
-  if (useMemoryOnly() || hasDatabaseUrl()) {
+  if (isMemoryOnlyStore() || hasDatabaseUrl()) {
     // Neon is async-only; schedule microtask
     void savePersistedSnapshot(snap);
     return;

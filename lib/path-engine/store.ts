@@ -9,7 +9,7 @@ import { newId, nowIso } from "./id";
 import {
   loadPersistedSnapshot,
   savePersistedSnapshot,
-  useMemoryOnly,
+  isMemoryOnlyStore,
 } from "./persist";
 import type {
   ActivityEvent,
@@ -64,7 +64,7 @@ export async function ensureOpsStore(): Promise<void> {
 
   if (!glob.__pathOpsLoadPromise) {
     glob.__pathOpsLoadPromise = (async () => {
-      if (useMemoryOnly()) {
+      if (isMemoryOnlyStore()) {
         if (!glob.__pathOpsStore) glob.__pathOpsStore = seedFresh();
         glob.__pathOpsReady = true;
         return;
@@ -86,13 +86,13 @@ export function getSnapshot(): OpsSnapshot {
   const glob = g();
   if (!glob.__pathOpsStore) {
     glob.__pathOpsStore = seedFresh();
-    glob.__pathOpsReady = useMemoryOnly() ? true : glob.__pathOpsReady;
+    glob.__pathOpsReady = isMemoryOnlyStore() ? true : glob.__pathOpsReady;
   }
   return glob.__pathOpsStore;
 }
 
 export function persistSoon(): void {
-  if (useMemoryOnly()) return;
+  if (isMemoryOnlyStore()) return;
   const snap = getSnapshot();
   void savePersistedSnapshot(clone(snap));
 }
