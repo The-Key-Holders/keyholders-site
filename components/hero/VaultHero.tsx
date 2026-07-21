@@ -99,8 +99,8 @@ export default function VaultHero() {
             transition={{ delay: 0.38, duration: 0.7 }}
             className="mt-6 max-w-2xl text-base text-white/70 sm:text-lg"
           >
-            Consumer tech, contractor platforms, professional Advisor Tools, and open labs —
-            one portfolio under The Key Holders.
+            Now featuring <span className="text-gold">PCF Vault</span> — Path to Compliance &amp;
+            Funding for CA 9-1-1 — plus Trade, Advisor Tools, and open labs under The Key Holders.
           </motion.p>
 
           <motion.div
@@ -109,14 +109,17 @@ export default function VaultHero() {
             transition={{ delay: 0.48, duration: 0.6 }}
             className="mt-8 flex flex-wrap items-center justify-center gap-3"
           >
-            <Link href="/projects" className="btn-primary text-sm">
-              Explore projects
+            <Link href="/pcf-vault/" className="btn-primary text-sm">
+              Open PCF Vault
             </Link>
-            <Link href="/trade" className="btn-secondary text-sm">
-              Trade services
+            <Link href="#pcf-vault" className="btn-secondary text-sm">
+              What&apos;s new
             </Link>
             <Link href="/advisor-tools" className="btn-secondary text-sm">
               Advisor tools
+            </Link>
+            <Link href="/projects" className="btn-secondary text-sm">
+              All projects
             </Link>
           </motion.div>
         </motion.div>

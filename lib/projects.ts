@@ -22,6 +22,18 @@ export interface Project {
 
 export const projects: Project[] = [
   {
+    id: "pcf-vault",
+    name: "PCF Vault",
+    summary:
+      "NEW — Path to Compliance & Funding: CA 9-1-1 PSAP/Advisor ERP, Funding Paths, PortablePost allotment, invoice recon, dual-era forms.",
+    kind: "tool",
+    status: "beta",
+    href: "/pcf-vault/",
+    gated: false,
+    tags: ["Cal OES", "9-1-1", "Funding", "Release"],
+    featured: true,
+  },
+  {
     id: "geeks-next-door",
     name: "Geeks Next Door",
     summary: "Neighborly tech support and field service — consumer face of The Key Holders.",

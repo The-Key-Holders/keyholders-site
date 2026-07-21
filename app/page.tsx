@@ -1,6 +1,7 @@
 import Footer from "@/components/Footer";
 import dynamic from "next/dynamic";
 import StaticHeroShell from "@/components/hero/StaticHeroShell";
+import PcfVaultReleaseSection from "@/components/home/PcfVaultReleaseSection";
 import {
   AboutSection,
   ContactSection,
@@ -18,6 +19,7 @@ export default function HomePage() {
   return (
     <>
       <VaultHero />
+      <PcfVaultReleaseSection />
       <PortfolioSection />
       <ProjectsSection />
       <WorkSection />
