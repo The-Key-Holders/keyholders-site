@@ -1,5 +1,6 @@
 "use client";
 
+import AgentChatMarkdown from "@/components/AgentChatMarkdown";
 import { ADVISOR_HELP_STARTERS } from "@/lib/advisor-help-agent";
 import Link from "next/link";
 import { FormEvent, useEffect, useRef, useState } from "react";
@@ -142,13 +143,17 @@ export default function AdvisorHelpAgentChat() {
               className={`flex ${m.role === "user" ? "justify-end" : "justify-start"}`}
             >
               <div
-                className={`max-w-[90%] whitespace-pre-wrap rounded-2xl px-4 py-3 text-sm leading-relaxed ${
+                className={`max-w-[90%] rounded-2xl px-4 py-3 text-sm leading-relaxed ${
                   m.role === "user"
-                    ? "bg-cyanGlow/20 text-white"
+                    ? "whitespace-pre-wrap bg-cyanGlow/20 text-white"
                     : "border border-white/10 bg-white/5 text-white/85"
                 }`}
               >
-                {m.content}
+                {m.role === "assistant" ? (
+                  <AgentChatMarkdown content={m.content} />
+                ) : (
+                  m.content
+                )}
               </div>
             </div>
           ))}

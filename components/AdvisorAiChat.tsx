@@ -1,5 +1,6 @@
 "use client";
 
+import AgentChatMarkdown from "@/components/AgentChatMarkdown";
 import {
   ADVISOR_AI_PROMPT_VERSION,
   ADVISOR_AI_STARTERS,
@@ -210,7 +211,11 @@ export default function AdvisorAiChat() {
               <p className="mb-1 text-[10px] font-semibold uppercase tracking-wide text-white/40">
                 {m.role === "user" ? "You" : "CA 9-1-1 Advisor AI"}
               </p>
-              <div className="whitespace-pre-wrap">{m.content}</div>
+              {m.role === "assistant" ? (
+                <AgentChatMarkdown content={m.content} />
+              ) : (
+                <div className="whitespace-pre-wrap">{m.content}</div>
+              )}
             </div>
           ))}
           {loading && (
