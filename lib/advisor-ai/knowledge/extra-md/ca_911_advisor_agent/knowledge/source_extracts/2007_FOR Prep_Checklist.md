@@ -1,0 +1,55 @@
+FISCAL AND OPERATIONAL REVIEW
+
+CHECKLIST
+
+FOR
+
+\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_
+
+(PSAP NAME)
+
+Prepared By
+
+\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_
+
+(9-1-1 OFFICE CONSULTANT NAME)
+
+**Prepare Binder:**
+
+* 1. Follow the steps provided in the “F.O.R. Binder Preparation” file to complete sections 1 – 9 of the binder (steps 2 and 3 below should be started as they require lead time from outside sources for the data).
+* 2. Request foreign language translation fees from Network Omni, via Carolyn Brown. Be sure to state specifically the date range required for the F.O.R. (typically, the last 12 full months).
+* 3. Request network information from the serving telco(s). Try to identify and resolve network/billing issues prior to meeting with the PSAP. Once the Consultant has had a chance to compare billing records with the input from the telco(s), the Consultant will have an approximation of the time required to resolve the issues.
+* Complete a blank Certificate of Achievement for those PSAPs with a call answer time of 90% in 10 seconds/less.
+
+**Scheduling (Once the Consultant has resolved network, billing, and CPE issues as possible):**
+
+* 1. Contact PSAP and schedule F.O.R. as follows:
+
+Date:\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_ Time:\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_
+
+* 2. Notify 9-1-1 Office of schedule/update Calendar appropriately
+* 3. Airline reservations needed/confirmed
+* 4. Rental car reservation needed/confirmed
+* 5. Motel/Hotel reservation needed/confirmed (**good idea to check with PSAP staff to find out “safest areas/motels to stay”).**
+* 6. E-mail/Send Executive Summary, Fiscal Review, and Network Review sections of the F.O.R. binder to PSAP along with any other questions/issues regarding network, billing, CPE information, or operational issues.
+* 7. If there are concerns about the CPE deployment, request PSAP contact to schedule CPE maintenance technician to attend the physical review portion of the meeting.
+* 8. If there are concerns about the network services deployed at the PSAP, request PSAP contact to schedule telco(s) representative(s) to attend F.O.R. meeting.
+* 9. Make copies of significant sections for handouts to anticipated participants in the F.O.R. meeting. That is, sections that contain unique information to the PSAP (typically sections 1, 3, 4, and 6 as well as a copy of equipment list from the last upgrade).
+* 10. Be sure to take the original copy of the Funding and Operational Review Binder and a copy of the PSAP Binder
+
+**During F.O.R. On-Site Meeting:**
+
+* 1. F.O.R. meeting with PSAP as outlined in F.O.R. Binder
+* 2. Notes/Issues from PSAP staff if/as applicable
+* 3. Discuss items included in Section 6 (Operational Issues) during meeting to ensure compliance with speed of answer and 24/7 operation. Also discuss TTY standards from NENA, publication of 7-digit emergency number(s), and use of the State’s MIS system (FRNIS or CARSNet).
+* 4. Verify equipment in communications center as noted in Statement of Work (major items) and document issues/discrepancies.
+* 5. Verify equipment in back room as noted in Statement of Work (major items) and document issues/discrepancies.
+* 6. Verify trunk information per 9-1-1 Office billing by telco by examining the call taker’s screen and/or through examination of the distribution blocks in the equipment room.
+
+**After F.O.R. On-Site Meeting: The Findings section should be completed and forwarded to the PSAP no more than 30 days following the F.O.R. meeting date.**
+
+* 1. Follow up and resolve/finalize all action items identified during the F.O.R. meeting
+* 2. Prepare Findings Report as described in the “F.O.R. Preparation” file
+* 3. Modify any sections of the F.O.R. binder as necessary following the F.O.R. meeting
+* 4. Provide copies of the Findings Report and any other sections of the F.O.R. binder that have been modified to the PSAP representative.
+* 5. File a hard copy of the Findings Report in the 9‑1‑1 Office PSAP binder

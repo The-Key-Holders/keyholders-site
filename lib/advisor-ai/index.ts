@@ -1,5 +1,5 @@
 /**
- * CA 9-1-1 Advisor AI — separate from New Hire + Automation Help agent.
+ * CA 9-1-1 Advisor AI — separate from Advisor Desk + Tools Help agent.
  */
 
 import { CONTACTS_ESCALATION_DIGEST } from "./knowledge/contacts-escalation";

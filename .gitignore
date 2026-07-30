@@ -37,6 +37,10 @@ yarn-error.log*
 # vercel
 .vercel
 
+# local backup artifacts (not app source)
+git-history.bundle
+BACKUP_MANIFEST.json
+
 # typescript
 *.tsbuildinfo
 next-env.d.ts

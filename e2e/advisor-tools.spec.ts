@@ -45,7 +45,7 @@ test.describe("Advisor Tools Hub", () => {
   test("hub lists live and beta tools", async ({ page }) => {
     await page.goto("/advisor-tools");
     await expect(page.getByRole("heading", { name: "Advisor Tools Hub" })).toBeVisible();
-    await expect(page.getByRole("heading", { name: /New Hire \+ Automation Help Agent/i })).toBeVisible();
+    await expect(page.getByRole("heading", { name: /Advisor Desk \+ Tools Help Agent/i })).toBeVisible();
     await expect(page.getByRole("heading", { name: "PSAP Allotment Engine" })).toBeVisible();
     await expect(page.getByRole("heading", { name: "Invoice ↔ TD-288 Reconciler" })).toBeVisible();
     await expect(page.getByRole("heading", { name: /FOR Assembly Engine/i })).toBeVisible();
@@ -62,7 +62,7 @@ test.describe("Advisor Tools Hub", () => {
     await page.goto("/advisor-tools");
     await page.locator('a[href="/advisor-tools/help-agent"]').click();
     await expect(page).toHaveURL(/\/advisor-tools\/help-agent/);
-    await expect(page.getByRole("heading", { name: /New Hire \+ Automation Help/i })).toBeVisible();
+    await expect(page.getByRole("heading", { name: /Advisor Desk \+ Tools Help/i })).toBeVisible();
     await expect(page.getByText(/password-protected hub/i)).toBeVisible();
     await expect(page.getByText(/Grok/i).first()).toBeVisible();
     await expect(page.getByLabel(/Message/i)).toBeVisible();

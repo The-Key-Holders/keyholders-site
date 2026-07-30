@@ -20,11 +20,11 @@ test.describe("CA 9-1-1 Advisor AI (separate from help-agent)", () => {
     await expect(page).toHaveURL(/\/advisor-tools\/login/);
   });
 
-  test("hub lists Advisor AI and New Hire help agent as separate tools", async ({ page }) => {
+  test("hub lists Advisor AI and Advisor Desk help agent as separate tools", async ({ page }) => {
     await loginAdvisorTools(page);
     await page.goto("/advisor-tools");
     await expect(page.getByRole("heading", { name: /CA 9-1-1 Advisor AI/i })).toBeVisible();
-    await expect(page.getByRole("heading", { name: /New Hire \+ Automation Help Agent/i })).toBeVisible();
+    await expect(page.getByRole("heading", { name: /Advisor Desk \+ Tools Help Agent/i })).toBeVisible();
   });
 
   test("advisor-ai page loads greeting and help-agent still exists", async ({ page }) => {
@@ -35,6 +35,6 @@ test.describe("CA 9-1-1 Advisor AI (separate from help-agent)", () => {
     await expect(page.getByLabel(/Message/i)).toBeVisible();
 
     await page.goto("/advisor-tools/help-agent");
-    await expect(page.getByRole("heading", { name: /New Hire \+ Automation Help/i })).toBeVisible();
+    await expect(page.getByRole("heading", { name: /Advisor Desk \+ Tools Help/i })).toBeVisible();
   });
 });

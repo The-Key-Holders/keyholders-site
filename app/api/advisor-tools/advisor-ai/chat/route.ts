@@ -2,7 +2,10 @@ import {
   ADVISOR_AI_PROMPT_VERSION,
   composeAdvisorAiSystemPrompt,
 } from "@/lib/advisor-ai";
-import { retrieveManualContext } from "@/lib/advisor-ai/retrieve";
+import {
+  getCorpusStats,
+  retrieveManualContext,
+} from "@/lib/advisor-ai/retrieve";
 import { NextResponse } from "next/server";
 
 export const runtime = "nodejs";
@@ -36,6 +39,12 @@ function rateLimit(key: string): boolean {
 
 export async function GET() {
   const key = process.env.XAI_API_KEY?.trim();
+  let corpusChunks: number | null = null;
+  try {
+    corpusChunks = getCorpusStats().chunks;
+  } catch {
+    corpusChunks = null;
+  }
   return NextResponse.json({
     configured: Boolean(key),
     provider: "xAI Grok",
@@ -44,6 +53,8 @@ export async function GET() {
     promptVersion: ADVISOR_AI_PROMPT_VERSION,
     scope: "password-gated-ca-911-advisor-ai",
     separateFrom: "advisor-tools-help-agent",
+    corpusChunks,
+    knowledgePacks: ["manual-md", "extra-md/ca_911_advisor_agent"],
   });
 }
 

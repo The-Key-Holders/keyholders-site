@@ -1,4 +1,11 @@
-import { ADVISOR_HELP_SYSTEM_PROMPT } from "@/lib/advisor-help-agent";
+import {
+  ADVISOR_HELP_PROMPT_VERSION,
+  ADVISOR_HELP_SYSTEM_PROMPT,
+} from "@/lib/advisor-help-agent";
+import {
+  getCorpusStats,
+  retrieveManualContext,
+} from "@/lib/advisor-ai/retrieve";
 import { NextResponse } from "next/server";
 
 export const runtime = "nodejs";
@@ -12,11 +19,20 @@ type ChatMessage = { role: "user" | "assistant"; content: string };
 
 export async function GET() {
   const key = process.env.XAI_API_KEY?.trim();
+  let corpusChunks: number | null = null;
+  try {
+    corpusChunks = getCorpusStats().chunks;
+  } catch {
+    corpusChunks = null;
+  }
   return NextResponse.json({
     configured: Boolean(key),
     provider: "xAI Grok",
     model: key ? DEFAULT_MODEL : null,
     scope: "password-gated-advisor-help",
+    promptVersion: ADVISOR_HELP_PROMPT_VERSION,
+    corpusChunks,
+    audiences: ["advisor-desk", "new-hire", "tool-coach", "psap-restricted"],
   });
 }
 
@@ -66,8 +82,13 @@ export async function POST(request: Request) {
         }))
     : [];
 
+  const retrieved = retrieveManualContext(message, 5);
+  const system = retrieved
+    ? `${ADVISOR_HELP_SYSTEM_PROMPT}\n\n---\n### Retrieved Manual / knowledge context\nUse the following excerpts to ground process answers. Prefer them for wording when on-topic. If they conflict with safety rules, prefer safety rules and escalate.\n\n${retrieved}`
+    : ADVISOR_HELP_SYSTEM_PROMPT;
+
   const messages = [
-    { role: "system" as const, content: ADVISOR_HELP_SYSTEM_PROMPT },
+    { role: "system" as const, content: system },
     ...history.map((m) => ({ role: m.role, content: m.content })),
     { role: "user" as const, content: message },
   ];
@@ -82,8 +103,8 @@ export async function POST(request: Request) {
       body: JSON.stringify({
         model: DEFAULT_MODEL,
         messages,
-        temperature: 0.4,
-        max_tokens: 1600,
+        temperature: 0.35,
+        max_tokens: 2200,
       }),
     });
 
@@ -112,6 +133,8 @@ export async function POST(request: Request) {
       reply,
       model: DEFAULT_MODEL,
       provider: "xAI Grok",
+      promptVersion: ADVISOR_HELP_PROMPT_VERSION,
+      retrievalUsed: Boolean(retrieved),
     });
   } catch (err) {
     const msg = err instanceof Error ? err.message : "Upstream error";

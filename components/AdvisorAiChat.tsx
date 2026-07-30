@@ -21,7 +21,7 @@ const GREETING = `Hello — I'm **CA 9-1-1 Advisor AI** (Grok), a password-gated
 
 I **complement** human Advisors — I never issue TD-288s, allotment letters, or claim approvals. For official decisions contact your assigned Advisor, **CA911Branch@caloes.ca.gov**, or **(916) 894-5007**.
 
-I am **separate** from the [New Hire + Automation Help](/advisor-tools/help-agent) agent (tool navigation & onboarding).
+I am **separate** from the [Advisor Desk + Tools Help](/advisor-tools/help-agent) agent (desk coaching, onboarding, and tool navigation).
 
 Ask about CPE allotments, Direct vs Reimbursement, residual funds, FOR prep, ATA, GIS funding, or Manual topics. **How else can I assist your PSAP today?**`;
 
@@ -152,7 +152,7 @@ export default function AdvisorAiChat() {
       <div className="mt-3 rounded-xl border border-amber-400/25 bg-amber-500/10 px-4 py-3 text-xs text-amber-50/90">
         Separate from{" "}
         <Link href="/advisor-tools/help-agent" className="text-cyanGlow underline">
-          New Hire + Automation Help
+          Advisor Desk + Tools Help
         </Link>
         . Not legal advice. Not Fi$Cal. Not an official allotment letter. Life-threatening emergency → call{" "}
         <strong>9-1-1</strong>.
@@ -247,7 +247,7 @@ export default function AdvisorAiChat() {
               Export transcript
             </button>
             <Link href="/advisor-tools/help-agent" className="text-[11px] text-cyanGlow/80 hover:underline">
-              Open New Hire + Tool Help agent
+              Open Advisor Desk + Tools Help agent
             </Link>
           </div>
         </form>

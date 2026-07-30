@@ -11,7 +11,7 @@ export default function AdvisorHelpAgentChat() {
     {
       role: "assistant",
       content:
-        "Hi — I'm the **New Hire + Automation Tool Help** agent (Grok). I only run inside this password-protected hub. Ask about onboarding, Chapter III / TD-288 themes, allotment, invoice reconciliation, or FOR process coaching.",
+        "Hi — I'm the **Advisor Desk + Tools Help** agent (Grok). I support new and experienced Funding Advisors inside this password-protected hub: package/process coaching, residual & FOR themes, onboarding, and how to use allotment / invoice / FOR tools. For the full Manual-grounded Advisor persona, also use **CA 9-1-1 Advisor AI**.",
     },
   ]);
   const [input, setInput] = useState("");
@@ -101,10 +101,12 @@ export default function AdvisorHelpAgentChat() {
         Restricted · Grok · password gate
       </p>
       <h1 className="mt-2 font-display text-3xl font-bold text-white sm:text-4xl">
-        New Hire + Automation Help
+        Advisor Desk + Tools Help
       </h1>
       <p className="mt-3 max-w-2xl text-sm leading-relaxed text-white/65">
-        Private Grok coach for onboarding and Advisor Tools. Public portfolio questions belong on{" "}
+        Private Grok coach for Funding Advisors (new and experienced) and Advisor Tools how-tos.
+        Grounded on the Operations Manual plus the CA 9-1-1 Advisor Agent knowledge pack. Public
+        portfolio questions belong on{" "}
         <Link href="/support" className="text-cyanGlow hover:underline">
           /support
         </Link>{" "}

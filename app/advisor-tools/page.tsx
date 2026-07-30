@@ -29,16 +29,16 @@ const TOOLS: ToolCard[] = [
     status: "live",
     title: "CA 9-1-1 Advisor AI",
     blurb:
-      "Full Advisor persona (Grok): PSAP funding, Chapter III processes, FOR prep, NG9-1-1, forms, and Manual-grounded walkthroughs. Complements human Advisors — separate from New Hire + Tool Help.",
+      "Full Advisor persona (Grok): PSAP funding, Chapter III processes, FOR prep, NG9-1-1, forms, and Manual-grounded walkthroughs. Complements human Advisors; separate from Advisor Desk + Tools Help.",
     tags: ["Funding", "Manual", "FOR", "Grok"],
   },
   {
     href: "/advisor-tools/help-agent",
     status: "live",
-    title: "New Hire + Automation Help Agent",
+    title: "Advisor Desk + Tools Help Agent",
     blurb:
-      "Private Grok coach for onboarding and Advisor Tools how-tos. Available only inside this password gate.",
-    tags: ["New hire", "Chat", "Grok"],
+      "Private Grok coach for experienced Advisors and new hires: process/package coaching plus Advisor Tools how-tos. Available only inside this password gate.",
+    tags: ["Advisor desk", "New hire", "Chat", "Grok"],
   },
   {
     href: "/psap-allotment",
@@ -156,7 +156,7 @@ export default function AdvisorToolsHubPage() {
           </li>
           <li>
             <strong className="text-white/90">Done (web):</strong> CA 9-1-1 Advisor AI (full Advisor persona) —
-            separate from New Hire + Automation Help
+            separate from Advisor Desk + Tools Help
           </li>
           <li>CPE package / residual gate tools</li>
           <li>Optional: Allotment v2 desktop parity on web (pinned until product-ready)</li>

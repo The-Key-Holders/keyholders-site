@@ -90,14 +90,14 @@ export const projects: Project[] = [
   },
   {
     id: "help-agent",
-    name: "New Hire + Automation Help Agent",
+    name: "Advisor Desk + Tools Help Agent",
     summary:
-      "Password-gated Grok coach for onboarding and Advisor Tools — private, no public link.",
+      "Password-gated Grok coach for Funding Advisors (new and experienced) and Advisor Tools how-tos — private, no public link.",
     kind: "tool",
     status: "live",
     href: "/advisor-tools/help-agent",
     gated: true,
-    tags: ["New hire", "Chat", "Grok"],
+    tags: ["Advisor desk", "New hire", "Chat", "Grok"],
     featured: true,
   },
   {
