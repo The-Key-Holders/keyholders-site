@@ -6,7 +6,8 @@
     <meta name="robots" content="noindex,nofollow" />
     <title>Host desk · Guest Hub</title>
     <link rel="stylesheet" href="css/party.css" />
-    <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.4/build/qrcode.min.js"></script>
+    <!-- Local copy (CDN path was 404; works offline on LAN day-of) -->
+    <script src="js/qrcode.min.js"></script>
     <style>
       body.host-desk { background: #0f0a12; color: #f6eef8; }
       .host-wrap { max-width: 980px; margin: 0 auto; padding: 1rem 1rem 4rem; }
@@ -190,13 +191,31 @@
       </section>
 
       <section class="host-card">
-        <h2>Trivia questions (JSON)</h2>
-        <p class="host-muted">Edit then Save. Guests load <code>data/trivia.json</code> on next refresh.</p>
-        <textarea id="trivia-json"></textarea>
+        <h2>Trivia questions</h2>
+        <p class="host-muted">
+          Prefer <strong>CSV</strong> (Excel-friendly). Columns:
+          <code>question,choice_a,choice_b,choice_c,choice_d,answer_index,explain</code>
+          · <code>answer_index</code> is 0–3 (0 = A). Guests load <code>data/trivia.json</code> after Save.
+        </p>
+        <label>CSV (easy edit)</label>
+        <textarea id="trivia-csv" style="min-height:160px" placeholder="question,choice_a,choice_b,choice_c,choice_d,answer_index,explain"></textarea>
         <div class="host-actions">
           <button class="btn" type="button" id="btn-load-trivia">Reload from server</button>
-          <button class="btn" type="button" id="btn-save-trivia">Save trivia</button>
+          <button class="btn" type="button" id="btn-save-trivia-csv">Save trivia from CSV</button>
+          <button class="btn btn-secondary" type="button" id="btn-download-trivia-csv">Download CSV</button>
+          <label class="btn btn-secondary" style="display:inline-flex;align-items:center;cursor:pointer">
+            Upload CSV
+            <input type="file" id="trivia-file" accept=".csv,text/csv" hidden />
+          </label>
         </div>
+        <details style="margin-top:0.75rem">
+          <summary class="host-muted" style="cursor:pointer">Advanced: raw JSON</summary>
+          <textarea id="trivia-json" style="margin-top:0.5rem"></textarea>
+          <div class="host-actions">
+            <button class="btn btn-secondary" type="button" id="btn-save-trivia">Save trivia from JSON</button>
+            <button class="btn btn-secondary" type="button" id="btn-json-to-csv">JSON → CSV editor</button>
+          </div>
+        </details>
       </section>
 
       <section class="host-card">
@@ -231,7 +250,7 @@
 
       <section class="host-card">
         <h2>QR quick generate</h2>
-        <p class="host-muted">Uses public base URL above (or current origin). Print pack still best for tables.</p>
+        <p class="host-muted">Uses public base URL above (or this site origin). For table packs use the full print page.</p>
         <div class="host-grid">
           <div>
             <label>Path</label>
@@ -254,7 +273,10 @@
             <input id="qr-url" readonly />
           </div>
         </div>
-        <div style="margin-top:0.75rem" class="qr-mini"><canvas id="qr-canvas"></canvas></div>
+        <div style="margin-top:0.75rem" class="qr-mini">
+          <canvas id="qr-canvas" width="180" height="180"></canvas>
+        </div>
+        <p class="host-muted" id="qr-status" style="margin:0.4rem 0 0"></p>
         <div class="host-actions">
           <button class="btn" type="button" id="btn-qr">Generate QR</button>
           <a class="btn btn-secondary" href="print/qrs.html" target="_blank" rel="noopener">Open full print pack</a>
@@ -426,6 +448,14 @@
       async function loadContent(name, textareaId) {
         const data = await api(`/api/host/content/${name}`);
         document.getElementById(textareaId).value = JSON.stringify(data.data, null, 2);
+        if (name === "trivia") {
+          try {
+            document.getElementById("trivia-csv").value = triviaToCsv(data.data);
+          } catch (e) {
+            /* ignore */
+          }
+        }
+        return data.data;
       }
 
       async function saveContent(name, textareaId) {
@@ -444,11 +474,123 @@
         toast("Saved " + name);
       }
 
+      function csvEscape(s) {
+        const t = String(s ?? "");
+        if (/[",\n\r]/.test(t)) return `"${t.replace(/"/g, '""')}"`;
+        return t;
+      }
+
+      function parseCsv(text) {
+        const rows = [];
+        let row = [];
+        let cur = "";
+        let inQ = false;
+        const s = String(text || "").replace(/^\uFEFF/, "");
+        for (let i = 0; i < s.length; i++) {
+          const ch = s[i];
+          if (inQ) {
+            if (ch === '"') {
+              if (s[i + 1] === '"') {
+                cur += '"';
+                i++;
+              } else inQ = false;
+            } else cur += ch;
+          } else if (ch === '"') inQ = true;
+          else if (ch === ",") {
+            row.push(cur);
+            cur = "";
+          } else if (ch === "\n") {
+            row.push(cur);
+            rows.push(row);
+            row = [];
+            cur = "";
+          } else if (ch === "\r") {
+            /* skip */
+          } else cur += ch;
+        }
+        if (cur.length || row.length) {
+          row.push(cur);
+          rows.push(row);
+        }
+        return rows.filter((r) => r.some((c) => String(c).trim() !== ""));
+      }
+
+      function triviaToCsv(data) {
+        const header = "question,choice_a,choice_b,choice_c,choice_d,answer_index,explain";
+        const qs = (data && data.questions) || [];
+        const lines = [header];
+        for (const q of qs) {
+          const ch = q.choices || [];
+          lines.push(
+            [
+              csvEscape(q.q || q.question || ""),
+              csvEscape(ch[0] || ""),
+              csvEscape(ch[1] || ""),
+              csvEscape(ch[2] || ""),
+              csvEscape(ch[3] || ""),
+              csvEscape(q.answer != null ? q.answer : 0),
+              csvEscape(q.explain || ""),
+            ].join(",")
+          );
+        }
+        return lines.join("\n");
+      }
+
+      function csvToTrivia(csvText, existing) {
+        const rows = parseCsv(csvText);
+        if (!rows.length) throw new Error("CSV is empty");
+        let start = 0;
+        const h0 = String(rows[0][0] || "")
+          .trim()
+          .toLowerCase();
+        if (h0 === "question" || h0 === "q") start = 1;
+        const questions = [];
+        for (let i = start; i < rows.length; i++) {
+          const r = rows[i];
+          if (!r || !String(r[0] || "").trim()) continue;
+          let ans = String(r[5] != null ? r[5] : "0").trim();
+          if (/^[A-Da-d]$/.test(ans)) ans = ans.toUpperCase().charCodeAt(0) - 65;
+          else ans = parseInt(ans, 10);
+          if (Number.isNaN(ans) || ans < 0 || ans > 3) ans = 0;
+          questions.push({
+            q: String(r[0] || "").trim(),
+            choices: [
+              String(r[1] || "").trim(),
+              String(r[2] || "").trim(),
+              String(r[3] || "").trim(),
+              String(r[4] || "").trim(),
+            ],
+            answer: ans,
+            explain: String(r[6] || "").trim(),
+          });
+        }
+        if (!questions.length) throw new Error("No question rows found");
+        const base = existing && typeof existing === "object" ? existing : {};
+        return {
+          id: base.id || "trivia",
+          title: base.title || "Couples & Family Trivia",
+          subtitle: base.subtitle || "Speed round about Dani & Javad.",
+          pointsPerCorrect: base.pointsPerCorrect != null ? base.pointsPerCorrect : 15,
+          questions,
+        };
+      }
+
       function baseUrl() {
         let b = (document.getElementById("public-base").value || "").trim();
-        if (!b) b = location.origin + location.pathname.replace(/host\.html.*/, "");
+        if (!b) {
+          // Host desk on /celebrate/host.html → root is /celebrate/
+          b = location.href.replace(/host\.html.*$/i, "");
+        }
         if (!b.endsWith("/")) b += "/";
         return b;
+      }
+
+      function qrLib() {
+        const q = window.QRCode || window.qrcode;
+        if (!q) return null;
+        if (typeof q.toCanvas === "function") return q;
+        if (q.default && typeof q.default.toCanvas === "function") return q.default;
+        return null;
       }
 
       function genQr() {
@@ -456,10 +598,32 @@
         const url = baseUrl() + path.replace(/^\//, "");
         document.getElementById("qr-url").value = url;
         const canvas = document.getElementById("qr-canvas");
-        if (window.QRCode) {
-          QRCode.toCanvas(canvas, url, { width: 180, margin: 1 }, (err) => {
-            if (err) toast(String(err));
-          });
+        const status = document.getElementById("qr-status");
+        const lib = qrLib();
+        if (!lib) {
+          status.textContent =
+            "QR library missing. Hard-refresh (Ctrl+F5). Fallback: open Full print pack.";
+          toast("QR library not loaded");
+          return;
+        }
+        status.textContent = "Generating…";
+        try {
+          lib.toCanvas(
+            canvas,
+            url,
+            { width: 180, margin: 1, color: { dark: "#1a1a1a", light: "#ffffff" } },
+            (err) => {
+              if (err) {
+                status.textContent = "QR error: " + err;
+                toast(String(err));
+              } else {
+                status.textContent = "Ready · scan with your phone to verify";
+              }
+            }
+          );
+        } catch (e) {
+          status.textContent = "QR error: " + e.message;
+          toast(e.message);
         }
       }
 
@@ -564,8 +728,52 @@
       };
 
       document.getElementById("btn-load-trivia").onclick = () =>
-        loadContent("trivia", "trivia-json").then(() => toast("Trivia loaded"));
+        loadContent("trivia", "trivia-json").then(() => toast("Trivia loaded (CSV + JSON)"));
       document.getElementById("btn-save-trivia").onclick = () => saveContent("trivia", "trivia-json");
+      document.getElementById("btn-save-trivia-csv").onclick = async () => {
+        try {
+          let existing = {};
+          try {
+            existing = JSON.parse(document.getElementById("trivia-json").value || "{}");
+          } catch (_) {
+            existing = {};
+          }
+          const data = csvToTrivia(document.getElementById("trivia-csv").value, existing);
+          document.getElementById("trivia-json").value = JSON.stringify(data, null, 2);
+          await api("/api/host/content/trivia", {
+            method: "PUT",
+            body: JSON.stringify({ data }),
+          });
+          toast("Trivia saved from CSV (" + data.questions.length + " questions)");
+        } catch (e) {
+          toast(e.message || "CSV save failed");
+        }
+      };
+      document.getElementById("btn-download-trivia-csv").onclick = () => {
+        const csv = document.getElementById("trivia-csv").value || "";
+        const blob = new Blob([csv], { type: "text/csv;charset=utf-8" });
+        const a = document.createElement("a");
+        a.href = URL.createObjectURL(blob);
+        a.download = "trivia-questions.csv";
+        a.click();
+      };
+      document.getElementById("btn-json-to-csv").onclick = () => {
+        try {
+          const data = JSON.parse(document.getElementById("trivia-json").value || "{}");
+          document.getElementById("trivia-csv").value = triviaToCsv(data);
+          toast("CSV editor updated from JSON");
+        } catch (e) {
+          toast("Invalid JSON");
+        }
+      };
+      document.getElementById("trivia-file").onchange = async (ev) => {
+        const f = ev.target.files && ev.target.files[0];
+        if (!f) return;
+        const text = await f.text();
+        document.getElementById("trivia-csv").value = text;
+        toast("CSV loaded into editor · click Save trivia from CSV");
+        ev.target.value = "";
+      };
       document.getElementById("btn-save-hesaid").onclick = () => saveContent("he-said", "hesaid-json");
       document.getElementById("btn-save-poses").onclick = () => saveContent("poses", "poses-json");
 
