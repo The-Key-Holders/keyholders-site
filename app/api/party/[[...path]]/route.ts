@@ -44,7 +44,7 @@ function hostAuthed(req: NextRequest): boolean {
   return (req.headers.get("x-host-password") || "") === HOST_PASSWORD;
 }
 
-async function handle(req: NextRequest, path: string[]) {
+async function handle(req: NextRequest, path: string[]): Promise<NextResponse> {
   const store = getStore();
   const host = getHost();
   const method = req.method;
@@ -306,17 +306,18 @@ async function handle(req: NextRequest, path: string[]) {
   }
 
   if (segs[0] === "dashboard" && method === "GET") {
-    const lb = await handle(
-      new NextRequest(new URL("http://local/api/party/leaderboard"), { method: "GET" }),
-      ["leaderboard"]
-    );
-    const body = await lb.json();
+    const all = Array.from(store.profiles.values());
+    all.forEach((p) => recompute(p));
+    const leaderboard = all
+      .sort((a, b) => b.totalPoints - a.totalPoints || a.createdAt - b.createdAt)
+      .slice(0, 10)
+      .map((p, i) => ({
+        rank: i + 1,
+        displayName: p.displayName,
+        totalPoints: p.totalPoints,
+      }));
     return json({
-      leaderboard: (body.leaderboard || []).slice(0, 10).map((r: { rank: number; displayName: string; totalPoints: number }) => ({
-        rank: r.rank,
-        displayName: r.displayName,
-        totalPoints: r.totalPoints,
-      })),
+      leaderboard,
       predictions: {},
       photos: [],
       songs: store.songs.slice(0, 15),
