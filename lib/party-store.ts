@@ -53,7 +53,17 @@ export type HostState = {
     heSaid?: unknown;
     poses?: unknown;
   };
+  /** Couples / hidden memory slots 1–10 (QR-only discovery) */
+  memories?: HiddenMemory[];
   updatedAt?: string;
+};
+
+export type HiddenMemory = {
+  slot: number;
+  title: string;
+  caption: string;
+  imageDataUrl: string;
+  enabled: boolean;
 };
 
 type Store = {
@@ -265,12 +275,29 @@ export const DEFAULT_POSES = {
   ],
 };
 
+export function emptyMemories(): HiddenMemory[] {
+  return Array.from({ length: 10 }, (_, i) => ({
+    slot: i + 1,
+    title: `Hidden memory ${i + 1}`,
+    caption: "",
+    imageDataUrl: "",
+    enabled: false,
+  }));
+}
+
 function defaultHost(): HostState {
   return {
     scoringMode: "auto",
     deadlineIso: DEFAULT_DEADLINE,
     publicBaseUrl: DEFAULT_PUBLIC_BASE,
     photosUrl: "https://photos.app.goo.gl/tNy59HYGHJzvhX536",
+    prize: {
+      enabled: true,
+      title: "Gift Card",
+      description: "Highest score at 4:30 PM wins. See Javad to claim.",
+      announceAt: "4:30 PM",
+      legalNote: "One win per person. Must be present. Host decision final.",
+    },
     comingle: DEFAULT_COMINGLE,
     comingleAnswers: DEFAULT_COMINGLE_ANSWERS,
     stations: DEFAULT_STATIONS,
@@ -280,6 +307,7 @@ function defaultHost(): HostState {
       heSaid: DEFAULT_HE_SAID,
       poses: DEFAULT_POSES,
     },
+    memories: emptyMemories(),
   };
 }
 
@@ -302,6 +330,14 @@ function store(): Store {
   if (!s.host.content) s.host.content = defaultHost().content;
   if (!s.host.comingle) s.host.comingle = DEFAULT_COMINGLE;
   if (!s.host.publicBaseUrl) s.host.publicBaseUrl = DEFAULT_PUBLIC_BASE;
+  if (!s.host.memories || s.host.memories.length !== 10) {
+    const existing = s.host.memories || [];
+    const base = emptyMemories();
+    for (const m of existing) {
+      if (m && m.slot >= 1 && m.slot <= 10) base[m.slot - 1] = { ...base[m.slot - 1], ...m };
+    }
+    s.host.memories = base;
+  }
   return s;
 }
 
@@ -319,13 +355,10 @@ export const BASE_PUBLIC_CONFIG = {
   timezone: "America/Los_Angeles",
   prize: {
     enabled: true,
-    title: "$5,000 Gift Card",
-    description:
-      "Highest score at 4:30 PM wins. See Javad to claim. (Yes, the number is real. Trust us.)",
+    title: "Gift Card",
+    description: "Highest score at 4:30 PM wins. See Javad to claim.",
     announceAt: "4:30 PM",
     legalNote: "One win per person. Must be present. Host decision final.",
-    claimNote: "Winner: see Javad to claim.",
-    hostOnlyRealPrize: "$100 gift card (the $5k is a prank on the winner)",
   },
   ringHunt: {
     title: "The Great Plastic Ring Hunt",
@@ -388,12 +421,22 @@ export function getHost() {
 
 export function liveConfig() {
   const h = getHost();
+  const prize = {
+    ...BASE_PUBLIC_CONFIG.prize,
+    ...(h.prize || {}),
+  };
+  // Explicit boolean so "enabled: false" always wins over defaults
+  if (h.prize && typeof h.prize.enabled === "boolean") {
+    prize.enabled = h.prize.enabled;
+  }
+  // Strip removed prank field if present
+  delete (prize as { hostOnlyRealPrize?: string }).hostOnlyRealPrize;
   return {
     ...BASE_PUBLIC_CONFIG,
     eventName: h.eventName || BASE_PUBLIC_CONFIG.eventName,
     couple: h.couple || BASE_PUBLIC_CONFIG.couple,
     photosUrl: h.photosUrl || BASE_PUBLIC_CONFIG.photosUrl,
-    prize: { ...BASE_PUBLIC_CONFIG.prize, ...(h.prize || {}) },
+    prize,
     comingle: h.comingle || DEFAULT_COMINGLE,
     stations: h.stations || DEFAULT_STATIONS,
     pointsDeadlineIso: h.deadlineIso || DEFAULT_DEADLINE,
@@ -403,6 +446,26 @@ export function liveConfig() {
       publicBaseUrl: h.publicBaseUrl || DEFAULT_PUBLIC_BASE,
       updatedAt: h.updatedAt,
     },
+  };
+}
+
+export function getMemory(slot: number): HiddenMemory | null {
+  if (slot < 1 || slot > 10) return null;
+  const list = getHost().memories || emptyMemories();
+  return list[slot - 1] || null;
+}
+
+export function publicMemory(slot: number) {
+  const m = getMemory(slot);
+  if (!m || !m.enabled || !m.caption) {
+    return { slot, enabled: false, title: "", caption: "", imageDataUrl: "" };
+  }
+  return {
+    slot: m.slot,
+    enabled: true,
+    title: m.title || `Hidden memory ${slot}`,
+    caption: m.caption,
+    imageDataUrl: m.imageDataUrl || "",
   };
 }
 

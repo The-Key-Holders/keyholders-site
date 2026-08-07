@@ -12,7 +12,10 @@ import {
   recompute,
   scoringOpen,
   toPublic,
+  publicMemory,
+  emptyMemories,
   type PartyProfile,
+  type HiddenMemory,
   DEFAULT_COMINGLE_ANSWERS,
   DEFAULT_STATION_KEYWORDS,
   DEFAULT_TRIVIA,
@@ -467,7 +470,28 @@ async function handle(req: NextRequest, path: string[]): Promise<NextResponse> {
       if (method === "PUT" || method === "POST") {
         const body = await req.json().catch(() => ({}));
         if (body.prize && typeof body.prize === "object") {
-          host.prize = { ...(liveConfig().prize as object), ...body.prize };
+          const incoming = body.prize as Record<string, unknown>;
+          const next = { ...(liveConfig().prize as object), ...incoming } as Record<
+            string,
+            unknown
+          >;
+          if (typeof incoming.enabled === "boolean") next.enabled = incoming.enabled;
+          delete next.hostOnlyRealPrize;
+          host.prize = next;
+        }
+        if (Array.isArray(body.memories)) {
+          const base = emptyMemories();
+          for (const raw of body.memories as HiddenMemory[]) {
+            if (!raw || raw.slot < 1 || raw.slot > 10) continue;
+            base[raw.slot - 1] = {
+              slot: raw.slot,
+              title: String(raw.title || `Hidden memory ${raw.slot}`).slice(0, 80),
+              caption: String(raw.caption || "").slice(0, 600),
+              imageDataUrl: String(raw.imageDataUrl || "").slice(0, 1_500_000),
+              enabled: Boolean(raw.enabled),
+            };
+          }
+          host.memories = base;
         }
         if (body.photosUrl != null) host.photosUrl = String(body.photosUrl);
         if (body.publicBaseUrl != null) host.publicBaseUrl = String(body.publicBaseUrl);
@@ -601,6 +625,78 @@ async function handle(req: NextRequest, path: string[]): Promise<NextResponse> {
     if (name === "trivia") return json(host.content?.trivia || DEFAULT_TRIVIA);
     if (name === "he-said") return json(host.content?.heSaid || DEFAULT_HE_SAID);
     if (name === "poses") return json(host.content?.poses || DEFAULT_POSES);
+  }
+
+  // Public hidden memories (QR-only discovery; no app nav links)
+  if (segs[0] === "memories" && method === "GET") {
+    if (segs[1]) {
+      const slot = parseInt(segs[1], 10);
+      if (Number.isNaN(slot) || slot < 1 || slot > 10) {
+        return json({ error: "Slot must be 1–10" }, 400);
+      }
+      return json(publicMemory(slot));
+    }
+    // list only enabled slots (minimal; not used by guest hub nav)
+    const list = (host.memories || emptyMemories())
+      .filter((m) => m.enabled && m.caption)
+      .map((m) => ({ slot: m.slot, title: m.title, url: `hiddenmemory${m.slot}.html` }));
+    return json({ memories: list });
+  }
+
+  if (segs[0] === "host" && segs[1] === "memories") {
+    if (!hostAuthed(req)) return json({ error: "Host auth required" }, 401);
+    if (method === "GET") {
+      return json({
+        ok: true,
+        memories: host.memories || emptyMemories(),
+        baseUrl: "https://www.thekeyholders.org/celebrate/",
+      });
+    }
+    if (method === "PUT" || method === "POST") {
+      const body = await req.json().catch(() => ({}));
+      const base = emptyMemories();
+      const incoming = Array.isArray(body.memories) ? body.memories : Array.isArray(body) ? body : null;
+      if (!incoming) return json({ error: "memories array required" }, 400);
+      for (const raw of incoming as HiddenMemory[]) {
+        if (!raw || raw.slot < 1 || raw.slot > 10) continue;
+        base[raw.slot - 1] = {
+          slot: raw.slot,
+          title: String(raw.title || `Hidden memory ${raw.slot}`).slice(0, 80),
+          caption: String(raw.caption || "").slice(0, 600),
+          imageDataUrl: String(raw.imageDataUrl || "").slice(0, 1_500_000),
+          enabled: Boolean(raw.enabled),
+        };
+      }
+      host.memories = base;
+      host.updatedAt = new Date().toISOString();
+      return json({ ok: true, memories: host.memories });
+    }
+  }
+
+  // Full host state backup/restore (browser localStorage durability)
+  if (segs[0] === "host" && segs[1] === "state") {
+    if (!hostAuthed(req)) return json({ error: "Host auth required" }, 401);
+    if (method === "GET") {
+      return json({ ok: true, hostState: host, updatedAt: host.updatedAt });
+    }
+    if (method === "PUT" || method === "POST") {
+      const body = await req.json().catch(() => ({}));
+      const st = body.hostState || body;
+      if (!st || typeof st !== "object") return json({ error: "hostState required" }, 400);
+      Object.assign(host, st);
+      if (!host.memories || host.memories.length !== 10) {
+        const base = emptyMemories();
+        for (const m of host.memories || []) {
+          if (m && m.slot >= 1 && m.slot <= 10) base[m.slot - 1] = { ...base[m.slot - 1], ...m };
+        }
+        host.memories = base;
+      }
+      if (host.prize && typeof host.prize === "object") {
+        delete (host.prize as { hostOnlyRealPrize?: string }).hostOnlyRealPrize;
+      }
+      host.updatedAt = new Date().toISOString();
+      return json({ ok: true, hostState: host, config: liveConfig() });
+    }
   }
 
   return json({ error: "Not found", path: segs }, 404);

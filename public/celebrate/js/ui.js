@@ -57,11 +57,16 @@
         .join("");
     }
     const prize = document.getElementById("prize-banner");
-    if (prize && cfg.prize && cfg.prize.enabled) {
-      prize.hidden = false;
-      prize.innerHTML = `🏆 <strong>Prize:</strong> ${escapeHtml(cfg.prize.title)} · ${escapeHtml(
-        cfg.prize.announceAt || ""
-      )} · <a href="leaderboard.html">Standings</a>`;
+    if (prize) {
+      if (cfg.prize && cfg.prize.enabled !== false && cfg.prize.title) {
+        prize.hidden = false;
+        prize.innerHTML = `🏆 <strong>Prize:</strong> ${escapeHtml(cfg.prize.title)} · ${escapeHtml(
+          cfg.prize.announceAt || ""
+        )} · <a href="leaderboard.html">Standings</a>`;
+      } else {
+        prize.hidden = true;
+        prize.innerHTML = "";
+      }
     }
     ensureHelpFab(activeId);
   }
@@ -94,11 +99,19 @@
     try {
       const remote = await PartyAPI.config();
       if (remote.photosUrl) PARTY_CONFIG.photosUrl = remote.photosUrl;
-      if (remote.prize) PARTY_CONFIG.prize = { ...PARTY_CONFIG.prize, ...remote.prize };
+      if (remote.prize) {
+        PARTY_CONFIG.prize = { ...PARTY_CONFIG.prize, ...remote.prize };
+        // ensure disabled wins over stale static config
+        if (typeof remote.prize.enabled === "boolean") {
+          PARTY_CONFIG.prize.enabled = remote.prize.enabled;
+        }
+        delete PARTY_CONFIG.prize.hostOnlyRealPrize;
+      }
       if (remote.thanks) PARTY_CONFIG.thanks = remote.thanks;
       if (remote.schedule) PARTY_CONFIG.schedule = remote.schedule;
       if (remote.ringHunt) PARTY_CONFIG.ringHunt = remote.ringHunt;
       if (remote.guestbook) PARTY_CONFIG.guestbook = remote.guestbook;
+      if (remote.comingle) PARTY_CONFIG.comingle = remote.comingle;
       PARTY_CONFIG._remote = remote;
       return remote;
     } catch {

@@ -8,9 +8,8 @@ window.PARTY_CONFIG = {
   maxProfiles: 150,
   prize: {
     enabled: true,
-    title: "$5,000 Gift Card",
-    description:
-      "Highest score at 4:30 PM wins. See Javad to claim. (Yes, the number is real. Trust us.)",
+    title: "Gift Card",
+    description: "Highest score at 4:30 PM wins. See Javad to claim.",
     announceAt: "4:30 PM",
     legalNote: "One win per person. Must be present. Host decision final.",
   },

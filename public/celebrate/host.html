@@ -117,20 +117,32 @@
             <input id="prize-legal" />
           </div>
           <div>
-            <label>Host-only real prize (export note)</label>
-            <input id="prize-real" placeholder="$100 gift card…" />
-          </div>
-          <div>
-            <label>Prize enabled</label>
+            <label>Prize enabled (shows on leaderboard + banners)</label>
             <select id="prize-enabled">
-              <option value="true">Yes</option>
-              <option value="false">No</option>
+              <option value="true">Yes — show prize</option>
+              <option value="false">No — hide prize (standings only)</option>
             </select>
           </div>
         </div>
         <div class="host-actions">
           <button class="btn" type="button" id="btn-save-prize">Save prize</button>
         </div>
+        <p class="host-muted" id="prize-save-status" style="margin-top:0.5rem"></p>
+      </section>
+
+      <section class="host-card">
+        <h2>Hidden memories (QR-only finds)</h2>
+        <p class="host-muted">
+          Up to 10 couples-memory pages. Guests only find them by scanning venue QRs
+          (<code>…/celebrate/hiddenmemory1.html</code> … <code>hiddenmemory10.html</code>).
+          Not listed in the Guest Hub menu. Photo + “Did you know?” caption help with trivia.
+        </p>
+        <div id="memories-list"></div>
+        <div class="host-actions">
+          <button class="btn" type="button" id="btn-save-memories">Save all memories</button>
+          <button class="btn btn-secondary" type="button" id="btn-reload-memories">Reload memories</button>
+        </div>
+        <p class="host-muted" id="memories-status" style="margin-top:0.5rem"></p>
       </section>
 
       <section class="host-card">
@@ -336,6 +348,13 @@
       const TOKEN_KEY = "dj_host_token";
       const TKH_BASE = "https://www.thekeyholders.org/celebrate/";
       let token = sessionStorage.getItem(TOKEN_KEY) || "";
+      function escapeHtml(s) {
+        return String(s)
+          .replace(/&/g, "&amp;")
+          .replace(/</g, "&lt;")
+          .replace(/>/g, "&gt;")
+          .replace(/"/g, "&quot;");
+      }
 
       function toast(msg, ms = 2800) {
         const el = document.getElementById("toast");
@@ -369,9 +388,155 @@
         document.getElementById("prize-desc").value = p.description || "";
         document.getElementById("prize-announce").value = p.announceAt || "";
         document.getElementById("prize-legal").value = p.legalNote || "";
-        document.getElementById("prize-real").value = p.hostOnlyRealPrize || "";
         document.getElementById("prize-enabled").value = p.enabled === false ? "false" : "true";
       }
+
+      const HOST_BACKUP_KEY = "dj_host_state_backup_v1";
+      let memoriesCache = [];
+
+      function persistHostBackup(hostState) {
+        try {
+          localStorage.setItem(
+            HOST_BACKUP_KEY,
+            JSON.stringify({ savedAt: new Date().toISOString(), hostState })
+          );
+        } catch (_) {}
+      }
+
+      async function restoreHostBackupIfNeeded() {
+        try {
+          const raw = localStorage.getItem(HOST_BACKUP_KEY);
+          if (!raw) return;
+          const bak = JSON.parse(raw);
+          if (!bak.hostState) return;
+          // Push browser backup to API so cold starts recover prize/memories
+          await api("/api/host/state", {
+            method: "PUT",
+            body: JSON.stringify({ hostState: bak.hostState }),
+          });
+          toast("Restored host settings from this browser backup");
+        } catch (_) {}
+      }
+
+      function renderMemories(list) {
+        memoriesCache = (list || []).slice();
+        while (memoriesCache.length < 10) {
+          const n = memoriesCache.length + 1;
+          memoriesCache.push({
+            slot: n,
+            title: "Hidden memory " + n,
+            caption: "",
+            imageDataUrl: "",
+            enabled: false,
+          });
+        }
+        const root = document.getElementById("memories-list");
+        root.innerHTML = memoriesCache
+          .map((m, idx) => {
+            const url = TKH_BASE + "hiddenmemory" + m.slot + ".html";
+            const hasImg = m.imageDataUrl ? "Photo set" : "No photo";
+            return `
+            <div class="host-card" style="margin:0.65rem 0;border-style:dashed" data-mem-slot="${m.slot}">
+              <h2 style="font-size:1rem">Memory ${m.slot} · <span class="host-muted">${hasImg}</span></h2>
+              <div class="host-grid">
+                <div>
+                  <label>Title</label>
+                  <input data-mem-title="${m.slot}" value="${escapeAttr(m.title || "")}" />
+                </div>
+                <div>
+                  <label>Enabled (show when QR scanned)</label>
+                  <select data-mem-enabled="${m.slot}">
+                    <option value="true" ${m.enabled ? "selected" : ""}>Yes</option>
+                    <option value="false" ${!m.enabled ? "selected" : ""}>No</option>
+                  </select>
+                </div>
+                <div style="grid-column:1/-1">
+                  <label>Caption (“Did you know…?”)</label>
+                  <textarea data-mem-caption="${m.slot}" style="min-height:70px">${escapeHtml(m.caption || "")}</textarea>
+                </div>
+                <div>
+                  <label>Photo (jpg/png, keep under ~1MB)</label>
+                  <input type="file" accept="image/*" data-mem-file="${m.slot}" />
+                </div>
+                <div>
+                  <label>Public URL (QR this)</label>
+                  <input readonly value="${url}" onclick="this.select()" />
+                </div>
+              </div>
+              <div style="margin-top:0.6rem;display:flex;gap:0.75rem;align-items:center;flex-wrap:wrap">
+                <div class="qr-mini"><canvas data-mem-qr="${m.slot}" width="120" height="120"></canvas></div>
+                ${m.imageDataUrl ? `<img src="${m.imageDataUrl}" alt="" style="max-height:90px;border-radius:10px;border:1px solid rgba(255,255,255,0.15)" />` : ""}
+              </div>
+            </div>`;
+          })
+          .join("");
+        // bind file inputs + draw QRs
+        root.querySelectorAll("[data-mem-file]").forEach((input) => {
+          input.onchange = async (ev) => {
+            const slot = Number(input.getAttribute("data-mem-file"));
+            const f = ev.target.files && ev.target.files[0];
+            if (!f) return;
+            if (f.size > 1_200_000) {
+              toast("Image too large — try under ~1MB or compress");
+              return;
+            }
+            const dataUrl = await readFileAsDataUrl(f);
+            const m = memoriesCache.find((x) => x.slot === slot);
+            if (m) m.imageDataUrl = dataUrl;
+            toast("Photo loaded for memory " + slot + " — click Save all memories");
+            renderMemories(memoriesCache);
+          };
+        });
+        root.querySelectorAll("[data-mem-qr]").forEach((canvas) => {
+          const slot = Number(canvas.getAttribute("data-mem-qr"));
+          const url = TKH_BASE + "hiddenmemory" + slot + ".html";
+          const lib = qrLib();
+          if (lib) {
+            lib.toCanvas(canvas, url, { width: 120, margin: 1 }, () => {});
+          }
+        });
+      }
+
+      function readFileAsDataUrl(file) {
+        return new Promise((resolve, reject) => {
+          const r = new FileReader();
+          r.onload = () => resolve(String(r.result || ""));
+          r.onerror = reject;
+          r.readAsDataURL(file);
+        });
+      }
+
+      function collectMemoriesFromDom() {
+        const out = [];
+        for (let slot = 1; slot <= 10; slot++) {
+          const prev = memoriesCache.find((m) => m.slot === slot) || {
+            slot,
+            title: "",
+            caption: "",
+            imageDataUrl: "",
+            enabled: false,
+          };
+          const titleEl = document.querySelector(`[data-mem-title="${slot}"]`);
+          const capEl = document.querySelector(`[data-mem-caption="${slot}"]`);
+          const enEl = document.querySelector(`[data-mem-enabled="${slot}"]`);
+          out.push({
+            slot,
+            title: titleEl ? titleEl.value : prev.title,
+            caption: capEl ? capEl.value : prev.caption,
+            imageDataUrl: prev.imageDataUrl || "",
+            enabled: enEl ? enEl.value === "true" : prev.enabled,
+          });
+        }
+        return out;
+      }
+
+      function escapeAttr(s) {
+        return String(s)
+          .replace(/&/g, "&amp;")
+          .replace(/"/g, "&quot;")
+          .replace(/</g, "&lt;");
+      }
+
 
       function fillEvent(cfg, hostState) {
         document.getElementById("event-name").value = (cfg && cfg.eventName) || "";
@@ -665,23 +830,67 @@
       document.getElementById("btn-refresh").onclick = () => boot().then(() => toast("Refreshed"));
 
       document.getElementById("btn-save-prize").onclick = async () => {
+        const status = document.getElementById("prize-save-status");
         try {
-          await api("/api/host/config", {
+          const prize = {
+            title: document.getElementById("prize-title").value,
+            description: document.getElementById("prize-desc").value,
+            announceAt: document.getElementById("prize-announce").value,
+            legalNote: document.getElementById("prize-legal").value,
+            enabled: document.getElementById("prize-enabled").value === "true",
+          };
+          const res = await api("/api/host/config", {
             method: "PUT",
-            body: JSON.stringify({
-              prize: {
-                title: document.getElementById("prize-title").value,
-                description: document.getElementById("prize-desc").value,
-                announceAt: document.getElementById("prize-announce").value,
-                legalNote: document.getElementById("prize-legal").value,
-                hostOnlyRealPrize: document.getElementById("prize-real").value,
-                enabled: document.getElementById("prize-enabled").value === "true",
-              },
-            }),
+            body: JSON.stringify({ prize }),
           });
-          toast("Prize saved");
+          // Browser backup so cold starts can re-hydrate host settings
+          try {
+            const st = await api("/api/host/state");
+            persistHostBackup(st.hostState);
+          } catch (_) {
+            persistHostBackup({ prize, publicBaseUrl: TKH_BASE });
+          }
+          status.textContent =
+            "Saved. Live prize: " +
+            (res.config && res.config.prize
+              ? (res.config.prize.enabled === false ? "(hidden) " : "") + (res.config.prize.title || "")
+              : prize.title);
+          toast(prize.enabled ? "Prize saved (enabled)" : "Prize saved (hidden from guests)");
           await loadOverview();
         } catch (e) {
+          status.textContent = "Save failed: " + e.message;
+          toast(e.message);
+        }
+      };
+
+      document.getElementById("btn-reload-memories").onclick = async () => {
+        try {
+          const data = await api("/api/host/memories");
+          renderMemories(data.memories || []);
+          document.getElementById("memories-status").textContent = "Memories loaded";
+        } catch (e) {
+          // empty slots if API missing
+          renderMemories([]);
+          toast(e.message);
+        }
+      };
+      document.getElementById("btn-save-memories").onclick = async () => {
+        const status = document.getElementById("memories-status");
+        try {
+          const memories = collectMemoriesFromDom();
+          memoriesCache = memories;
+          await api("/api/host/memories", {
+            method: "PUT",
+            body: JSON.stringify({ memories }),
+          });
+          const st = await api("/api/host/state");
+          persistHostBackup(st.hostState);
+          const n = memories.filter((m) => m.enabled && m.caption).length;
+          status.textContent = "Saved " + n + " active memory page(s). QR print: use memory URLs above.";
+          toast("Memories saved");
+          renderMemories(memories);
+        } catch (e) {
+          status.textContent = "Save failed: " + e.message;
           toast(e.message);
         }
       };
@@ -987,6 +1196,10 @@
       };
 
       async function boot() {
+        // Re-apply last host settings from this browser (prize, memories, etc.)
+        try {
+          await restoreHostBackupIfNeeded();
+        } catch (_) {}
         try {
           await loadOverview();
         } catch (e) {
@@ -1011,6 +1224,12 @@
         try {
           document.getElementById("btn-load-comingle").click();
         } catch (_) {}
+        try {
+          const data = await api("/api/host/memories");
+          renderMemories(data.memories || []);
+        } catch (_) {
+          renderMemories([]);
+        }
         // Force public base to TKH for QR pack
         document.getElementById("public-base").value = TKH_BASE;
         genQr();

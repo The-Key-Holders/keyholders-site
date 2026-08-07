@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="robots" content="noindex,nofollow" />
+    <title>Hidden memory · Dani &amp; Javad</title>
+    <link rel="stylesheet" href="css/party.css" />
+    <style>
+      body.memory-page {
+        min-height: 100dvh;
+        background:
+          radial-gradient(700px 400px at 10% 0%, rgba(255, 107, 107, 0.25), transparent 55%),
+          radial-gradient(600px 360px at 90% 10%, rgba(255, 217, 102, 0.18), transparent 50%),
+          #120c0c;
+        color: #fff8f5;
+        margin: 0;
+        font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+      }
+      .mem-wrap {
+        max-width: 520px;
+        margin: 0 auto;
+        padding: 1.25rem 1rem 2.5rem;
+        text-align: center;
+      }
+      .mem-kicker {
+        display: inline-block;
+        font-size: 0.8rem;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+        opacity: 0.85;
+        margin-bottom: 0.5rem;
+        padding: 0.25rem 0.65rem;
+        border-radius: 999px;
+        border: 1px solid rgba(255, 217, 102, 0.35);
+        background: rgba(255, 217, 102, 0.1);
+      }
+      .mem-title {
+        font-size: 1.45rem;
+        margin: 0.35rem 0 0.85rem;
+        letter-spacing: -0.02em;
+      }
+      .mem-img-wrap {
+        border-radius: 18px;
+        overflow: hidden;
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        background: rgba(0, 0, 0, 0.35);
+        box-shadow: 0 16px 40px rgba(0, 0, 0, 0.35);
+        min-height: 200px;
+        display: grid;
+        place-items: center;
+      }
+      .mem-img-wrap img {
+        width: 100%;
+        height: auto;
+        max-height: 70vh;
+        object-fit: contain;
+        display: block;
+        background: #1a1212;
+      }
+      .mem-caption {
+        margin: 1rem 0 0.35rem;
+        font-size: 1.08rem;
+        line-height: 1.45;
+        text-align: left;
+        background: rgba(255, 255, 255, 0.06);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 16px;
+        padding: 0.9rem 1rem;
+      }
+      .mem-caption strong {
+        color: #ffd966;
+      }
+      .mem-actions {
+        margin-top: 1.25rem;
+        display: flex;
+        flex-direction: column;
+        gap: 0.55rem;
+      }
+      .mem-actions a.btn {
+        display: block;
+        text-decoration: none;
+        text-align: center;
+        padding: 0.85rem 1rem;
+        border-radius: 14px;
+        background: linear-gradient(135deg, #ff6b6b, #e85a5a);
+        color: #fff;
+        font-weight: 600;
+      }
+      .mem-actions a.btn-secondary {
+        background: transparent;
+        border: 1px solid rgba(255, 255, 255, 0.25);
+      }
+      .mem-empty {
+        opacity: 0.8;
+        padding: 2rem 1rem;
+      }
+      .mem-hint {
+        font-size: 0.85rem;
+        opacity: 0.7;
+        margin-top: 0.75rem;
+      }
+    </style>
+  </head>
+  <body class="memory-page" data-memory-slot="5">
+    <div class="mem-wrap">
+      <div class="mem-kicker">Couples memory</div>
+      <h1 class="mem-title" id="title">Loading…</h1>
+      <div class="mem-img-wrap" id="img-wrap">
+        <p class="mem-empty" id="img-placeholder">…</p>
+      </div>
+      <div class="mem-caption" id="caption" hidden></div>
+      <div class="mem-actions">
+        <a class="btn" href="index.html">← Back to Guest Hub</a>
+        <a class="btn btn-secondary" href="trivia.html">Try trivia</a>
+      </div>
+      <p class="mem-hint">
+        Tip: this page is a hidden find. It is not listed in the app menu. Scan venue QRs to discover more.
+      </p>
+    </div>
+    <script>
+      (async function () {
+        const slot = Number(document.body.dataset.memorySlot || "5");
+        const titleEl = document.getElementById("title");
+        const capEl = document.getElementById("caption");
+        const wrap = document.getElementById("img-wrap");
+        try {
+          const res = await fetch("/api/memories/" + slot, { cache: "no-store" });
+          const data = await res.json().catch(() => ({}));
+          if (!res.ok || !data.enabled) {
+            titleEl.textContent = "Memory not active";
+            document.getElementById("img-placeholder").textContent =
+              "This couples memory is not set up yet (or was turned off by the host).";
+            return;
+          }
+          document.title = (data.title || "Hidden memory") + " · Dani & Javad";
+          titleEl.textContent = data.title || "Hidden memory " + slot;
+          if (data.imageDataUrl) {
+            wrap.innerHTML = "";
+            const img = document.createElement("img");
+            img.src = data.imageDataUrl;
+            img.alt = data.title || "Couples memory";
+            wrap.appendChild(img);
+          } else {
+            document.getElementById("img-placeholder").textContent = "No photo yet — caption only.";
+          }
+          if (data.caption) {
+            capEl.hidden = false;
+            const text = String(data.caption);
+            // Highlight leading "Did you know" if present
+            if (/^did you know/i.test(text)) {
+              capEl.innerHTML = "<strong>Did you know?</strong> " + escapeHtml(text.replace(/^did you know[?\s]*/i, ""));
+            } else {
+              capEl.innerHTML = "<strong>Did you know?</strong> " + escapeHtml(text);
+            }
+          }
+        } catch (e) {
+          titleEl.textContent = "Could not load memory";
+          document.getElementById("img-placeholder").textContent =
+            "Check your connection and try the QR again.";
+        }
+        function escapeHtml(s) {
+          return String(s)
+            .replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;")
+            .replace(/"/g, "&quot;");
+        }
+      })();
+    </script>
+  </body>
+</html>

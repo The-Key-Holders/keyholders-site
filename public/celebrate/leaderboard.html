@@ -41,14 +41,31 @@
     <script src="js/shell.js"></script>
     <script>
       async function load() {
-        const prize = PARTY_CONFIG.prize || {};
-        document.getElementById("prize-title").textContent = prize.enabled
-          ? `🏆 ${prize.title}`
-          : "Standings";
-        document.getElementById("prize-desc").textContent = prize.description || "";
-        document.getElementById("legal").textContent = prize.legalNote || "";
+        // Always prefer live host-configured prize from API (not static config.js)
+        await PartyUI.hydrateConfigFromApi();
         try {
           const data = await PartyAPI.leaderboard();
+          const prize = data.prize || PARTY_CONFIG.prize || {};
+          const enabled = prize.enabled !== false;
+          document.getElementById("prize-title").textContent = enabled
+            ? `🏆 ${prize.title || "Prize track"}`
+            : "Standings";
+          document.getElementById("prize-desc").textContent = enabled
+            ? prize.description || ""
+            : "Prize track is off. Still play for glory.";
+          document.getElementById("legal").textContent = enabled ? prize.legalNote || "" : "";
+          const banner = document.getElementById("prize-banner");
+          if (banner) {
+            if (enabled && prize.title) {
+              banner.hidden = false;
+              banner.innerHTML = `🏆 <strong>Prize:</strong> ${PartyUI.escapeHtml(prize.title)} · ${PartyUI.escapeHtml(
+                prize.announceAt || ""
+              )}`;
+            } else {
+              banner.hidden = true;
+              banner.innerHTML = "";
+            }
+          }
           document.getElementById("stats").textContent = `${data.stats.profiles} players · ${data.stats.ringsClaimed} rings claimed`;
           const me = PartyProfile.get();
           document.getElementById("board").innerHTML = data.leaderboard.length
@@ -62,6 +79,9 @@
                 .join("")
             : `<p class="muted">No scores yet. Be the awkward first. We believe in you.</p>`;
         } catch {
+          const prize = PARTY_CONFIG.prize || {};
+          document.getElementById("prize-title").textContent =
+            prize.enabled !== false ? `🏆 ${prize.title || "Prize track"}` : "Standings";
           document.getElementById("board").innerHTML =
             `<p class="muted">Leaderboard needs the API online. Local play still works on each phone.</p>`;
         }
