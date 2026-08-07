@@ -469,18 +469,13 @@ async function handle(req: NextRequest, path: string[]): Promise<NextResponse> {
         if (body.prize && typeof body.prize === "object") {
           host.prize = { ...(liveConfig().prize as object), ...body.prize };
         }
-        for (const k of [
-          "photosUrl",
-          "publicBaseUrl",
-          "eventName",
-          "couple",
-          "deadlineIso",
-          "scoringMode",
-        ] as const) {
-          if (body[k] != null) {
-            // @ts-expect-error index
-            host[k] = body[k];
-          }
+        if (body.photosUrl != null) host.photosUrl = String(body.photosUrl);
+        if (body.publicBaseUrl != null) host.publicBaseUrl = String(body.publicBaseUrl);
+        if (body.eventName != null) host.eventName = String(body.eventName);
+        if (body.couple != null) host.couple = String(body.couple);
+        if (body.deadlineIso != null) host.deadlineIso = String(body.deadlineIso);
+        if (body.scoringMode === "auto" || body.scoringMode === "open" || body.scoringMode === "frozen") {
+          host.scoringMode = body.scoringMode;
         }
         if (Array.isArray(body.comingle)) host.comingle = body.comingle;
         if (body.comingleAnswers && typeof body.comingleAnswers === "object") {
