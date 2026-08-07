@@ -44,3 +44,7 @@ BACKUP_MANIFEST.json
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+# Party kit binary snapshots (notes tracked separately)
+.artifacts/releases/*-kit.zip
+.artifacts/logs/
+
