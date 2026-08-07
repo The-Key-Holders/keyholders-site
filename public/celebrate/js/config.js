@@ -1,10 +1,6 @@
-/* Host config — edit freely. Redeploy web after changes. */
+/* Host config - edit freely. Redeploy web after changes. */
 window.PARTY_CONFIG = {
-  // Empty = same-origin /api (nginx or Vercel rewrites).
   apiBase: "",
-  // Live public root for QR print pack (trailing slash recommended).
-  // Prefer thekeyholders.org/celebrate/ after Vercel redeploy succeeds.
-  // Live public tunnel (Docker) for phone/cellular testing:
   publicBaseUrl: "https://www.thekeyholders.org/celebrate/",
   photosUrl: "https://photos.app.goo.gl/tNy59HYGHJzvhX536",
   couple: "Dani & Javad",
@@ -36,3 +32,5 @@ window.PARTY_CONFIG = {
     { id: "passport", path: "passport.html", title: "Passport", emoji: "🛂", blurb: "Stamp quest" },
     { id: "poses", path: "poses.html", title: "Poses", emoji: "🌀", blurb: "Arch energy" },
     { id: "leaderboard", path: "leaderboard.html", title: "Leaderboard", emoji: "🏆", blurb: "Glory board" },
+  ],
+};
