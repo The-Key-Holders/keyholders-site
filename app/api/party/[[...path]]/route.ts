@@ -1,13 +1,23 @@
 import { NextRequest, NextResponse } from "next/server";
 import {
   MAX_PROFILES,
-  PUBLIC_CONFIG,
+  answerMatches,
+  computeWinner,
+  deadlinePayload,
   displayFor,
+  getHost,
   getStore,
+  liveConfig,
   norm,
   recompute,
+  scoringOpen,
   toPublic,
   type PartyProfile,
+  DEFAULT_COMINGLE_ANSWERS,
+  DEFAULT_STATION_KEYWORDS,
+  DEFAULT_TRIVIA,
+  DEFAULT_HE_SAID,
+  DEFAULT_POSES,
 } from "@/lib/party-store";
 
 export const dynamic = "force-dynamic";
@@ -16,17 +26,45 @@ function json(data: unknown, status = 200) {
   return NextResponse.json(data, { status });
 }
 
+const HOST_PASSWORD = process.env.PARTY_HOST_PASSWORD || "dj-host-2026";
+
+function sessions() {
+  const g = globalThis as unknown as { __djHostSessions?: Map<string, number> };
+  if (!g.__djHostSessions) g.__djHostSessions = new Map();
+  return g.__djHostSessions;
+}
+
+function hostAuthed(req: NextRequest): boolean {
+  const auth = req.headers.get("authorization") || "";
+  const token = auth.toLowerCase().startsWith("bearer ")
+    ? auth.slice(7).trim()
+    : req.headers.get("x-host-token") || "";
+  const exp = token ? sessions().get(token) : undefined;
+  if (exp && exp > Date.now()) return true;
+  return (req.headers.get("x-host-password") || "") === HOST_PASSWORD;
+}
+
 async function handle(req: NextRequest, path: string[]) {
   const store = getStore();
+  const host = getHost();
   const method = req.method;
   const segs = path || [];
 
   if (segs[0] === "health" && method === "GET") {
-    return json({ ok: true, service: "party-api-vercel-memory", note: "best-effort" });
+    return json({
+      ok: true,
+      service: "party-api-vercel-memory",
+      note: "cellular-ready best-effort",
+      scoringOpen: scoringOpen(),
+    });
   }
 
   if (segs[0] === "config" && method === "GET") {
-    return json(PUBLIC_CONFIG);
+    return json({ ...liveConfig(), scoring: deadlinePayload() });
+  }
+
+  if (segs[0] === "status" && method === "GET") {
+    return json(deadlinePayload());
   }
 
   if (segs[0] === "profiles" && segs[1] === "lookup" && method === "GET") {
@@ -76,6 +114,8 @@ async function handle(req: NextRequest, path: string[]) {
       posesSpun: 0,
       passportBonus: 0,
       totalPoints: 0,
+      comingleDone: [],
+      stationsDone: [],
     };
     store.profiles.set(id, profile);
     return json({ exists: false, profile: toPublic(profile) }, 201);
@@ -84,6 +124,7 @@ async function handle(req: NextRequest, path: string[]) {
   if (segs[0] === "profiles" && segs[1] && method === "GET") {
     const p = store.profiles.get(segs[1]);
     if (!p) return json({ error: "Profile not found" }, 404);
+    recompute(p);
     const scores = store.scores.filter((s) => s.profileId === p.id);
     return json({
       profile: toPublic(p),
@@ -94,6 +135,7 @@ async function handle(req: NextRequest, path: string[]) {
         duration_ms: s.durationMs,
         created_at: s.createdAt,
       })),
+      scoring: deadlinePayload(),
     });
   }
 
@@ -101,17 +143,24 @@ async function handle(req: NextRequest, path: string[]) {
     const body = await req.json().catch(() => ({}));
     const p = store.profiles.get(String(body.profileId || ""));
     if (!p) return json({ error: "Profile not found" }, 404);
+    const raw = Number(body.score) || 0;
+    const awarded = scoringOpen() ? raw : 0;
     store.scores.push({
       id: crypto.randomUUID(),
       profileId: p.id,
       game: String(body.game || "").slice(0, 40),
-      score: Number(body.score) || 0,
+      score: awarded,
       maxScore: Number(body.maxScore) || 0,
       durationMs: body.durationMs,
       createdAt: Date.now() / 1000,
     });
-    const total = recompute(p, store.scores);
-    return json({ ok: true, totalPoints: total });
+    const total = recompute(p);
+    return json({
+      ok: true,
+      totalPoints: total,
+      pointsAwarded: awarded,
+      scoring: deadlinePayload(),
+    });
   }
 
   if (segs[0] === "checkins" && method === "POST") {
@@ -119,17 +168,120 @@ async function handle(req: NextRequest, path: string[]) {
     const p = store.profiles.get(String(body.profileId || ""));
     if (!p) return json({ error: "Profile not found" }, 404);
     const kind = String(body.kind || "");
-    if (kind === "ring") p.ringsFound += 1;
+    if (kind === "ring" && scoringOpen()) p.ringsFound += 1;
     if (kind === "guestbook") p.guestbookSigned = true;
     if (kind === "pose") p.posesSpun += 1;
-    if (kind === "passport_complete" && !p.passportBonus) p.passportBonus = 25;
-    const total = recompute(p, store.scores);
-    return json({ ok: true, profile: toPublic(p), totalPoints: total });
+    if (kind === "passport_complete" && !p.passportBonus && scoringOpen()) {
+      p.passportBonus = 25;
+    }
+    const total = recompute(p);
+    return json({
+      ok: true,
+      profile: toPublic(p),
+      totalPoints: total,
+      scoring: deadlinePayload(),
+    });
+  }
+
+  if (segs[0] === "comingle" && method === "POST") {
+    const body = await req.json().catch(() => ({}));
+    const p = store.profiles.get(String(body.profileId || ""));
+    if (!p) return json({ error: "Profile not found" }, 404);
+    const promptId = String(body.promptId || "");
+    const answer = String(body.answer || "");
+    const prompts = host.comingle || liveConfig().comingle || [];
+    const prompt = prompts.find((x) => x.id === promptId);
+    if (!prompt) return json({ error: "Unknown prompt" }, 404);
+    if (p.comingleDone.includes(promptId)) {
+      return json({
+        ok: true,
+        already: true,
+        correct: true,
+        points: 0,
+        message: "Already completed.",
+        scoring: deadlinePayload(),
+      });
+    }
+    const accepted =
+      (host.comingleAnswers && host.comingleAnswers[promptId]) ||
+      DEFAULT_COMINGLE_ANSWERS[promptId] ||
+      [];
+    const correct = accepted.length ? answerMatches(answer, accepted) : answer.trim().length > 1;
+    const pts = correct && scoringOpen() ? Number(prompt.points) || 25 : 0;
+    if (correct) {
+      p.comingleDone.push(promptId);
+      store.scores.push({
+        id: crypto.randomUUID(),
+        profileId: p.id,
+        game: `comingle:${promptId}`,
+        score: pts,
+        maxScore: Number(prompt.points) || 25,
+        createdAt: Date.now() / 1000,
+      });
+    }
+    const total = recompute(p);
+    return json({
+      ok: true,
+      correct,
+      points: pts,
+      message: correct
+        ? "Verified. Social legendary."
+        : "Not verified yet — check the spelling or ask again.",
+      totalPoints: total,
+      scoring: deadlinePayload(),
+    });
+  }
+
+  if (segs[0] === "stations" && method === "POST") {
+    const body = await req.json().catch(() => ({}));
+    const p = store.profiles.get(String(body.profileId || ""));
+    if (!p) return json({ error: "Profile not found" }, 404);
+    const stationId = String(body.stationId || "");
+    const answer = String(body.answer || "");
+    const stations = host.stations || liveConfig().stations || [];
+    const st = stations.find((x) => x.id === stationId);
+    if (!st) return json({ error: "Unknown station" }, 404);
+    if (p.stationsDone.includes(stationId)) {
+      return json({
+        ok: true,
+        already: true,
+        points: 0,
+        message: "Already stamped.",
+        scoring: deadlinePayload(),
+      });
+    }
+    const keys =
+      (host.stationKeywords && host.stationKeywords[stationId]) ||
+      DEFAULT_STATION_KEYWORDS[stationId] ||
+      [];
+    const okAns = keys.length ? answerMatches(answer, keys) : answer.trim().length > 2;
+    const pts = okAns && scoringOpen() ? Number(st.points) || 20 : 0;
+    if (okAns) {
+      p.stationsDone.push(stationId);
+      store.scores.push({
+        id: crypto.randomUUID(),
+        profileId: p.id,
+        game: `station:${stationId}`,
+        score: pts,
+        maxScore: Number(st.points) || 20,
+        createdAt: Date.now() / 1000,
+      });
+    }
+    const total = recompute(p);
+    return json({
+      ok: true,
+      correct: okAns,
+      points: pts,
+      message: okAns ? "Station stamped!" : "Not quite — try another clue word.",
+      totalPoints: total,
+      scoring: deadlinePayload(),
+    });
   }
 
   if (segs[0] === "leaderboard" && method === "GET") {
-    const allProfiles = Array.from(store.profiles.values());
-    const board = allProfiles
+    const all = Array.from(store.profiles.values());
+    all.forEach((p) => recompute(p));
+    const board = all
       .sort((a, b) => b.totalPoints - a.totalPoints || a.createdAt - b.createdAt)
       .slice(0, 15)
       .map((p, i) => ({
@@ -141,59 +293,141 @@ async function handle(req: NextRequest, path: string[]) {
         guestbookSigned: p.guestbookSigned,
         passportBonus: p.passportBonus,
       }));
-    const ringsClaimed = allProfiles.reduce((a, p) => a + p.ringsFound, 0);
     return json({
       leaderboard: board,
-      stats: { profiles: store.profiles.size, ringsClaimed },
-      prize: PUBLIC_CONFIG.prize,
+      stats: {
+        profiles: all.length,
+        ringsClaimed: all.reduce((a, p) => a + p.ringsFound, 0),
+      },
+      prize: liveConfig().prize,
+      scoring: deadlinePayload(),
+      winner: deadlinePayload().winner,
     });
   }
 
-  // ── Host desk (password) ─────────────────────────────────────────────
-  const HOST_PASSWORD = process.env.PARTY_HOST_PASSWORD || "dj-host-2026";
-  const g = globalThis as unknown as {
-    __djHostSessions?: Map<string, number>;
-    __djHostState?: Record<string, unknown>;
-  };
-  if (!g.__djHostSessions) g.__djHostSessions = new Map();
-  if (!g.__djHostState) {
-    g.__djHostState = {
-      scoringMode: "auto",
-      prize: null,
-      photosUrl: null,
-      publicBaseUrl: "https://www.thekeyholders.org/celebrate/",
-    };
-  }
-  const sessions = g.__djHostSessions;
-  const hostState = g.__djHostState;
-
-  function hostAuthed(): boolean {
-    const auth = req.headers.get("authorization") || "";
-    const token = auth.toLowerCase().startsWith("bearer ")
-      ? auth.slice(7).trim()
-      : req.headers.get("x-host-token") || "";
-    const exp = token ? sessions.get(token) : undefined;
-    if (exp && exp > Date.now()) return true;
-    const pw = req.headers.get("x-host-password") || "";
-    return pw === HOST_PASSWORD;
+  if (segs[0] === "dashboard" && method === "GET") {
+    const lb = await handle(
+      new NextRequest(new URL("http://local/api/party/leaderboard"), { method: "GET" }),
+      ["leaderboard"]
+    );
+    const body = await lb.json();
+    return json({
+      leaderboard: (body.leaderboard || []).slice(0, 10).map((r: { rank: number; displayName: string; totalPoints: number }) => ({
+        rank: r.rank,
+        displayName: r.displayName,
+        totalPoints: r.totalPoints,
+      })),
+      predictions: {},
+      photos: [],
+      songs: store.songs.slice(0, 15),
+      wishes: store.wishes.slice(0, 15),
+      scoring: deadlinePayload(),
+      winner: deadlinePayload().winner,
+      prize: liveConfig().prize,
+      couple: liveConfig().couple,
+      schedule: liveConfig().schedule,
+    });
   }
 
+  if (segs[0] === "predictions" && method === "GET") {
+    return json({ predictions: liveConfig().predictions, votes: store.predictions.length });
+  }
+  if (segs[0] === "predictions" && method === "POST") {
+    const body = await req.json().catch(() => ({}));
+    store.predictions.push({
+      profileId: String(body.profileId || ""),
+      predictionId: String(body.predictionId || body.id || ""),
+      option: String(body.option || body.choice || ""),
+    });
+    return json({ ok: true });
+  }
+
+  if (segs[0] === "wishes" && method === "GET") {
+    return json({ wishes: store.wishes.slice(0, 40) });
+  }
+  if (segs[0] === "wishes" && method === "POST") {
+    const body = await req.json().catch(() => ({}));
+    store.wishes.unshift({
+      displayName: String(body.displayName || "Guest").slice(0, 60),
+      message: String(body.message || "").slice(0, 280),
+      createdAt: Date.now() / 1000,
+    });
+    return json({ ok: true });
+  }
+
+  if (segs[0] === "songs" && method === "GET") {
+    return json({ songs: store.songs.slice(0, 40) });
+  }
+  if (segs[0] === "songs" && method === "POST") {
+    const body = await req.json().catch(() => ({}));
+    const title = String(body.title || "").trim();
+    if (!title) return json({ error: "title required" }, 400);
+    store.songs.unshift({
+      displayName: String(body.displayName || "Guest").slice(0, 60),
+      title: title.slice(0, 120),
+      artist: String(body.artist || "").slice(0, 120),
+      createdAt: Date.now() / 1000,
+    });
+    return json({ ok: true, songs: store.songs.slice(0, 40) });
+  }
+
+  if (segs[0] === "advice" && method === "GET") {
+    return json({ advice: store.advice.slice(0, 40) });
+  }
+  if (segs[0] === "advice" && method === "POST") {
+    const body = await req.json().catch(() => ({}));
+    store.advice.unshift({
+      displayName: String(body.displayName || "Guest").slice(0, 60),
+      message: String(body.message || "").slice(0, 280),
+      createdAt: Date.now() / 1000,
+    });
+    return json({ ok: true });
+  }
+
+  if (segs[0] === "margarita" && method === "GET") {
+    return json({ flavors: liveConfig().margaritaFlavors, ratings: store.margarita.length });
+  }
+  if (segs[0] === "margarita" && method === "POST") {
+    const body = await req.json().catch(() => ({}));
+    store.margarita.push({
+      profileId: String(body.profileId || ""),
+      flavor: String(body.flavor || ""),
+      rating: Number(body.rating) || 0,
+    });
+    return json({ ok: true });
+  }
+
+  if (segs[0] === "photos" && method === "GET") {
+    return json({
+      photos: [],
+      note: "Photo uploads use Google Photos album on cellular; see photos page.",
+    });
+  }
+  if (segs[0] === "photos" && method === "POST") {
+    return json({
+      ok: true,
+      skipped: true,
+      message: "Use the shared Google Photos album on cellular (see Photos tile).",
+    });
+  }
+
+  // ── Host desk ─────────────────────────────────────────────────────────
   if (segs[0] === "host" && segs[1] === "login" && method === "POST") {
     const body = await req.json().catch(() => ({}));
     if (String(body.password || "") !== HOST_PASSWORD) {
       return json({ error: "Wrong password" }, 403);
     }
     const token = crypto.randomUUID() + crypto.randomUUID();
-    sessions.set(token, Date.now() + 12 * 3600 * 1000);
+    sessions().set(token, Date.now() + 12 * 3600 * 1000);
     return json({ ok: true, token, expiresInSec: 12 * 3600 });
   }
 
   if (segs[0] === "host") {
-    if (!hostAuthed() && !(segs[1] === "login")) {
-      return json({ error: "Host auth required" }, 401);
-    }
+    if (!hostAuthed(req)) return json({ error: "Host auth required" }, 401);
+
     if (segs[1] === "overview" && method === "GET") {
       const all = Array.from(store.profiles.values());
+      all.forEach((p) => recompute(p));
       const top = all
         .sort((a, b) => b.totalPoints - a.totalPoints)
         .slice(0, 10)
@@ -202,8 +436,6 @@ async function handle(req: NextRequest, path: string[]) {
           displayName: p.displayName,
           totalPoints: p.totalPoints,
         }));
-      const prize =
-        (hostState.prize as Record<string, unknown> | null) || PUBLIC_CONFIG.prize;
       return json({
         ok: true,
         stats: {
@@ -212,60 +444,119 @@ async function handle(req: NextRequest, path: string[]) {
           totalPointsSum: all.reduce((a, p) => a + p.totalPoints, 0),
         },
         leaderboard: top,
-        scoring: {
-          scoringOpen: hostState.scoringMode !== "frozen",
-          scoringMode: hostState.scoringMode || "auto",
-          message:
-            hostState.scoringMode === "frozen"
-              ? "Host override: scoring FROZEN (memory store)"
-              : "Vercel memory store · points best-effort",
-          winner: null,
-        },
-        config: { ...PUBLIC_CONFIG, prize, host: hostState },
-        hostState,
-        paths: { note: "vercel-memory" },
+        scoring: deadlinePayload(),
+        config: liveConfig(),
+        hostState: host,
+        paths: { note: "vercel-memory-cellular" },
         links: {
-          hub: "/celebrate/index.html",
-          screen: "/celebrate/screen.html",
-          qrs: "/celebrate/print/qrs.html",
-          leaderboard: "/celebrate/leaderboard.html",
-          join: "/celebrate/join.html",
+          hub: "https://www.thekeyholders.org/celebrate/index.html",
+          screen: "https://www.thekeyholders.org/celebrate/screen.html",
+          qrs: "https://www.thekeyholders.org/celebrate/print/qrs.html",
+          leaderboard: "https://www.thekeyholders.org/celebrate/leaderboard.html",
+          join: "https://www.thekeyholders.org/celebrate/join.html",
         },
         passwordConfigured: true,
       });
     }
-    if (segs[1] === "config" && (method === "PUT" || method === "POST" || method === "GET")) {
+
+    if (segs[1] === "config") {
       if (method === "GET") {
-        return json({ ok: true, config: PUBLIC_CONFIG, hostState });
+        return json({ ok: true, config: liveConfig(), hostState: host });
       }
-      const body = await req.json().catch(() => ({}));
-      if (body.prize) hostState.prize = { ...(PUBLIC_CONFIG.prize as object), ...body.prize };
-      for (const k of ["photosUrl", "publicBaseUrl", "eventName", "couple", "scoringMode"]) {
-        if (body[k] != null) hostState[k] = body[k];
+      if (method === "PUT" || method === "POST") {
+        const body = await req.json().catch(() => ({}));
+        if (body.prize && typeof body.prize === "object") {
+          host.prize = { ...(liveConfig().prize as object), ...body.prize };
+        }
+        for (const k of [
+          "photosUrl",
+          "publicBaseUrl",
+          "eventName",
+          "couple",
+          "deadlineIso",
+          "scoringMode",
+        ] as const) {
+          if (body[k] != null) {
+            // @ts-expect-error index
+            host[k] = body[k];
+          }
+        }
+        if (Array.isArray(body.comingle)) host.comingle = body.comingle;
+        if (body.comingleAnswers && typeof body.comingleAnswers === "object") {
+          host.comingleAnswers = body.comingleAnswers;
+        }
+        if (Array.isArray(body.stations)) host.stations = body.stations;
+        if (body.stationKeywords && typeof body.stationKeywords === "object") {
+          host.stationKeywords = body.stationKeywords;
+        }
+        // Always keep TKH public base if blank or local
+        const pb = String(host.publicBaseUrl || "");
+        if (!pb || /localhost|127\.0\.0\.1|192\.168\./i.test(pb)) {
+          host.publicBaseUrl = "https://www.thekeyholders.org/celebrate/";
+        }
+        if (!host.publicBaseUrl.endsWith("/")) host.publicBaseUrl += "/";
+        host.updatedAt = new Date().toISOString();
+        return json({ ok: true, config: liveConfig(), hostState: host });
       }
-      return json({ ok: true, config: { ...PUBLIC_CONFIG, ...hostState }, hostState });
     }
+
     if (segs[1] === "scoring" && method === "POST") {
       const body = await req.json().catch(() => ({}));
-      if (body.mode) hostState.scoringMode = body.mode;
-      return json({
-        ok: true,
-        scoring: { scoringMode: hostState.scoringMode, scoringOpen: hostState.scoringMode !== "frozen" },
-        hostState,
-      });
+      if (body.mode && ["auto", "open", "frozen"].includes(body.mode)) {
+        host.scoringMode = body.mode;
+      }
+      if (body.deadlineIso) host.deadlineIso = body.deadlineIso;
+      host.updatedAt = new Date().toISOString();
+      return json({ ok: true, scoring: deadlinePayload(), hostState: host });
     }
+
+    if (segs[1] === "content" && segs[2]) {
+      const name = segs[2];
+      if (!host.content) host.content = {};
+      if (method === "GET") {
+        let data: unknown = null;
+        if (name === "trivia") data = host.content.trivia || DEFAULT_TRIVIA;
+        else if (name === "he-said" || name === "he-said-she-said")
+          data = host.content.heSaid || DEFAULT_HE_SAID;
+        else if (name === "poses") data = host.content.poses || DEFAULT_POSES;
+        else if (name === "comingle")
+          data = { prompts: host.comingle || liveConfig().comingle, answers: host.comingleAnswers };
+        else return json({ error: "Unknown content" }, 404);
+        return json({ ok: true, name, data, source: "memory" });
+      }
+      if (method === "PUT" || method === "POST") {
+        const body = await req.json().catch(() => ({}));
+        const data = body.data !== undefined ? body.data : body;
+        if (name === "trivia") host.content.trivia = data;
+        else if (name === "he-said" || name === "he-said-she-said") host.content.heSaid = data;
+        else if (name === "poses") host.content.poses = data;
+        else if (name === "comingle") {
+          if (data.prompts) host.comingle = data.prompts;
+          if (data.answers) host.comingleAnswers = data.answers;
+          if (Array.isArray(data)) host.comingle = data;
+        } else return json({ error: "Unknown content" }, 404);
+        host.updatedAt = new Date().toISOString();
+        return json({ ok: true, name, written: ["memory"] });
+      }
+    }
+
     if (segs[1] === "guests" && method === "GET") {
       return json({
         ok: true,
-        guests: Array.from(store.profiles.values()).map(toPublic),
+        guests: Array.from(store.profiles.values()).map((p) => {
+          recompute(p);
+          return toPublic(p);
+        }),
       });
     }
-    if (segs[1] === "guests" && segs[2] && (method === "DELETE" || segs[3] === "delete")) {
+
+    if (segs[1] === "guests" && segs[2] && (method === "DELETE" || segs[3] === "delete" || method === "POST")) {
       const id = segs[2];
       store.profiles.delete(id);
       store.scores = store.scores.filter((s) => s.profileId !== id);
       return json({ ok: true, deleted: id });
     }
+
     if (segs[1] === "reset" && method === "POST") {
       const body = await req.json().catch(() => ({}));
       if (body.confirm !== "RESET") {
@@ -279,34 +570,46 @@ async function handle(req: NextRequest, path: string[]) {
           p.guestbookSigned = false;
           p.posesSpun = 0;
           p.passportBonus = 0;
+          p.comingleDone = [];
+          p.stationsDone = [];
         }
       } else {
         store.profiles.clear();
         store.scores = [];
+        store.predictions = [];
+        store.wishes = [];
+        store.songs = [];
+        store.advice = [];
+        store.margarita = [];
       }
       return json({ ok: true, scope: body.scope || "all" });
     }
+
     if (segs[1] === "export" && method === "GET") {
       return json({
         profiles: Array.from(store.profiles.values()).map(toPublic),
         scores: store.scores,
-        winner: null,
+        winner: computeWinner(),
+        hostPrizeNote: (liveConfig().prize as { hostOnlyRealPrize?: string }).hostOnlyRealPrize,
+        exportedAt: new Date().toISOString(),
+        scoring: deadlinePayload(),
+        config: liveConfig(),
         note: "vercel-memory-export",
-        hostPrizeNote: (hostState.prize as { hostOnlyRealPrize?: string } | null)?.hostOnlyRealPrize,
       });
     }
-    if (segs[1] === "content") {
-      return json({
-        error: "Content file edit is Docker-only. Use LAN host desk for trivia JSON.",
-        docker: "http://192.168.8.201:8088/host.html",
-      }, 501);
-    }
+  }
+
+  // Public content reads for guest pages that load JSON (optional)
+  if (segs[0] === "content" && segs[1] && method === "GET") {
+    const name = segs[1];
+    if (name === "trivia") return json(host.content?.trivia || DEFAULT_TRIVIA);
+    if (name === "he-said") return json(host.content?.heSaid || DEFAULT_HE_SAID);
+    if (name === "poses") return json(host.content?.poses || DEFAULT_POSES);
   }
 
   return json({ error: "Not found", path: segs }, 404);
 }
 
-/** Map /api/* party paths used by static hub when rewritten, and /api/party/* */
 export async function GET(
   req: NextRequest,
   ctx: { params: Promise<{ path?: string[] }> }

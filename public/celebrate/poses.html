@@ -43,8 +43,14 @@
         const p = PartyProfile.requireOrRedirect();
         if (!p) return;
         document.getElementById("photos").href = PARTY_CONFIG.photosUrl;
-        const data = await fetch("data/poses.json").then((r) => r.json());
-        const prompts = data.prompts;
+        let data;
+        try {
+          const remote = await fetch("/api/content/poses").then((r) => (r.ok ? r.json() : null));
+          data = remote && remote.prompts ? remote : await fetch("data/poses.json").then((r) => r.json());
+        } catch {
+          data = await fetch("data/poses.json").then((r) => r.json());
+        }
+        const prompts = data.prompts || [];
         let rot = 0;
         document.getElementById("spin").onclick = async () => {
           const pick = prompts[Math.floor(Math.random() * prompts.length)];

@@ -38,10 +38,23 @@
         const p = PartyProfile.requireOrRedirect();
         if (!p) return;
         await PartyUI.hydrateConfigFromApi();
-        const prompts = (PARTY_CONFIG._remote && PARTY_CONFIG._remote.comingle) || [];
+        const FALLBACK = [
+          { id: "chad", prompt: "Find Chad Cahill and ask him his daughter's name.", hint: "One word.", points: 25 },
+          { id: "cupcakes", prompt: "Find Ronni or Alondra and ask what cupcake flavors are at the dessert station.", hint: "Any flavors you heard.", points: 25 },
+          { id: "homelab", prompt: "Find Uncle J and ask how many servers are in his homelab.", hint: "A number.", points: 25 },
+        ];
+        const prompts =
+          (PARTY_CONFIG._remote && PARTY_CONFIG._remote.comingle && PARTY_CONFIG._remote.comingle.length
+            ? PARTY_CONFIG._remote.comingle
+            : null) ||
+          FALLBACK;
         const scoring = (PARTY_CONFIG._remote && PARTY_CONFIG._remote.scoring) || {};
         document.getElementById("score-note").textContent = scoring.message || "";
         const list = document.getElementById("list");
+        if (!prompts.length) {
+          list.innerHTML = `<section class="card"><p class="muted">No co-mingle quests yet. Host can add them in Host desk → Co-Mingle CSV.</p></section>`;
+          return;
+        }
         list.innerHTML = prompts
           .map(
             (q) => `

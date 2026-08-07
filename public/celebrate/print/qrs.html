@@ -42,12 +42,12 @@
     <div class="no-print" style="margin-bottom: 1rem">
       <h1>QR print pack</h1>
       <p>
-        Set <code>publicBaseUrl</code> in <code>js/config.js</code> to your live hub root (with trailing path if needed),
-        then print.
+        Guest phones use <strong>cellular</strong>. Default base is always
+        <code>https://www.thekeyholders.org/celebrate/</code> (do not use localhost).
       </p>
       <label
-        >Base URL
-        <input id="base" style="width: min(520px, 100%); padding: 0.5rem" placeholder="https://www.thekeyholders.org/celebrate/"
+        >Base URL (public TKH)
+        <input id="base" style="width: min(520px, 100%); padding: 0.5rem" value="https://www.thekeyholders.org/celebrate/"
       /></label>
       <button class="btn" id="gen" style="margin-left: 0.5rem">Generate</button>
       <button class="btn btn-secondary" onclick="print()">Print</button>
@@ -75,25 +75,42 @@
         { file: "screen.html", title: "Screen / Projector", blurb: "Host display" },
       ];
 
-      document.getElementById("base").value =
-        PARTY_CONFIG.publicBaseUrl ||
-        location.href.replace(/print\/qrs\.html.*/, "");
+      const TKH = "https://www.thekeyholders.org/celebrate/";
+      // Always default to TKH for cellular guests (ignore localhost)
+      let initial =
+        (window.PARTY_CONFIG && PARTY_CONFIG.publicBaseUrl) || TKH;
+      if (!initial || /localhost|127\.0\.0\.1|192\.168\./i.test(initial)) initial = TKH;
+      if (!initial.endsWith("/")) initial += "/";
+      document.getElementById("base").value = initial;
 
       async function generate() {
-        let base = document.getElementById("base").value.trim();
+        let base = document.getElementById("base").value.trim() || TKH;
+        if (/localhost|127\.0\.0\.1|192\.168\./i.test(base)) {
+          base = TKH;
+          document.getElementById("base").value = base;
+          alert("Base URL was local — switched to thekeyholders.org/celebrate/ for guest cellular access.");
+        }
         if (!base.endsWith("/")) base += "/";
         const grid = document.getElementById("grid");
         grid.innerHTML = "";
+        const lib = window.QRCode || (window.QRCode && window.QRCode.toCanvas);
+        if (!window.QRCode || typeof window.QRCode.toCanvas !== "function") {
+          grid.innerHTML = "<p>QR library failed to load. Refresh the page.</p>";
+          return;
+        }
         for (const m of modules) {
           const url = base + m.file;
           const card = document.createElement("div");
           card.className = "print-card";
           card.innerHTML = `<div style="font-size:1.4rem">🌸</div><h2>${m.title}</h2><p>${m.blurb}</p><canvas></canvas><p style="font-size:0.65rem;word-break:break-all">${url}</p>`;
           grid.appendChild(card);
-          await QRCode.toCanvas(card.querySelector("canvas"), url, {
-            width: 180,
-            margin: 1,
-            color: { dark: "#1a1a1a", light: "#ffffff" },
+          await new Promise((resolve, reject) => {
+            QRCode.toCanvas(
+              card.querySelector("canvas"),
+              url,
+              { width: 180, margin: 1, color: { dark: "#1a1a1a", light: "#ffffff" } },
+              (err) => (err ? reject(err) : resolve())
+            );
           });
         }
       }

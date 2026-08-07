@@ -219,38 +219,45 @@
       </section>
 
       <section class="host-card">
-        <h2>He / She said + Poses (JSON)</h2>
-        <div class="host-grid">
-          <div>
-            <label>he-said-she-said.json</label>
-            <textarea id="hesaid-json"></textarea>
-            <div class="host-actions">
-              <button class="btn" type="button" id="btn-save-hesaid">Save he/she</button>
-            </div>
-          </div>
-          <div>
-            <label>poses.json</label>
-            <textarea id="poses-json"></textarea>
-            <div class="host-actions">
-              <button class="btn" type="button" id="btn-save-poses">Save poses</button>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <section class="host-card">
-        <h2>Co-Mingle prompts (JSON array)</h2>
-        <textarea id="comingle-json" style="min-height:140px"></textarea>
-        <label style="margin-top:0.5rem">Answer keys (id → array of accepted strings)</label>
-        <textarea id="comingle-answers" style="min-height:90px"></textarea>
+        <h2>He / She said (CSV)</h2>
+        <p class="host-muted">Columns: <code>question,choice_a,choice_b,choice_c,answer_index</code> (choice_c optional; answer 0=A)</p>
+        <textarea id="hesaid-csv" style="min-height:120px"></textarea>
         <div class="host-actions">
-          <button class="btn" type="button" id="btn-save-comingle">Save co-mingle</button>
+          <button class="btn" type="button" id="btn-load-hesaid">Reload</button>
+          <button class="btn" type="button" id="btn-save-hesaid-csv">Save he/she CSV</button>
         </div>
+        <textarea id="hesaid-json" hidden></textarea>
       </section>
 
       <section class="host-card">
-        <h2>QR quick generate</h2>
-        <p class="host-muted">Uses public base URL above (or this site origin). For table packs use the full print page.</p>
+        <h2>Poses (CSV)</h2>
+        <p class="host-muted">One prompt per line (or column <code>prompt</code>). Guests spin these on the Poses page.</p>
+        <textarea id="poses-csv" style="min-height:100px"></textarea>
+        <div class="host-actions">
+          <button class="btn" type="button" id="btn-load-poses">Reload</button>
+          <button class="btn" type="button" id="btn-save-poses-csv">Save poses CSV</button>
+        </div>
+        <textarea id="poses-json" hidden></textarea>
+      </section>
+
+      <section class="host-card">
+        <h2>Co-Mingle quests (CSV)</h2>
+        <p class="host-muted">
+          Columns: <code>id,prompt,hint,points,accepted_answers</code>
+          · accepted_answers = pipe-separated (e.g. <code>quinn|Quinn</code>). Complete prompts so guests always see quests.
+        </p>
+        <textarea id="comingle-csv" style="min-height:140px"></textarea>
+        <div class="host-actions">
+          <button class="btn" type="button" id="btn-load-comingle">Reload</button>
+          <button class="btn" type="button" id="btn-save-comingle-csv">Save co-mingle CSV</button>
+        </div>
+        <textarea id="comingle-json" hidden></textarea>
+        <textarea id="comingle-answers" hidden></textarea>
+      </section>
+
+      <section class="host-card">
+        <h2>QR quick generate (TKH cellular)</h2>
+        <p class="host-muted">Always encodes <strong>thekeyholders.org/celebrate/…</strong> so guests on cell data can play. Print pack recommended for tables.</p>
         <div class="host-grid">
           <div>
             <label>Path</label>
@@ -320,13 +327,14 @@
       </section>
 
       <p class="host-muted">
-        Host desk talks to <code>/api/host/*</code> on this origin. Use the Docker LAN stack for durable controls.
-        Vercel memory API is best-effort only.
+        <strong>Guest public base (QR pack):</strong> always <code>https://www.thekeyholders.org/celebrate/</code>
+        so phones on cellular work. Host desk can run on TKH or LAN; guests use TKH only.
       </p>
     </div>
 
     <script>
       const TOKEN_KEY = "dj_host_token";
+      const TKH_BASE = "https://www.thekeyholders.org/celebrate/";
       let token = sessionStorage.getItem(TOKEN_KEY) || "";
 
       function toast(msg, ms = 2800) {
@@ -368,10 +376,13 @@
       function fillEvent(cfg, hostState) {
         document.getElementById("event-name").value = (cfg && cfg.eventName) || "";
         document.getElementById("couple").value = (cfg && cfg.couple) || "";
-        document.getElementById("public-base").value =
+        let pb =
           (hostState && hostState.publicBaseUrl) ||
           (cfg && cfg.host && cfg.host.publicBaseUrl) ||
-          "";
+          (cfg && cfg.publicBaseUrl) ||
+          TKH_BASE;
+        if (!pb || /localhost|127\.0\.0\.1|192\.168\./i.test(pb)) pb = TKH_BASE;
+        document.getElementById("public-base").value = pb;
         document.getElementById("photos-url").value = (cfg && cfg.photosUrl) || "";
         document.getElementById("ig-ar").value = (cfg && cfg.instagramArUrl) || "";
         document.getElementById("max-profiles").value = (cfg && cfg.maxProfiles) || 150;
@@ -577,10 +588,7 @@
 
       function baseUrl() {
         let b = (document.getElementById("public-base").value || "").trim();
-        if (!b) {
-          // Host desk on /celebrate/host.html → root is /celebrate/
-          b = location.href.replace(/host\.html.*$/i, "");
-        }
+        if (!b || /localhost|127\.0\.0\.1|192\.168\./i.test(b)) b = TKH_BASE;
         if (!b.endsWith("/")) b += "/";
         return b;
       }
@@ -774,20 +782,171 @@
         toast("CSV loaded into editor · click Save trivia from CSV");
         ev.target.value = "";
       };
-      document.getElementById("btn-save-hesaid").onclick = () => saveContent("he-said", "hesaid-json");
-      document.getElementById("btn-save-poses").onclick = () => saveContent("poses", "poses-json");
+      function heSaidToCsv(data) {
+        const header = "question,choice_a,choice_b,choice_c,answer_index";
+        const lines = [header];
+        for (const q of (data && data.questions) || []) {
+          const ch = q.choices || [];
+          lines.push(
+            [csvEscape(q.q), csvEscape(ch[0] || ""), csvEscape(ch[1] || ""), csvEscape(ch[2] || ""), csvEscape(q.answer != null ? q.answer : 0)].join(",")
+          );
+        }
+        return lines.join("\n");
+      }
+      function csvToHeSaid(csvText, existing) {
+        const rows = parseCsv(csvText);
+        let start = 0;
+        if (String(rows[0]?.[0] || "").toLowerCase().includes("question")) start = 1;
+        const questions = [];
+        for (let i = start; i < rows.length; i++) {
+          const r = rows[i];
+          if (!r?.[0]) continue;
+          let ans = String(r[4] != null ? r[4] : "0").trim();
+          if (/^[A-Da-d]$/.test(ans)) ans = ans.toUpperCase().charCodeAt(0) - 65;
+          else ans = parseInt(ans, 10) || 0;
+          const choices = [r[1], r[2], r[3]].map((x) => String(x || "").trim()).filter(Boolean);
+          questions.push({ q: String(r[0]).trim(), choices, answer: ans });
+        }
+        return {
+          id: (existing && existing.id) || "he-said-she-said",
+          title: (existing && existing.title) || "He Said / She Said",
+          subtitle: (existing && existing.subtitle) || "Who is more likely?",
+          questions,
+        };
+      }
+      function posesToCsv(data) {
+        const prompts = (data && data.prompts) || [];
+        return ["prompt"].concat(prompts.map((p) => csvEscape(p))).join("\n");
+      }
+      function csvToPoses(csvText) {
+        const rows = parseCsv(csvText);
+        let start = 0;
+        if (String(rows[0]?.[0] || "").toLowerCase() === "prompt") start = 1;
+        const prompts = [];
+        for (let i = start; i < rows.length; i++) {
+          const line = (rows[i] || []).join(",").trim();
+          // prefer first column
+          const p = String(rows[i]?.[0] || line).trim();
+          if (p) prompts.push(p);
+        }
+        return { prompts };
+      }
+      function comingleToCsv(prompts, answers) {
+        const header = "id,prompt,hint,points,accepted_answers";
+        const lines = [header];
+        for (const q of prompts || []) {
+          const acc = (answers && answers[q.id]) || [];
+          lines.push(
+            [csvEscape(q.id), csvEscape(q.prompt), csvEscape(q.hint || ""), csvEscape(q.points != null ? q.points : 25), csvEscape(acc.join("|"))].join(",")
+          );
+        }
+        return lines.join("\n");
+      }
+      function csvToComingle(csvText) {
+        const rows = parseCsv(csvText);
+        let start = 0;
+        if (String(rows[0]?.[0] || "").toLowerCase() === "id") start = 1;
+        const prompts = [];
+        const answers = {};
+        for (let i = start; i < rows.length; i++) {
+          const r = rows[i];
+          if (!r?.[0] || !r?.[1]) continue;
+          const id = String(r[0]).trim();
+          prompts.push({
+            id,
+            prompt: String(r[1]).trim(),
+            hint: String(r[2] || "").trim(),
+            points: parseInt(r[3], 10) || 25,
+          });
+          const acc = String(r[4] || "")
+            .split("|")
+            .map((s) => s.trim())
+            .filter(Boolean);
+          if (acc.length) answers[id] = acc;
+        }
+        return { prompts, answers };
+      }
 
-      document.getElementById("btn-save-comingle").onclick = async () => {
+      document.getElementById("btn-load-hesaid").onclick = async () => {
         try {
-          const comingle = JSON.parse(document.getElementById("comingle-json").value || "[]");
-          const comingleAnswers = JSON.parse(document.getElementById("comingle-answers").value || "{}");
+          const data = await loadContent("he-said", "hesaid-json");
+          document.getElementById("hesaid-csv").value = heSaidToCsv(data);
+          toast("He/she loaded");
+        } catch (e) {
+          toast(e.message);
+        }
+      };
+      document.getElementById("btn-save-hesaid-csv").onclick = async () => {
+        try {
+          let existing = {};
+          try {
+            existing = JSON.parse(document.getElementById("hesaid-json").value || "{}");
+          } catch (_) {}
+          const data = csvToHeSaid(document.getElementById("hesaid-csv").value, existing);
+          document.getElementById("hesaid-json").value = JSON.stringify(data, null, 2);
+          await api("/api/host/content/he-said", { method: "PUT", body: JSON.stringify({ data }) });
+          toast("He/she saved (" + data.questions.length + ")");
+        } catch (e) {
+          toast(e.message);
+        }
+      };
+      document.getElementById("btn-load-poses").onclick = async () => {
+        try {
+          const data = await loadContent("poses", "poses-json");
+          document.getElementById("poses-csv").value = posesToCsv(data);
+          toast("Poses loaded");
+        } catch (e) {
+          toast(e.message);
+        }
+      };
+      document.getElementById("btn-save-poses-csv").onclick = async () => {
+        try {
+          const data = csvToPoses(document.getElementById("poses-csv").value);
+          document.getElementById("poses-json").value = JSON.stringify(data, null, 2);
+          await api("/api/host/content/poses", { method: "PUT", body: JSON.stringify({ data }) });
+          toast("Poses saved (" + data.prompts.length + ")");
+        } catch (e) {
+          toast(e.message);
+        }
+      };
+      document.getElementById("btn-load-comingle").onclick = async () => {
+        try {
+          const res = await api("/api/host/content/comingle");
+          const data = res.data || {};
+          const prompts = data.prompts || data || [];
+          const answers = data.answers || {};
+          document.getElementById("comingle-csv").value = comingleToCsv(prompts, answers);
+          document.getElementById("comingle-json").value = JSON.stringify(prompts, null, 2);
+          document.getElementById("comingle-answers").value = JSON.stringify(answers, null, 2);
+          toast("Co-mingle loaded");
+        } catch (e) {
+          // fallback from overview config
+          try {
+            const ov = await api("/api/host/overview");
+            const prompts = (ov.config && ov.config.comingle) || [];
+            document.getElementById("comingle-csv").value = comingleToCsv(prompts, {});
+            toast("Co-mingle from config");
+          } catch (e2) {
+            toast(e.message);
+          }
+        }
+      };
+      document.getElementById("btn-save-comingle-csv").onclick = async () => {
+        try {
+          const { prompts, answers } = csvToComingle(document.getElementById("comingle-csv").value);
+          document.getElementById("comingle-json").value = JSON.stringify(prompts, null, 2);
+          document.getElementById("comingle-answers").value = JSON.stringify(answers, null, 2);
           await api("/api/host/config", {
             method: "PUT",
-            body: JSON.stringify({ comingle, comingleAnswers }),
+            body: JSON.stringify({ comingle: prompts, comingleAnswers: answers }),
           });
-          toast("Co-mingle saved");
+          await api("/api/host/content/comingle", {
+            method: "PUT",
+            body: JSON.stringify({ data: { prompts, answers } }),
+          }).catch(() => null);
+          toast("Co-mingle saved (" + prompts.length + " quests)");
         } catch (e) {
-          toast(e.message || "Invalid JSON");
+          toast(e.message);
         }
       };
 
@@ -828,15 +987,32 @@
       };
 
       async function boot() {
-        await loadOverview();
-        await loadGuests();
+        try {
+          await loadOverview();
+        } catch (e) {
+          toast("Overview failed: " + e.message);
+        }
+        try {
+          await loadGuests();
+        } catch (e) {
+          toast("Guests failed: " + e.message);
+        }
         try {
           await loadContent("trivia", "trivia-json");
-          await loadContent("he-said", "hesaid-json");
-          await loadContent("poses", "poses-json");
-        } catch (_) {
-          /* content optional on limited hosts */
-        }
+        } catch (_) {}
+        try {
+          const d = await loadContent("he-said", "hesaid-json");
+          document.getElementById("hesaid-csv").value = heSaidToCsv(d);
+        } catch (_) {}
+        try {
+          const d = await loadContent("poses", "poses-json");
+          document.getElementById("poses-csv").value = posesToCsv(d);
+        } catch (_) {}
+        try {
+          document.getElementById("btn-load-comingle").click();
+        } catch (_) {}
+        // Force public base to TKH for QR pack
+        document.getElementById("public-base").value = TKH_BASE;
         genQr();
       }
 

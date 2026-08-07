@@ -48,7 +48,13 @@
       (async function () {
         const p = PartyProfile.requireOrRedirect();
         if (!p) return;
-        const data = await fetch("data/trivia.json").then((r) => r.json());
+        let data;
+        try {
+          const remote = await fetch("/api/content/trivia").then((r) => (r.ok ? r.json() : null));
+          data = remote && remote.questions ? remote : await fetch("data/trivia.json").then((r) => r.json());
+        } catch {
+          data = await fetch("data/trivia.json").then((r) => r.json());
+        }
         let i = 0;
         let score = 0;
         const t0 = performance.now();
