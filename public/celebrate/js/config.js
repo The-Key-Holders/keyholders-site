@@ -1,7 +1,7 @@
 /* Host config - edit freely. Redeploy web after changes. */
 window.PARTY_CONFIG = {
   apiBase: "",
-  publicBaseUrl: "https://dani-javad-guest-hub.vercel.app/",
+  publicBaseUrl: "https://www.thekeyholders.org/celebrate/",
   photosUrl: "https://photos.app.goo.gl/tNy59HYGHJzvhX536",
   couple: "Dani & Javad",
   eventName: "Dani & Javad Guest Hub",
