@@ -20,7 +20,11 @@ const pageUrl = (path: string) => {
   return isDocker ? `${BASE}/${p}` : `${BASE}${hubRoot}/${p}`;
 };
 
-test.use({ ...devices["iPhone 13"] });
+// Chromium + mobile viewport (avoid requiring WebKit install)
+test.use({
+  ...devices["Pixel 5"],
+  browserName: "chromium",
+});
 
 test.describe("Guest Hub @ mobile", () => {
   test("critical routes respond (not 404)", async ({ request }) => {
