@@ -36,6 +36,8 @@ const nextConfig = {
         destination: "/api/party/leaderboard",
       },
       { source: "/api/export", destination: "/api/party/export" },
+      { source: "/api/host", destination: "/api/party/host" },
+      { source: "/api/host/:path*", destination: "/api/party/host/:path*" },
     ];
   },
 };
