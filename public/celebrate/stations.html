@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=5" />
+    <title>QR Stations · Guest Hub</title>
+    <link rel="stylesheet" href="css/party.css" />
+    <script src="js/head-boot.js"></script>
+  </head>
+  <body data-page="stations">
+    <header class="app-header">
+      <div class="brand">
+        <div class="brand-mark">📍</div>
+        <div>
+          <h1>QR Stations</h1>
+          <p>Riddles + selfie challenges · +20 pts</p>
+        </div>
+      </div>
+      <div id="profile-chip"></div>
+      <div id="prize-banner" hidden></div>
+    </header>
+    <main>
+      <section class="hero">
+        <h2>Venue zone unlocks</h2>
+        <p class="lede">Scan a station QR (or open this page and pick a zone). Solve the riddle, take the selfie, collect points.</p>
+        <p class="muted">Print separate QRs to: stations.html?station=margarita · arch · dessert</p>
+      </section>
+      <div id="list"></div>
+    </main>
+    <nav id="bottom-nav"></nav>
+    <script src="js/config.js"></script>
+    <script src="js/api.js"></script>
+    <script src="js/profile.js"></script>
+    <script src="js/ui.js"></script>
+    <script src="js/shell.js"></script>
+    <script>
+      (async function () {
+        const p = PartyProfile.requireOrRedirect();
+        if (!p) return;
+        await PartyUI.hydrateConfigFromApi();
+        const stations = (PARTY_CONFIG._remote && PARTY_CONFIG._remote.stations) || [];
+        const focus = new URLSearchParams(location.search).get("station");
+        const list = focus ? stations.filter((s) => s.id === focus) : stations;
+        document.getElementById("list").innerHTML = list
+          .map(
+            (s) => `
+          <section class="card">
+            <h3>${s.title}</h3>
+            <p><strong>Riddle:</strong> ${s.riddle}</p>
+            <p class="muted"><strong>Selfie:</strong> ${s.selfie}</p>
+            <div class="field"><label>Your answer</label><input id="a-${s.id}" placeholder="Type what you see / the answer" /></div>
+            <button class="btn btn-block" data-id="${s.id}">Check in (+${s.points})</button>
+            <p class="muted" id="m-${s.id}"></p>
+          </section>`
+          )
+          .join("");
+        document.querySelectorAll("[data-id]").forEach((btn) => {
+          btn.onclick = async () => {
+            const id = btn.dataset.id;
+            const answer = document.getElementById("a-" + id).value.trim();
+            const res = await PartyAPI.postStation({ profileId: p.id, stationId: id, answer });
+            document.getElementById("m-" + id).textContent = res.message || (res.correct ? `Nice. +${res.points}` : "Try again");
+            if (res.correct || res.already) PartyUI.confetti(800);
+          };
+        });
+      })();
+    </script>
+  </body>
+</html>

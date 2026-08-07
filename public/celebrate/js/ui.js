@@ -46,7 +46,7 @@
     }
     const nav = document.getElementById("bottom-nav");
     if (nav && cfg.modules) {
-      const main = ["home", "trivia", "rings", "passport", "leaderboard"];
+      const main = ["home", "trivia", "comingle", "photowall", "leaderboard"];
       nav.innerHTML = main
         .map((id) => {
           const m = cfg.modules.find((x) => x.id === id);
@@ -63,6 +63,23 @@
         cfg.prize.announceAt || ""
       )} · <a href="leaderboard.html">Standings</a>`;
     }
+    ensureHelpFab(activeId);
+  }
+
+  function ensureHelpFab(activeId) {
+    if (activeId === "screen") return;
+    let fab = document.querySelector(".help-fab");
+    if (!fab) {
+      fab = document.createElement("a");
+      fab.className = "help-fab";
+      fab.href = "help.html";
+      fab.setAttribute("aria-label", "Help");
+      fab.title = "Help";
+      fab.textContent = "?";
+      document.body.appendChild(fab);
+    }
+    if (activeId === "help") fab.classList.add("help-fab-active");
+    else fab.classList.remove("help-fab-active");
   }
 
   function escapeHtml(s) {

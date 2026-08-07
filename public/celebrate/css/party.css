@@ -179,6 +179,61 @@ main {
   border: 1px solid rgba(255, 107, 107, 0.22);
 }
 
+/* Discrete help control — always available, out of the way */
+.help-fab {
+  position: fixed;
+  top: calc(0.65rem + env(safe-area-inset-top, 0px));
+  right: calc(0.75rem + env(safe-area-inset-right, 0px));
+  z-index: 40;
+  width: 36px;
+  height: 36px;
+  border-radius: 999px;
+  display: grid;
+  place-items: center;
+  font-weight: 800;
+  font-size: 1.05rem;
+  color: var(--ink-soft);
+  background: rgba(255, 255, 255, 0.88);
+  border: 1px solid rgba(26, 26, 26, 0.12);
+  box-shadow: 0 4px 14px rgba(26, 26, 26, 0.1);
+  text-decoration: none;
+  touch-action: manipulation;
+}
+.help-fab:hover,
+.help-fab:focus-visible {
+  color: var(--coral-deep);
+  border-color: rgba(255, 107, 107, 0.45);
+  outline: none;
+}
+.help-fab-active {
+  background: linear-gradient(135deg, var(--coral), #ff8e72);
+  color: #fff;
+  border-color: transparent;
+}
+
+.about-dev {
+  border: 1px solid rgba(212, 175, 55, 0.35);
+  background: linear-gradient(180deg, #fffef9, #fff5f5);
+}
+.about-dev a {
+  display: inline-block;
+  margin: 0.15rem 0;
+}
+
+/* Soft readability polish */
+.hero h2 {
+  text-wrap: balance;
+}
+.card h3 {
+  letter-spacing: -0.01em;
+}
+.tile strong {
+  letter-spacing: -0.01em;
+}
+.muted {
+  line-height: 1.5;
+}
+
 .grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));

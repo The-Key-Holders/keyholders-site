@@ -30,6 +30,7 @@
   window.PartyAPI = {
     health: () => req("/api/health"),
     config: () => req("/api/config"),
+    status: () => req("/api/status"),
     lookup: (first, last) =>
       req(`/api/profiles/lookup?first=${encodeURIComponent(first)}&last=${encodeURIComponent(last)}`),
     createProfile: (firstName, lastName, forceNew = false) =>
@@ -41,5 +42,26 @@
     postScore: (body) => req("/api/scores", { method: "POST", body: JSON.stringify(body) }),
     checkin: (body) => req("/api/checkins", { method: "POST", body: JSON.stringify(body) }),
     leaderboard: () => req("/api/leaderboard"),
+    dashboard: () => req("/api/dashboard"),
+    comingle: (body) => req("/api/comingle", { method: "POST", body: JSON.stringify(body) }),
+    postPrediction: (body) => req("/api/predictions", { method: "POST", body: JSON.stringify(body) }),
+    getPredictions: () => req("/api/predictions"),
+    postWish: (body) => req("/api/wishes", { method: "POST", body: JSON.stringify(body) }),
+    getWishes: () => req("/api/wishes"),
+    getPhotos: () => req("/api/photos"),
+    postSong: (body) => req("/api/songs", { method: "POST", body: JSON.stringify(body) }),
+    getSongs: () => req("/api/songs"),
+    postStation: (body) => req("/api/stations", { method: "POST", body: JSON.stringify(body) }),
+    postMargarita: (body) => req("/api/margarita", { method: "POST", body: JSON.stringify(body) }),
+    getMargarita: () => req("/api/margarita"),
+    postAdvice: (body) => req("/api/advice", { method: "POST", body: JSON.stringify(body) }),
+    getAdvice: () => req("/api/advice"),
+    async uploadPhoto(formData) {
+      const b = (cfg().apiBase || "").replace(/\/$/, "");
+      const res = await fetch(`${b}/api/photos`, { method: "POST", body: formData });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data.error || "Upload failed");
+      return data;
+    },
   };
 })();

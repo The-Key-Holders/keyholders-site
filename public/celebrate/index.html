@@ -26,10 +26,13 @@
           Thanks for showing up IRL. Scan, play, stamp your passport, and dump photos in the shared album.
           We kept this password-free because we barely remember our own.
         </p>
+        <p class="muted" id="scoring-line"></p>
+        <div id="winner-home" class="card" style="display:none;margin-top:0.85rem;background:linear-gradient(135deg,#fff8e1,#ffe0e0)"></div>
         <div class="badge-row">
           <span class="badge">🌸 Bright floral vibes</span>
           <span class="badge">🌮 Taco timeline</span>
-          <span class="badge">🏆 Optional glory</span>
+          <span class="badge">⏰ Points freeze 4:30 PM</span>
+          <span class="badge">🏆 $5,000 joke card*</span>
         </div>
       </section>
 
@@ -81,6 +84,15 @@
           .map((s) => `<li><strong>${s.time}</strong> — ${s.what}</li>`)
           .join("");
         if (remote && remote.thanks) document.getElementById("thanks").textContent = remote.thanks;
+        try {
+          const st = await PartyAPI.status();
+          document.getElementById("scoring-line").textContent = st.message || "";
+          if (st.winner) {
+            const w = document.getElementById("winner-home");
+            w.style.display = "block";
+            w.innerHTML = `<h3>🏆 Winner locked</h3><p><strong>${PartyUI.escapeHtml(st.winner.displayName)}</strong> · ${st.winner.totalPoints} pts</p><p class="muted">${PartyUI.escapeHtml(st.winner.congrats)}</p>`;
+          }
+        } catch (_) {}
       })();
     </script>
   </body>

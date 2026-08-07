@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=5" />
+    <title>Co-Mingle · Guest Hub</title>
+    <link rel="stylesheet" href="css/party.css" />
+    <script src="js/head-boot.js"></script>
+  </head>
+  <body data-page="comingle">
+    <header class="app-header">
+      <div class="brand">
+        <div class="brand-mark">🤝</div>
+        <div>
+          <h1>Co-Mingle Quest</h1>
+          <p>Talk to humans. Earn XP. +25 each.</p>
+        </div>
+      </div>
+      <div id="profile-chip"></div>
+      <div id="prize-banner" hidden></div>
+    </header>
+    <main>
+      <section class="hero">
+        <h2>Icebreakers with receipts</h2>
+        <p class="lede">Find the person, ask the question, type what they said. No social anxiety? Cool. A little social anxiety? Also valid. Still try.</p>
+        <p class="muted" id="score-note"></p>
+      </section>
+      <div id="list"></div>
+    </main>
+    <nav id="bottom-nav"></nav>
+    <script src="js/config.js"></script>
+    <script src="js/api.js"></script>
+    <script src="js/profile.js"></script>
+    <script src="js/ui.js"></script>
+    <script src="js/shell.js"></script>
+    <script>
+      (async function () {
+        const p = PartyProfile.requireOrRedirect();
+        if (!p) return;
+        await PartyUI.hydrateConfigFromApi();
+        const prompts = (PARTY_CONFIG._remote && PARTY_CONFIG._remote.comingle) || [];
+        const scoring = (PARTY_CONFIG._remote && PARTY_CONFIG._remote.scoring) || {};
+        document.getElementById("score-note").textContent = scoring.message || "";
+        const list = document.getElementById("list");
+        list.innerHTML = prompts
+          .map(
+            (q) => `
+          <section class="card" data-id="${q.id}">
+            <h3>${q.prompt}</h3>
+            <p class="muted">${q.hint || ""} · ${q.points || 25} pts</p>
+            <div class="field"><label>Their answer</label><input id="a-${q.id}" placeholder="Type it here" /></div>
+            <button class="btn btn-block" data-submit="${q.id}">Submit</button>
+            <p class="muted" id="m-${q.id}"></p>
+          </section>`
+          )
+          .join("");
+        list.querySelectorAll("[data-submit]").forEach((btn) => {
+          btn.onclick = async () => {
+            const id = btn.getAttribute("data-submit");
+            const answer = document.getElementById("a-" + id).value.trim();
+            try {
+              const res = await PartyAPI.comingle({ profileId: p.id, promptId: id, answer });
+              document.getElementById("m-" + id).textContent = res.message + (res.points ? ` (+${res.points})` : "");
+              if (res.correct) PartyUI.confetti(1000);
+              PartyUI.toast(res.correct ? "Verified. Social legendary." : "Not verified yet.");
+            } catch (e) {
+              PartyUI.toast(e.message || "Failed");
+            }
+          };
+        });
+      })();
+    </script>
+  </body>
+</html>

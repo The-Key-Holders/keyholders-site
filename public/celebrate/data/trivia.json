@@ -1,68 +1,56 @@
 {
   "id": "trivia",
-  "title": "Couple Trivia",
-  "subtitle": "Prove you listen at dinner. Or guess stylishly.",
-  "pointsNote": "Your best run counts toward the leaderboard.",
+  "title": "Couples & Family Trivia",
+  "subtitle": "Speed round about Dani & Javad. +15 pts per correct answer.",
+  "pointsPerCorrect": 15,
   "questions": [
     {
-      "q": "Where is this party happening (city)?",
-      "choices": ["Sacramento", "San Francisco", "Stockton", "The cloud"],
+      "q": "Where did Dani & Javad go on their first date?",
+      "choices": ["Coffee shop hang", "Fancy steakhouse", "Bowling alley", "Homelab tour (romantic)"],
+      "answer": 0,
+      "explain": "First dates: keep it chill."
+    },
+    {
+      "q": "Who said 'I love you' first?",
+      "choices": ["Dani", "Javad", "Luna (via bark)", "Simultaneously, for the plot"],
+      "answer": 1,
+      "explain": "Host can edit this answer in trivia.json if lore differs."
+    },
+    {
+      "q": "What is the name of Javad & Dani's dog?",
+      "choices": ["Luna", "Pixel", "Taco", "Server"],
+      "answer": 0,
+      "explain": "Luna. Correct. Good human."
+    },
+    {
+      "q": "Who is most likely to steal the last taco from La Esperanza?",
+      "choices": ["Dani", "Javad", "A coordinated joint operation", "The dog (spiritual theft)"],
+      "answer": 2,
+      "explain": "Teamwork makes the taco work."
+    },
+    {
+      "q": "What are Dani & Javad wearing so you can spot them instantly?",
+      "choices": ["Matching Hawaiian shirts", "All white", "Server-rack camo", "Superhero capes"],
+      "answer": 1,
+      "explain": "All white. Bright florals for everyone else."
+    },
+    {
+      "q": "Where is this party (city)?",
+      "choices": ["Sacramento", "San Francisco", "The cloud", "Stockton"],
       "answer": 0,
       "explain": "Sacramento. Farm-to-fork and freeways."
     },
     {
-      "q": "What are Dani & Javad wearing so you can spot the couple instantly?",
-      "choices": ["Matching Hawaiian shirts", "All white", "Superhero capes", "Camo"],
-      "answer": 1,
-      "explain": "All white. Everyone else: bright florals encouraged."
-    },
-    {
       "q": "Main food energy today?",
-      "choices": ["Sushi conveyor", "Tacos", "Only celery", "Mystery meat loaf"],
+      "choices": ["Sushi conveyor", "Tacos", "Only celery", "Mystery meatloaf"],
       "answer": 1,
-      "explain": "Tacos. Correct priorities."
+      "explain": "Tacos. Priorities."
     },
     {
-      "q": "Guest dress code vibe?",
-      "choices": ["Black-tie gala", "Bright floral semi-formal", "Pajamas only", "Full armor"],
+      "q": "Scoring freezes at what time?",
+      "choices": ["3:00 PM", "4:30 PM", "Midnight", "Never (chaos mode)"],
       "answer": 1,
-      "explain": "Bright, floral, semi-formal, approachable."
-    },
-    {
-      "q": "Gifts expectation?",
-      "choices": ["Mandatory toaster", "Your presence is the gift", "Crypto only", "Bring a goat"],
-      "answer": 1,
-      "explain": "Presence > presents."
-    },
-    {
-      "q": "Approx. party window?",
-      "choices": ["1–5 PM", "Midnight–sunrise", "Brunch at 9 AM sharp", "Whenever Zoom starts"],
-      "answer": 0,
-      "explain": "1:00–5:00 PM. Afternoon excellence."
-    },
-    {
-      "q": "Kids drinks policy (soft rule of the day)?",
-      "choices": ["Unlimited soda fountain", "Juice / lemonade / water energy", "Espresso martinis", "Nothing, they photosynthesize"],
-      "answer": 1,
-      "explain": "Juice, lemonade, sparkling water. Hydration nation."
-    },
-    {
-      "q": "If you want photos in the shared album, you should…",
-      "choices": ["Mail a USB stick", "Use the shared Google Photos album", "Fax them", "Describe them loudly"],
-      "answer": 1,
-      "explain": "Shared album. One tap from the Hub."
-    },
-    {
-      "q": "Nerdy host energy belongs to…",
-      "choices": ["Dani exclusively", "Javad (with gratitude)", "The taco tray", "A rogue Roomba"],
-      "answer": 1,
-      "explain": "Javad: grateful nerd with a QR code habit."
-    },
-    {
-      "q": "Best way to “win” this party?",
-      "choices": ["Max leaderboard + be kind", "Hide all the tacos", "Unplug the speakers", "Skip saying hi"],
-      "answer": 0,
-      "explain": "Points are fun. Kindness is meta."
+      "explain": "4:30 PM Pacific. Winner locks then."
     }
   ]
 }

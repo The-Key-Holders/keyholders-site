@@ -77,7 +77,8 @@
             b.onclick = () => {
               const ok = idx === qs[i].answer;
               b.classList.add(ok ? "correct" : "wrong");
-              if (ok) score += 10;
+              const ppc = data.pointsPerCorrect || 15;
+              if (ok) score += ppc;
               else {
                 const right = box.children[qs[i].answer];
                 if (right) right.classList.add("correct");
@@ -96,7 +97,7 @@
           document.getElementById("play").hidden = true;
           document.getElementById("done").hidden = false;
           document.getElementById("bar").style.width = "100%";
-          const max = qs.length * 10;
+          const max = qs.length * (data.pointsPerCorrect || 15);
           const durationMs = Math.round(performance.now() - t0);
           document.getElementById("result-title").textContent = `${titleFor(score, max)} · ${score}/${max}`;
           document.getElementById("result-body").textContent =

@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=5" />
+    <title>Photo Wall · Guest Hub</title>
+    <link rel="stylesheet" href="css/party.css" />
+    <script src="js/head-boot.js"></script>
+  </head>
+  <body data-page="photowall">
+    <header class="app-header">
+      <div class="brand">
+        <div class="brand-mark">📷</div>
+        <div>
+          <h1>Live Photo Wall</h1>
+          <p>Upload · wish · appear on the big screen</p>
+        </div>
+      </div>
+      <div id="profile-chip"></div>
+      <div id="prize-banner" hidden></div>
+    </header>
+    <main>
+      <section class="hero">
+        <h2>Pixels + well-wishes</h2>
+        <p class="lede">Drop a photo for the projector wall, and/or leave a short note. Also dump extras to the Google album if you want archival glory.</p>
+        <a class="btn btn-secondary" href="photos.html">Open Google album</a>
+      </section>
+      <section class="card">
+        <h3>Upload a photo</h3>
+        <div class="field"><label>Photo</label><input type="file" id="file" accept="image/*" capture="environment" /></div>
+        <div class="field"><label>Caption (optional)</label><input id="cap" maxlength="200" placeholder="Peak taco energy" /></div>
+        <button class="btn btn-block" id="up">Upload to wall</button>
+      </section>
+      <section class="card">
+        <h3>Digital guestbook wish</h3>
+        <div class="field"><label>Message</label><input id="wish" maxlength="500" placeholder="May your uptime be high and your arguments short." /></div>
+        <button class="btn btn-block" id="wishBtn">Send wish</button>
+      </section>
+      <section class="card">
+        <h3>Recent wall</h3>
+        <div id="feed" class="grid" style="grid-template-columns:1fr 1fr"></div>
+      </section>
+    </main>
+    <nav id="bottom-nav"></nav>
+    <script src="js/config.js"></script>
+    <script src="js/api.js"></script>
+    <script src="js/profile.js"></script>
+    <script src="js/ui.js"></script>
+    <script src="js/shell.js"></script>
+    <script>
+      (async function () {
+        const p = PartyProfile.requireOrRedirect();
+        if (!p) return;
+        async function load() {
+          const data = await PartyAPI.getPhotos();
+          document.getElementById("feed").innerHTML = (data.photos || [])
+            .map(
+              (ph) =>
+                `<div class="tile" style="min-height:auto;padding:0.4rem"><img src="${ph.url}" alt="" style="width:100%;border-radius:12px;display:block"/><span>${PartyUI.escapeHtml(ph.displayName || "")}</span></div>`
+            )
+            .join("") || "<p class='muted'>No photos yet. Be first.</p>";
+        }
+        document.getElementById("up").onclick = async () => {
+          const f = document.getElementById("file").files[0];
+          if (!f) return PartyUI.toast("Pick a photo first");
+          const fd = new FormData();
+          fd.append("photo", f);
+          fd.append("profileId", p.id);
+          fd.append("displayName", PartyProfile.display(p));
+          fd.append("caption", document.getElementById("cap").value);
+          try {
+            await PartyAPI.uploadPhoto(fd);
+            PartyUI.confetti(900);
+            PartyUI.toast("On the wall.");
+            load();
+          } catch (e) {
+            PartyUI.toast(e.message || "Upload failed");
+          }
+        };
+        document.getElementById("wishBtn").onclick = async () => {
+          const message = document.getElementById("wish").value.trim();
+          if (!message) return;
+          await PartyAPI.postWish({ profileId: p.id, displayName: PartyProfile.display(p), message });
+          document.getElementById("wish").value = "";
+          PartyUI.toast("Wish saved. Soft and legendary.");
+        };
+        load();
+      })();
+    </script>
+  </body>
+</html>

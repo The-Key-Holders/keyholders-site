@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=5" />
+    <title>Advice · Guest Hub</title>
+    <link rel="stylesheet" href="css/party.css" />
+    <script src="js/head-boot.js"></script>
+  </head>
+  <body data-page="advice">
+    <header class="app-header">
+      <div class="brand">
+        <div class="brand-mark">💌</div>
+        <div>
+          <h1>Advice for the Couple</h1>
+          <p>One sentence. No essays.</p>
+        </div>
+      </div>
+      <div id="profile-chip"></div>
+      <div id="prize-banner" hidden></div>
+    </header>
+    <main>
+      <section class="hero">
+        <h2>Digital advice jar</h2>
+        <p class="lede">Drop a quick marriage tip. First tip earns a tiny point bonus (before 4:30). Keep it kind, funny, or useful.</p>
+      </section>
+      <section class="card">
+        <div class="field"><label>Your one-liner</label><input id="msg" maxlength="280" placeholder="Never go to bed angry — reboot first." /></div>
+        <button class="btn btn-block" id="go">Send advice</button>
+      </section>
+      <section class="card">
+        <h3>Recent tips</h3>
+        <div id="feed" class="muted"></div>
+      </section>
+    </main>
+    <nav id="bottom-nav"></nav>
+    <script src="js/config.js"></script>
+    <script src="js/api.js"></script>
+    <script src="js/profile.js"></script>
+    <script src="js/ui.js"></script>
+    <script src="js/shell.js"></script>
+    <script>
+      (async function () {
+        const p = PartyProfile.requireOrRedirect();
+        if (!p) return;
+        async function load() {
+          const data = await PartyAPI.getAdvice();
+          document.getElementById("feed").innerHTML = (data.advice || [])
+            .map((a) => `<p>“${PartyUI.escapeHtml(a.message)}” <span class="muted">— ${PartyUI.escapeHtml(a.display_name)}</span></p>`)
+            .join("") || "No advice yet. Be wise.";
+        }
+        document.getElementById("go").onclick = async () => {
+          const message = document.getElementById("msg").value.trim();
+          if (!message) return;
+          await PartyAPI.postAdvice({ profileId: p.id, displayName: PartyProfile.display(p), message });
+          document.getElementById("msg").value = "";
+          PartyUI.confetti(700);
+          PartyUI.toast("Advice filed under forever.");
+          load();
+        };
+        load();
+      })();
+    </script>
+  </body>
+</html>

@@ -22,6 +22,18 @@ export interface Project {
 
 export const projects: Project[] = [
   {
+    id: "guest-hub",
+    name: "Dani & Javad Guest Hub",
+    summary:
+      "NEW — Mobile engagement-party experience: trivia, co-mingle quests, photo wall, jukebox, QR stations, live projection board. No password.",
+    kind: "lab",
+    status: "live",
+    href: "/celebrate/",
+    gated: false,
+    tags: ["Mobile", "Party", "Realtime", "Release"],
+    featured: true,
+  },
+  {
     id: "pcf-vault",
     name: "PCF Vault",
     summary:

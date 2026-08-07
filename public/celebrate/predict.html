@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=5" />
+    <title>Predictions · Guest Hub</title>
+    <link rel="stylesheet" href="css/party.css" />
+    <script src="js/head-boot.js"></script>
+  </head>
+  <body data-page="predict">
+    <header class="app-header">
+      <div class="brand">
+        <div class="brand-mark">🔮</div>
+        <div>
+          <h1>Prediction Market</h1>
+          <p>Friendly prop bets · no real money</p>
+        </div>
+      </div>
+      <div id="profile-chip"></div>
+      <div id="prize-banner" hidden></div>
+    </header>
+    <main>
+      <section class="hero">
+        <h2>Future-telling (low stakes)</h2>
+        <p class="lede">Vote once per question. Live odds show on the big screen. Bragging rights only.</p>
+      </section>
+      <div id="qs"></div>
+      <section class="card"><h3>Live odds</h3><div id="agg" class="muted">Loading…</div></section>
+    </main>
+    <nav id="bottom-nav"></nav>
+    <script src="js/config.js"></script>
+    <script src="js/api.js"></script>
+    <script src="js/profile.js"></script>
+    <script src="js/ui.js"></script>
+    <script src="js/shell.js"></script>
+    <script>
+      (async function () {
+        const p = PartyProfile.requireOrRedirect();
+        if (!p) return;
+        async function refresh() {
+          const data = await PartyAPI.getPredictions();
+          const box = document.getElementById("qs");
+          box.innerHTML = data.predictions
+            .map((q) => {
+              const opts = q.options
+                .map((o) => `<button type="button" class="choice" data-q="${q.id}" data-c="${PartyUI.escapeHtml(o)}">${PartyUI.escapeHtml(o)}</button>`)
+                .join("");
+              return `<section class="card"><h3>${PartyUI.escapeHtml(q.question)}</h3>${opts}</section>`;
+            })
+            .join("");
+          box.querySelectorAll(".choice").forEach((b) => {
+            b.onclick = async () => {
+              await PartyAPI.postPrediction({
+                profileId: p.id,
+                questionId: b.dataset.q,
+                choice: b.dataset.c,
+              });
+              PartyUI.toast("Vote locked in.");
+              refresh();
+            };
+          });
+          const agg = data.aggregates || {};
+          document.getElementById("agg").innerHTML = Object.keys(agg)
+            .map((qid) => {
+              const a = agg[qid];
+              const lines = (a.options || [])
+                .map((o) => `${PartyUI.escapeHtml(o.choice)}: ${o.pct}% (${o.count})`)
+                .join("<br/>");
+              return `<p><strong>${qid}</strong><br/>${lines || "No votes yet"}</p>`;
+            })
+            .join("");
+        }
+        refresh();
+      })();
+    </script>
+  </body>
+</html>

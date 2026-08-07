@@ -2,30 +2,74 @@
 <html lang="en">
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=5" />
-    <title>Screen Mode · Guest Hub</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Projection Dashboard · Guest Hub</title>
     <link rel="stylesheet" href="css/party.css" />
-    <script src="js/head-boot.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.4/build/qrcode.min.js"></script>
+    <style>
+      body.screen-mode {
+        overflow: hidden;
+        background:
+          radial-gradient(900px 500px at 15% 0%, rgba(255, 107, 107, 0.28), transparent 55%),
+          radial-gradient(700px 420px at 90% 20%, rgba(255, 217, 102, 0.18), transparent 50%),
+          #120c0c;
+      }
+      .dash { min-height: 100vh; min-height: 100dvh; display: grid; place-items: center; padding: 2rem 1.5rem; text-align: center; }
+      .dash h1 { font-size: clamp(2rem, 5.5vw, 3.6rem); margin: 0 0 0.4rem; letter-spacing: -0.02em; text-shadow: 0 2px 24px rgba(0,0,0,0.35); }
+      .dash h2 { font-size: clamp(1.4rem, 3.5vw, 2.2rem); margin: 0.5rem 0; color: #ffd966; }
+      .slide { display: none; width: min(1100px, 100%); animation: fadeIn 0.55s ease; }
+      .slide.on { display: block; }
+      @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+      .row { display: grid; grid-template-columns: 1fr; gap: 0.45rem; text-align: left; max-width: 760px; margin: 1rem auto; font-size: clamp(1.05rem, 2.2vw, 1.3rem); }
+      .row div { display: flex; justify-content: space-between; gap: 1rem; padding: 0.55rem 0.85rem; background: rgba(255,255,255,0.07); border: 1px solid rgba(255,255,255,0.08); border-radius: 14px; backdrop-filter: blur(6px); }
+      .row div:first-child { border-color: rgba(255, 217, 102, 0.35); background: rgba(255, 217, 102, 0.1); }
+      .photos { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.55rem; max-width: 920px; margin: 1rem auto; }
+      .photos img { width: 100%; height: min(22vh, 180px); object-fit: cover; border-radius: 14px; background: #333; box-shadow: 0 8px 24px rgba(0,0,0,0.35); }
+      .qrbox { background: #fff; border-radius: 22px; padding: 0.85rem; display: inline-block; margin: 0.85rem auto; box-shadow: 0 12px 40px rgba(0,0,0,0.35); }
+      .meta { opacity: 0.88; font-size: clamp(1rem, 2vw, 1.15rem); }
+      .winner-banner { font-size: clamp(1.3rem, 3vw, 2rem); color: #ffd966; margin: 1rem auto; padding: 1.1rem 1.25rem; border: 2px solid #d4af37; border-radius: 18px; max-width: 820px; background: rgba(212,175,55,0.1); }
+      .dots { margin-top: 1.5rem; opacity: 0.75; letter-spacing: 0.45rem; font-size: 0.95rem; }
+      .kicker { display: inline-block; padding: 0.25rem 0.7rem; border-radius: 999px; background: rgba(255,107,107,0.2); border: 1px solid rgba(255,107,107,0.35); font-size: 0.85rem; margin-bottom: 0.65rem; }
+    </style>
   </head>
-  <body class="screen-mode" data-page="screen">
-    <div class="screen-wrap">
-      <p class="screen-meta">Dani & Javad · Engagement Party</p>
-      <h1>Scan to join the Guest Hub</h1>
-      <p class="screen-meta" id="url-line"></p>
-      <canvas id="qr" class="screen-qr"></canvas>
-      <p class="screen-meta" id="prize-line"></p>
-      <p class="screen-meta" id="next-beat" style="margin-top: 1.25rem; font-size: 1.35rem"></p>
-      <p class="screen-meta" id="top" style="margin-top: 1rem; opacity: 0.75"></p>
-      <p class="screen-meta" style="margin-top: 2rem; font-size: 0.95rem">Press F11 for fullscreen · no password on the hub</p>
+  <body class="screen-mode">
+    <div class="dash">
+      <div class="slide on" id="s-qr">
+        <div class="kicker">Dani &amp; Javad · Engagement Party</div>
+        <h1>Scan to join the Guest Hub</h1>
+        <p class="meta" id="url-line"></p>
+        <div class="qrbox"><canvas id="qr"></canvas></div>
+        <p class="meta" id="score-line"></p>
+        <p class="meta">No password · first + last name · phones welcome</p>
+      </div>
+      <div class="slide" id="s-lb">
+        <h1>Live Leaderboard</h1>
+        <h2 id="lb-sub">Top 10</h2>
+        <div class="row" id="lb"></div>
+      </div>
+      <div class="slide" id="s-pred">
+        <h1>Prediction Odds</h1>
+        <div class="row" id="pred" style="display:block;text-align:left"></div>
+      </div>
+      <div class="slide" id="s-photos">
+        <h1>Live Photo Wall</h1>
+        <div class="photos" id="photos"></div>
+      </div>
+      <div class="slide" id="s-songs">
+        <h1>Jukebox Requests</h1>
+        <div class="row" id="songs" style="display:block;text-align:left"></div>
+      </div>
+      <div class="slide" id="s-winner">
+        <h1>Winner</h1>
+        <div class="winner-banner" id="winner-box">Scoring freezes at 4:30 PM…</div>
+      </div>
+      <div class="dots" id="dots">● ○ ○ ○ ○</div>
     </div>
     <script src="js/config.js"></script>
     <script src="js/api.js"></script>
     <script>
       (async function () {
-        const base =
-          PARTY_CONFIG.publicBaseUrl ||
-          location.href.replace(/screen\.html.*/, "index.html");
+        const base = PARTY_CONFIG.publicBaseUrl || location.href.replace(/screen\.html.*/, "index.html");
         document.getElementById("url-line").textContent = base;
         if (window.QRCode) {
           await QRCode.toCanvas(document.getElementById("qr"), base, {
@@ -34,31 +78,52 @@
             color: { dark: "#1a1a1a", light: "#ffffff" },
           });
         }
-        const prize = PARTY_CONFIG.prize;
-        if (prize && prize.enabled) {
-          document.getElementById("prize-line").textContent = `Prize: ${prize.title} · ${prize.announceAt || ""}`;
+        const slides = ["s-qr", "s-lb", "s-pred", "s-photos", "s-songs", "s-winner"];
+        let i = 0;
+        function show(idx) {
+          slides.forEach((id, n) => document.getElementById(id).classList.toggle("on", n === idx));
+          document.getElementById("dots").textContent = slides.map((_, n) => (n === idx ? "●" : "○")).join(" ");
         }
-        try {
-          const cfg = await PartyAPI.config();
-          const s = (cfg.schedule || [])[0];
-          if (cfg.schedule) {
-            const nowLabel = cfg.schedule.map((x) => `${x.time} ${x.what}`).slice(0, 3).join("  ·  ");
-            document.getElementById("next-beat").textContent = nowLabel;
-          }
-        } catch (_) {
-          document.getElementById("next-beat").textContent = "1:00 doors · 1:30 tacos · 2:30 games";
-        }
-        async function tops() {
+        async function refresh() {
           try {
-            const lb = await PartyAPI.leaderboard();
-            document.getElementById("top").textContent = lb.leaderboard
-              .slice(0, 5)
-              .map((r) => `#${r.rank} ${r.displayName} (${r.totalPoints})`)
-              .join("   ");
-          } catch (_) {}
+            const d = await PartyAPI.dashboard();
+            const scoring = d.scoring || {};
+            document.getElementById("score-line").textContent = scoring.message || "";
+            document.getElementById("lb").innerHTML = (d.leaderboard || [])
+              .map((r) => `<div><span>#${r.rank} ${r.displayName}</span><strong>${r.totalPoints}</strong></div>`)
+              .join("") || "<div>Waiting for heroes…</div>";
+            const pred = d.predictions || {};
+            document.getElementById("pred").innerHTML = Object.keys(pred)
+              .map((k) => {
+                const a = pred[k];
+                const lines = (a.options || []).map((o) => `${o.choice}: ${o.pct}%`).join(" · ");
+                return `<p style="margin:0.6rem 0"><strong>${k}</strong><br/>${lines || "No votes"}</p>`;
+              })
+              .join("");
+            document.getElementById("photos").innerHTML = (d.photos || [])
+              .slice(0, 6)
+              .map((p) => `<img src="${p.url}" alt=""/>`)
+              .join("") || "<p class='meta'>No uploads yet</p>";
+            document.getElementById("songs").innerHTML = (d.songs || [])
+              .map((s) => `<p style="margin:0.4rem 0"><strong>${s.title}</strong>${s.artist ? " — " + s.artist : ""}</p>`)
+              .join("") || "<p>Queue empty</p>";
+            if (d.winner) {
+              document.getElementById("winner-box").innerHTML =
+                `${d.winner.congrats}<br/><span style="font-size:0.85em;opacity:0.9">${d.winner.totalPoints} pts · ${d.prize?.title || ""}</span>`;
+            } else {
+              document.getElementById("winner-box").textContent =
+                "Winner locks at 4:30 PM. Keep playing. Be excellent.";
+            }
+          } catch (e) {
+            document.getElementById("score-line").textContent = "Waiting for API…";
+          }
         }
-        tops();
-        setInterval(tops, 20000);
+        refresh();
+        setInterval(refresh, 12000);
+        setInterval(() => {
+          i = (i + 1) % slides.length;
+          show(i);
+        }, 9000);
       })();
     </script>
   </body>

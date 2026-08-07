@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=5" />
+    <title>Margarita Ratings · Guest Hub</title>
+    <link rel="stylesheet" href="css/party.css" />
+    <script src="js/head-boot.js"></script>
+  </head>
+  <body data-page="margarita">
+    <header class="app-header">
+      <div class="brand">
+        <div class="brand-mark">🍹</div>
+        <div>
+          <h1>Margarita Rating Wheel</h1>
+          <p>Rate the 4 flavors · science-ish</p>
+        </div>
+      </div>
+      <div id="profile-chip"></div>
+      <div id="prize-banner" hidden></div>
+    </header>
+    <main>
+      <section class="hero">
+        <h2>Sip. Score. Hydrate.</h2>
+        <p class="lede">1 = nah · 5 = marry the blender. Aggregates show on the big screen.</p>
+      </section>
+      <div id="list"></div>
+      <section class="card"><h3>Live averages</h3><div id="avg" class="muted"></div></section>
+    </main>
+    <nav id="bottom-nav"></nav>
+    <script src="js/config.js"></script>
+    <script src="js/api.js"></script>
+    <script src="js/profile.js"></script>
+    <script src="js/ui.js"></script>
+    <script src="js/shell.js"></script>
+    <script>
+      (async function () {
+        const p = PartyProfile.requireOrRedirect();
+        if (!p) return;
+        async function load() {
+          const data = await PartyAPI.getMargarita();
+          document.getElementById("list").innerHTML = (data.flavors || [])
+            .map(
+              (f) => `
+            <section class="card">
+              <h3>${f}</h3>
+              <div class="badge-row">
+                ${[1, 2, 3, 4, 5]
+                  .map((n) => `<button type="button" class="btn btn-secondary btn-small" data-f="${f}" data-n="${n}">${n}</button>`)
+                  .join("")}
+              </div>
+            </section>`
+            )
+            .join("");
+          document.querySelectorAll("[data-f]").forEach((b) => {
+            b.onclick = async () => {
+              await PartyAPI.postMargarita({ profileId: p.id, flavor: b.dataset.f, rating: Number(b.dataset.n) });
+              PartyUI.toast("Rated.");
+              load();
+            };
+          });
+          document.getElementById("avg").innerHTML = (data.averages || [])
+            .map((a) => `<p><strong>${a.flavor}</strong>: ${a.avg} ★ (${a.count} votes)</p>`)
+            .join("");
+        }
+        load();
+      })();
+    </script>
+  </body>
+</html>

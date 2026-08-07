@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=5" />
+    <title>AR Filter · Guest Hub</title>
+    <link rel="stylesheet" href="css/party.css" />
+    <script src="js/head-boot.js"></script>
+  </head>
+  <body data-page="ar">
+    <header class="app-header">
+      <div class="brand">
+        <div class="brand-mark">✨</div>
+        <div>
+          <h1>Instagram AR Station</h1>
+          <p>Ring border filter · couple energy</p>
+        </div>
+      </div>
+      <div id="profile-chip"></div>
+      <div id="prize-banner" hidden></div>
+    </header>
+    <main>
+      <section class="hero">
+        <h2>Dani & Javad AR</h2>
+        <p class="lede" id="note">Opens Instagram's AR camera with the custom engagement filter (when the host pastes a real AR link).</p>
+        <a class="btn btn-block" id="go" target="_blank" rel="noopener">Open Instagram AR ✨</a>
+        <p class="muted" style="margin-top:0.75rem">Needs Instagram app on your phone. If the link is still a placeholder, ask Javad for the real filter URL.</p>
+      </section>
+    </main>
+    <nav id="bottom-nav"></nav>
+    <script src="js/config.js"></script>
+    <script src="js/api.js"></script>
+    <script src="js/profile.js"></script>
+    <script src="js/ui.js"></script>
+    <script src="js/shell.js"></script>
+    <script>
+      (async function () {
+        await PartyUI.hydrateConfigFromApi();
+        const r = PARTY_CONFIG._remote || {};
+        const url = r.instagramArUrl || "https://www.instagram.com/";
+        document.getElementById("go").href = url;
+        if (r.instagramArNote) document.getElementById("note").textContent = r.instagramArNote;
+      })();
+    </script>
+  </body>
+</html>

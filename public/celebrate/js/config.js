@@ -3,6 +3,8 @@ window.PARTY_CONFIG = {
   // Empty = same-origin /api (nginx or Vercel rewrites).
   apiBase: "",
   // Live public root for QR print pack (trailing slash recommended).
+  // Prefer thekeyholders.org/celebrate/ after Vercel redeploy succeeds.
+  // Live public tunnel (Docker) for phone/cellular testing:
   publicBaseUrl: "https://www.thekeyholders.org/celebrate/",
   photosUrl: "https://photos.app.goo.gl/tNy59HYGHJzvhX536",
   couple: "Dani & Javad",
@@ -10,21 +12,27 @@ window.PARTY_CONFIG = {
   maxProfiles: 150,
   prize: {
     enabled: true,
-    title: "Mystery gift card",
+    title: "$5,000 Gift Card",
     description:
-      "Top combined score near last call wins. Handed out in person — you must still be here (shocking, we know).",
-    announceAt: "4:45 PM",
-    legalNote: "One win per person. Host decision final. Kindness > exploits.",
+      "Highest score at 4:30 PM wins. See Javad to claim. (Yes, the number is real. Trust us.)",
+    announceAt: "4:30 PM",
+    legalNote: "One win per person. Must be present. Host decision final.",
   },
   modules: [
     { id: "home", path: "index.html", title: "Home", emoji: "🏠", blurb: "Mission control" },
-    { id: "photos", path: "photos.html", title: "Photos", emoji: "📸", blurb: "Shared album" },
+    { id: "trivia", path: "trivia.html", title: "Trivia", emoji: "🧠", blurb: "+15 per correct" },
+    { id: "comingle", path: "comingle.html", title: "Co-Mingle", emoji: "🤝", blurb: "Talk to humans" },
+    { id: "predict", path: "predict.html", title: "Predictions", emoji: "🔮", blurb: "Prop bets" },
+    { id: "photowall", path: "photowall.html", title: "Photo Wall", emoji: "📷", blurb: "Upload + wishes" },
+    { id: "jukebox", path: "jukebox.html", title: "Jukebox", emoji: "🎵", blurb: "Song requests" },
+    { id: "stations", path: "stations.html", title: "QR Stations", emoji: "📍", blurb: "Riddles + selfies" },
+    { id: "ar", path: "ar.html", title: "AR Filter", emoji: "✨", blurb: "Instagram camera" },
+    { id: "margarita", path: "margarita.html", title: "Margarita Rate", emoji: "🍹", blurb: "Flavor wheel" },
+    { id: "advice", path: "advice.html", title: "Advice", emoji: "💌", blurb: "1-sentence tips" },
+    { id: "photos", path: "photos.html", title: "Album", emoji: "📸", blurb: "Google Photos" },
     { id: "rings", path: "rings.html", title: "Ring Hunt", emoji: "💍", blurb: "Plastic glory" },
     { id: "guestbook", path: "guestbook.html", title: "Guest Book", emoji: "✍️", blurb: "Real ink" },
-    { id: "trivia", path: "trivia.html", title: "Trivia", emoji: "🧠", blurb: "Couple facts" },
-    { id: "he-said", path: "he-said.html", title: "He / She Said", emoji: "⚡", blurb: "Speed round" },
+    { id: "he-said", path: "he-said.html", title: "He / She", emoji: "⚡", blurb: "Speed round" },
     { id: "passport", path: "passport.html", title: "Passport", emoji: "🛂", blurb: "Stamp quest" },
-    { id: "poses", path: "poses.html", title: "Pose Spinner", emoji: "🌀", blurb: "Arch energy" },
+    { id: "poses", path: "poses.html", title: "Poses", emoji: "🌀", blurb: "Arch energy" },
     { id: "leaderboard", path: "leaderboard.html", title: "Leaderboard", emoji: "🏆", blurb: "Glory board" },
-  ],
-};
