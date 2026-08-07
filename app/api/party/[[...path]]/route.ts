@@ -34,7 +34,7 @@ async function handle(req: NextRequest, path: string[]) {
     const last = req.nextUrl.searchParams.get("last") || "";
     const fk = norm(first);
     const lk = norm(last);
-    const profiles = [...store.profiles.values()].filter(
+    const profiles = Array.from(store.profiles.values()).filter(
       (p) => p.firstKey === fk && p.lastKey === lk
     );
     return json({ profiles: profiles.map(toPublic) });
@@ -49,7 +49,7 @@ async function handle(req: NextRequest, path: string[]) {
     }
     const fk = norm(firstName);
     const lk = norm(lastName);
-    const existing = [...store.profiles.values()].filter(
+    const existing = Array.from(store.profiles.values()).filter(
       (p) => p.firstKey === fk && p.lastKey === lk
     );
     if (existing.length && !body.forceNew) {
@@ -128,7 +128,8 @@ async function handle(req: NextRequest, path: string[]) {
   }
 
   if (segs[0] === "leaderboard" && method === "GET") {
-    const board = [...store.profiles.values()]
+    const allProfiles = Array.from(store.profiles.values());
+    const board = allProfiles
       .sort((a, b) => b.totalPoints - a.totalPoints || a.createdAt - b.createdAt)
       .slice(0, 15)
       .map((p, i) => ({
@@ -140,7 +141,7 @@ async function handle(req: NextRequest, path: string[]) {
         guestbookSigned: p.guestbookSigned,
         passportBonus: p.passportBonus,
       }));
-    const ringsClaimed = [...store.profiles.values()].reduce((a, p) => a + p.ringsFound, 0);
+    const ringsClaimed = allProfiles.reduce((a, p) => a + p.ringsFound, 0);
     return json({
       leaderboard: board,
       stats: { profiles: store.profiles.size, ringsClaimed },

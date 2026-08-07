@@ -1,0 +1,648 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="robots" content="noindex,nofollow" />
+    <title>Host desk · Guest Hub</title>
+    <link rel="stylesheet" href="css/party.css" />
+    <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.4/build/qrcode.min.js"></script>
+    <style>
+      body.host-desk { background: #0f0a12; color: #f6eef8; }
+      .host-wrap { max-width: 980px; margin: 0 auto; padding: 1rem 1rem 4rem; }
+      .host-wrap h1 { margin: 0 0 0.25rem; font-size: 1.6rem; }
+      .host-muted { opacity: 0.75; font-size: 0.92rem; }
+      .host-card {
+        background: rgba(255,255,255,0.06);
+        border: 1px solid rgba(255,255,255,0.1);
+        border-radius: 16px;
+        padding: 1rem 1.1rem;
+        margin: 0.85rem 0;
+      }
+      .host-card h2 { margin: 0 0 0.65rem; font-size: 1.1rem; color: #ffd966; }
+      .host-grid { display: grid; gap: 0.65rem; grid-template-columns: 1fr 1fr; }
+      @media (max-width: 720px) { .host-grid { grid-template-columns: 1fr; } }
+      .host-card label { display: block; font-size: 0.82rem; opacity: 0.85; margin-bottom: 0.2rem; }
+      .host-card input, .host-card select, .host-card textarea {
+        width: 100%; box-sizing: border-box; border-radius: 10px; border: 1px solid rgba(255,255,255,0.18);
+        background: rgba(0,0,0,0.35); color: #fff; padding: 0.55rem 0.65rem; font: inherit;
+      }
+      .host-card textarea { min-height: 120px; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 0.82rem; }
+      .host-actions { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 0.75rem; }
+      .host-actions .btn, .host-card .btn { cursor: pointer; }
+      .stat-row { display: flex; flex-wrap: wrap; gap: 0.6rem; }
+      .stat {
+        flex: 1 1 120px; background: rgba(255,107,107,0.12); border: 1px solid rgba(255,107,107,0.3);
+        border-radius: 12px; padding: 0.65rem 0.75rem;
+      }
+      .stat b { display: block; font-size: 1.35rem; }
+      .guest-table { width: 100%; border-collapse: collapse; font-size: 0.88rem; }
+      .guest-table th, .guest-table td { text-align: left; padding: 0.4rem 0.35rem; border-bottom: 1px solid rgba(255,255,255,0.08); }
+      .toast {
+        position: fixed; bottom: 1rem; left: 50%; transform: translateX(-50%);
+        background: #1b1224; border: 1px solid #ffd966; color: #fff; padding: 0.65rem 1rem;
+        border-radius: 999px; z-index: 50; display: none; max-width: 90vw;
+      }
+      .toast.on { display: block; }
+      #login-panel { max-width: 420px; margin: 12vh auto; }
+      .danger { border-color: rgba(255,80,80,0.45) !important; }
+      .qr-mini { background: #fff; border-radius: 12px; padding: 0.5rem; display: inline-block; }
+      .pill { display: inline-block; padding: 0.15rem 0.55rem; border-radius: 999px; font-size: 0.78rem; background: rgba(255,217,102,0.15); border: 1px solid rgba(255,217,102,0.35); }
+      .pill.bad { background: rgba(255,80,80,0.15); border-color: rgba(255,80,80,0.4); }
+      .pill.ok { background: rgba(80,220,120,0.12); border-color: rgba(80,220,120,0.4); }
+    </style>
+  </head>
+  <body class="host-desk">
+    <div class="toast" id="toast"></div>
+
+    <div class="host-wrap" id="login-panel">
+      <div class="host-card">
+        <h1>Host desk</h1>
+        <p class="host-muted">Password-gated controls for Dani &amp; Javad Guest Hub. Not for guests.</p>
+        <label for="pw">Host password</label>
+        <input id="pw" type="password" autocomplete="current-password" placeholder="PARTY_HOST_PASSWORD" />
+        <div class="host-actions">
+          <button class="btn" id="btn-login" type="button">Unlock</button>
+          <a class="btn btn-secondary" href="index.html">Guest home</a>
+        </div>
+        <p class="host-muted" style="margin-top:0.75rem">
+          Default (change in Docker env): <code>dj-host-2026</code>
+        </p>
+      </div>
+    </div>
+
+    <div class="host-wrap" id="desk" hidden>
+      <header style="display:flex;justify-content:space-between;align-items:flex-start;gap:1rem;flex-wrap:wrap">
+        <div>
+          <h1>Host desk</h1>
+          <p class="host-muted" id="header-sub">Loading…</p>
+        </div>
+        <div class="host-actions">
+          <button class="btn btn-secondary" type="button" id="btn-refresh">Refresh</button>
+          <button class="btn btn-secondary" type="button" id="btn-logout">Lock</button>
+        </div>
+      </header>
+
+      <section class="host-card">
+        <h2>Live status</h2>
+        <div class="stat-row" id="stats"></div>
+        <p style="margin:0.75rem 0 0.35rem"><span class="pill" id="score-pill">scoring</span>
+          <span class="host-muted" id="score-msg"></span></p>
+        <div class="host-actions">
+          <a class="btn btn-secondary" href="screen.html" target="_blank" rel="noopener">Screen / projector</a>
+          <a class="btn btn-secondary" href="leaderboard.html" target="_blank" rel="noopener">Leaderboard</a>
+          <a class="btn btn-secondary" href="print/qrs.html" target="_blank" rel="noopener">Full print QR pack</a>
+          <a class="btn btn-secondary" href="index.html" target="_blank" rel="noopener">Guest hub</a>
+        </div>
+      </section>
+
+      <section class="host-card">
+        <h2>Prize (guest-facing + host note)</h2>
+        <div class="host-grid">
+          <div>
+            <label>Public title</label>
+            <input id="prize-title" />
+          </div>
+          <div>
+            <label>Announce at</label>
+            <input id="prize-announce" placeholder="4:30 PM" />
+          </div>
+          <div style="grid-column:1/-1">
+            <label>Public description</label>
+            <textarea id="prize-desc" style="min-height:70px"></textarea>
+          </div>
+          <div>
+            <label>Legal note</label>
+            <input id="prize-legal" />
+          </div>
+          <div>
+            <label>Host-only real prize (export note)</label>
+            <input id="prize-real" placeholder="$100 gift card…" />
+          </div>
+          <div>
+            <label>Prize enabled</label>
+            <select id="prize-enabled">
+              <option value="true">Yes</option>
+              <option value="false">No</option>
+            </select>
+          </div>
+        </div>
+        <div class="host-actions">
+          <button class="btn" type="button" id="btn-save-prize">Save prize</button>
+        </div>
+      </section>
+
+      <section class="host-card">
+        <h2>Event / links</h2>
+        <div class="host-grid">
+          <div>
+            <label>Event name</label>
+            <input id="event-name" />
+          </div>
+          <div>
+            <label>Couple</label>
+            <input id="couple" />
+          </div>
+          <div>
+            <label>Public base URL (QR default)</label>
+            <input id="public-base" placeholder="https://dani-javad-guest-hub.vercel.app/" />
+          </div>
+          <div>
+            <label>Photos album URL</label>
+            <input id="photos-url" />
+          </div>
+          <div>
+            <label>Instagram AR URL</label>
+            <input id="ig-ar" />
+          </div>
+          <div>
+            <label>Max profiles</label>
+            <input id="max-profiles" type="number" min="1" max="500" />
+          </div>
+        </div>
+        <div class="host-actions">
+          <button class="btn" type="button" id="btn-save-event">Save event / links</button>
+        </div>
+      </section>
+
+      <section class="host-card">
+        <h2>Scoring clock</h2>
+        <div class="host-grid">
+          <div>
+            <label>Mode</label>
+            <select id="score-mode">
+              <option value="auto">Auto (use deadline)</option>
+              <option value="open">Force open (points count)</option>
+              <option value="frozen">Force frozen (fun only)</option>
+            </select>
+          </div>
+          <div>
+            <label>Deadline (local PT ISO)</label>
+            <input id="deadline" placeholder="2026-08-08T16:30:00-07:00" />
+          </div>
+        </div>
+        <div class="host-actions">
+          <button class="btn" type="button" id="btn-save-scoring">Save scoring</button>
+          <button class="btn btn-secondary" type="button" id="btn-freeze-now">Freeze now</button>
+          <button class="btn btn-secondary" type="button" id="btn-open-now">Force open</button>
+          <button class="btn btn-secondary" type="button" id="btn-auto-clock">Back to auto clock</button>
+        </div>
+      </section>
+
+      <section class="host-card">
+        <h2>Trivia questions (JSON)</h2>
+        <p class="host-muted">Edit then Save. Guests load <code>data/trivia.json</code> on next refresh.</p>
+        <textarea id="trivia-json"></textarea>
+        <div class="host-actions">
+          <button class="btn" type="button" id="btn-load-trivia">Reload from server</button>
+          <button class="btn" type="button" id="btn-save-trivia">Save trivia</button>
+        </div>
+      </section>
+
+      <section class="host-card">
+        <h2>He / She said + Poses (JSON)</h2>
+        <div class="host-grid">
+          <div>
+            <label>he-said-she-said.json</label>
+            <textarea id="hesaid-json"></textarea>
+            <div class="host-actions">
+              <button class="btn" type="button" id="btn-save-hesaid">Save he/she</button>
+            </div>
+          </div>
+          <div>
+            <label>poses.json</label>
+            <textarea id="poses-json"></textarea>
+            <div class="host-actions">
+              <button class="btn" type="button" id="btn-save-poses">Save poses</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="host-card">
+        <h2>Co-Mingle prompts (JSON array)</h2>
+        <textarea id="comingle-json" style="min-height:140px"></textarea>
+        <label style="margin-top:0.5rem">Answer keys (id → array of accepted strings)</label>
+        <textarea id="comingle-answers" style="min-height:90px"></textarea>
+        <div class="host-actions">
+          <button class="btn" type="button" id="btn-save-comingle">Save co-mingle</button>
+        </div>
+      </section>
+
+      <section class="host-card">
+        <h2>QR quick generate</h2>
+        <p class="host-muted">Uses public base URL above (or current origin). Print pack still best for tables.</p>
+        <div class="host-grid">
+          <div>
+            <label>Path</label>
+            <select id="qr-path">
+              <option value="index.html">Home</option>
+              <option value="join.html">Join</option>
+              <option value="trivia.html">Trivia</option>
+              <option value="leaderboard.html">Leaderboard</option>
+              <option value="rings.html">Ring hunt</option>
+              <option value="guestbook.html">Guest book</option>
+              <option value="screen.html">Screen</option>
+              <option value="stations.html?station=margarita">Station: margarita</option>
+              <option value="stations.html?station=arch">Station: arch</option>
+              <option value="stations.html?station=dessert">Station: dessert</option>
+              <option value="host.html">Host desk (this page)</option>
+            </select>
+          </div>
+          <div>
+            <label>Preview URL</label>
+            <input id="qr-url" readonly />
+          </div>
+        </div>
+        <div style="margin-top:0.75rem" class="qr-mini"><canvas id="qr-canvas"></canvas></div>
+        <div class="host-actions">
+          <button class="btn" type="button" id="btn-qr">Generate QR</button>
+          <a class="btn btn-secondary" href="print/qrs.html" target="_blank" rel="noopener">Open full print pack</a>
+        </div>
+      </section>
+
+      <section class="host-card">
+        <h2>Guests</h2>
+        <div style="overflow:auto;max-height:320px">
+          <table class="guest-table">
+            <thead><tr><th>Name</th><th>Pts</th><th>Rings</th><th></th></tr></thead>
+            <tbody id="guest-body"></tbody>
+          </table>
+        </div>
+        <div class="host-actions">
+          <button class="btn btn-secondary" type="button" id="btn-reload-guests">Reload guests</button>
+          <button class="btn" type="button" id="btn-export">Download export JSON</button>
+        </div>
+      </section>
+
+      <section class="host-card danger">
+        <h2>Danger zone</h2>
+        <p class="host-muted">Resets cannot be undone. Type RESET in the box to confirm.</p>
+        <div class="host-grid">
+          <div>
+            <label>Confirm</label>
+            <input id="reset-confirm" placeholder="RESET" autocomplete="off" />
+          </div>
+          <div>
+            <label>Scope</label>
+            <select id="reset-scope">
+              <option value="scores">Scores only (keep guests)</option>
+              <option value="profiles">Profiles + scores</option>
+              <option value="all">Everything (all tables)</option>
+            </select>
+          </div>
+        </div>
+        <div class="host-actions">
+          <button class="btn" type="button" id="btn-reset" style="background:#a33;border-color:#c55">Reset game data</button>
+        </div>
+      </section>
+
+      <p class="host-muted">
+        Host desk talks to <code>/api/host/*</code> on this origin. Use the Docker LAN stack for durable controls.
+        Vercel memory API is best-effort only.
+      </p>
+    </div>
+
+    <script>
+      const TOKEN_KEY = "dj_host_token";
+      let token = sessionStorage.getItem(TOKEN_KEY) || "";
+
+      function toast(msg, ms = 2800) {
+        const el = document.getElementById("toast");
+        el.textContent = msg;
+        el.classList.add("on");
+        setTimeout(() => el.classList.remove("on"), ms);
+      }
+
+      async function api(path, opts = {}) {
+        const headers = { "Content-Type": "application/json", ...(opts.headers || {}) };
+        if (token) headers["Authorization"] = `Bearer ${token}`;
+        const res = await fetch(path, { ...opts, headers });
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok) {
+          const err = new Error(data.error || res.statusText || "Request failed");
+          err.status = res.status;
+          err.data = data;
+          throw err;
+        }
+        return data;
+      }
+
+      function showDesk(on) {
+        document.getElementById("login-panel").hidden = on;
+        document.getElementById("desk").hidden = !on;
+      }
+
+      function fillPrize(cfg) {
+        const p = (cfg && cfg.prize) || {};
+        document.getElementById("prize-title").value = p.title || "";
+        document.getElementById("prize-desc").value = p.description || "";
+        document.getElementById("prize-announce").value = p.announceAt || "";
+        document.getElementById("prize-legal").value = p.legalNote || "";
+        document.getElementById("prize-real").value = p.hostOnlyRealPrize || "";
+        document.getElementById("prize-enabled").value = p.enabled === false ? "false" : "true";
+      }
+
+      function fillEvent(cfg, hostState) {
+        document.getElementById("event-name").value = (cfg && cfg.eventName) || "";
+        document.getElementById("couple").value = (cfg && cfg.couple) || "";
+        document.getElementById("public-base").value =
+          (hostState && hostState.publicBaseUrl) ||
+          (cfg && cfg.host && cfg.host.publicBaseUrl) ||
+          "";
+        document.getElementById("photos-url").value = (cfg && cfg.photosUrl) || "";
+        document.getElementById("ig-ar").value = (cfg && cfg.instagramArUrl) || "";
+        document.getElementById("max-profiles").value = (cfg && cfg.maxProfiles) || 150;
+        document.getElementById("score-mode").value = (hostState && hostState.scoringMode) || "auto";
+        document.getElementById("deadline").value =
+          (hostState && hostState.deadlineIso) ||
+          (cfg && cfg.pointsDeadlineIso) ||
+          "";
+        if (cfg && cfg.comingle) {
+          document.getElementById("comingle-json").value = JSON.stringify(cfg.comingle, null, 2);
+        }
+      }
+
+      function renderStats(ov) {
+        const s = ov.stats || {};
+        document.getElementById("stats").innerHTML = `
+          <div class="stat"><b>${s.profiles ?? 0}</b>guests</div>
+          <div class="stat"><b>${s.ringsClaimed ?? 0}</b>rings claimed</div>
+          <div class="stat"><b>${s.totalPointsSum ?? 0}</b>pts sum</div>
+        `;
+        const sc = ov.scoring || {};
+        const pill = document.getElementById("score-pill");
+        pill.textContent = sc.scoringOpen ? "POINTS LIVE" : "FROZEN";
+        pill.className = "pill " + (sc.scoringOpen ? "ok" : "bad");
+        document.getElementById("score-msg").textContent =
+          (sc.message || "") + " · mode " + (sc.scoringMode || "auto");
+        document.getElementById("header-sub").textContent =
+          (ov.config && ov.config.eventName) || "Guest Hub host controls";
+      }
+
+      async function loadOverview() {
+        const ov = await api("/api/host/overview");
+        renderStats(ov);
+        fillPrize(ov.config);
+        fillEvent(ov.config, ov.hostState);
+        return ov;
+      }
+
+      async function loadGuests() {
+        const data = await api("/api/host/guests");
+        const tb = document.getElementById("guest-body");
+        tb.innerHTML = "";
+        for (const g of data.guests || []) {
+          const tr = document.createElement("tr");
+          tr.innerHTML = `<td>${escapeHtml(g.displayName || "")}</td>
+            <td>${g.totalPoints ?? 0}</td>
+            <td>${g.ringsFound ?? 0}</td>
+            <td><button type="button" class="btn btn-secondary" data-del="${g.id}" style="padding:0.25rem 0.5rem;font-size:0.8rem">Delete</button></td>`;
+          tb.appendChild(tr);
+        }
+        tb.querySelectorAll("[data-del]").forEach((btn) => {
+          btn.addEventListener("click", async () => {
+            if (!confirm("Delete this guest and their scores?")) return;
+            try {
+              await api(`/api/host/guests/${btn.getAttribute("data-del")}/delete`, { method: "POST", body: "{}" });
+              toast("Guest deleted");
+              await loadGuests();
+              await loadOverview();
+            } catch (e) {
+              toast(e.message);
+            }
+          });
+        });
+      }
+
+      function escapeHtml(s) {
+        return String(s)
+          .replace(/&/g, "&amp;")
+          .replace(/</g, "&lt;")
+          .replace(/>/g, "&gt;")
+          .replace(/"/g, "&quot;");
+      }
+
+      async function loadContent(name, textareaId) {
+        const data = await api(`/api/host/content/${name}`);
+        document.getElementById(textareaId).value = JSON.stringify(data.data, null, 2);
+      }
+
+      async function saveContent(name, textareaId) {
+        const raw = document.getElementById(textareaId).value;
+        let parsed;
+        try {
+          parsed = JSON.parse(raw);
+        } catch (e) {
+          toast("Invalid JSON");
+          return;
+        }
+        await api(`/api/host/content/${name}`, {
+          method: "PUT",
+          body: JSON.stringify({ data: parsed }),
+        });
+        toast("Saved " + name);
+      }
+
+      function baseUrl() {
+        let b = (document.getElementById("public-base").value || "").trim();
+        if (!b) b = location.origin + location.pathname.replace(/host\.html.*/, "");
+        if (!b.endsWith("/")) b += "/";
+        return b;
+      }
+
+      function genQr() {
+        const path = document.getElementById("qr-path").value;
+        const url = baseUrl() + path.replace(/^\//, "");
+        document.getElementById("qr-url").value = url;
+        const canvas = document.getElementById("qr-canvas");
+        if (window.QRCode) {
+          QRCode.toCanvas(canvas, url, { width: 180, margin: 1 }, (err) => {
+            if (err) toast(String(err));
+          });
+        }
+      }
+
+      document.getElementById("btn-login").onclick = async () => {
+        const password = document.getElementById("pw").value;
+        try {
+          const data = await api("/api/host/login", {
+            method: "POST",
+            body: JSON.stringify({ password }),
+          });
+          token = data.token;
+          sessionStorage.setItem(TOKEN_KEY, token);
+          showDesk(true);
+          await boot();
+          toast("Unlocked");
+        } catch (e) {
+          toast(e.message || "Login failed");
+        }
+      };
+
+      document.getElementById("pw").addEventListener("keydown", (e) => {
+        if (e.key === "Enter") document.getElementById("btn-login").click();
+      });
+
+      document.getElementById("btn-logout").onclick = () => {
+        token = "";
+        sessionStorage.removeItem(TOKEN_KEY);
+        showDesk(false);
+      };
+
+      document.getElementById("btn-refresh").onclick = () => boot().then(() => toast("Refreshed"));
+
+      document.getElementById("btn-save-prize").onclick = async () => {
+        try {
+          await api("/api/host/config", {
+            method: "PUT",
+            body: JSON.stringify({
+              prize: {
+                title: document.getElementById("prize-title").value,
+                description: document.getElementById("prize-desc").value,
+                announceAt: document.getElementById("prize-announce").value,
+                legalNote: document.getElementById("prize-legal").value,
+                hostOnlyRealPrize: document.getElementById("prize-real").value,
+                enabled: document.getElementById("prize-enabled").value === "true",
+              },
+            }),
+          });
+          toast("Prize saved");
+          await loadOverview();
+        } catch (e) {
+          toast(e.message);
+        }
+      };
+
+      document.getElementById("btn-save-event").onclick = async () => {
+        try {
+          await api("/api/host/config", {
+            method: "PUT",
+            body: JSON.stringify({
+              eventName: document.getElementById("event-name").value,
+              couple: document.getElementById("couple").value,
+              publicBaseUrl: document.getElementById("public-base").value,
+              photosUrl: document.getElementById("photos-url").value,
+              instagramArUrl: document.getElementById("ig-ar").value,
+              maxProfiles: Number(document.getElementById("max-profiles").value) || 150,
+            }),
+          });
+          toast("Event / links saved");
+          await loadOverview();
+          genQr();
+        } catch (e) {
+          toast(e.message);
+        }
+      };
+
+      document.getElementById("btn-save-scoring").onclick = async () => {
+        try {
+          await api("/api/host/scoring", {
+            method: "POST",
+            body: JSON.stringify({
+              mode: document.getElementById("score-mode").value,
+              deadlineIso: document.getElementById("deadline").value || null,
+            }),
+          });
+          toast("Scoring saved");
+          await loadOverview();
+        } catch (e) {
+          toast(e.message);
+        }
+      };
+      document.getElementById("btn-freeze-now").onclick = async () => {
+        document.getElementById("score-mode").value = "frozen";
+        document.getElementById("btn-save-scoring").click();
+      };
+      document.getElementById("btn-open-now").onclick = async () => {
+        document.getElementById("score-mode").value = "open";
+        document.getElementById("btn-save-scoring").click();
+      };
+      document.getElementById("btn-auto-clock").onclick = async () => {
+        document.getElementById("score-mode").value = "auto";
+        document.getElementById("btn-save-scoring").click();
+      };
+
+      document.getElementById("btn-load-trivia").onclick = () =>
+        loadContent("trivia", "trivia-json").then(() => toast("Trivia loaded"));
+      document.getElementById("btn-save-trivia").onclick = () => saveContent("trivia", "trivia-json");
+      document.getElementById("btn-save-hesaid").onclick = () => saveContent("he-said", "hesaid-json");
+      document.getElementById("btn-save-poses").onclick = () => saveContent("poses", "poses-json");
+
+      document.getElementById("btn-save-comingle").onclick = async () => {
+        try {
+          const comingle = JSON.parse(document.getElementById("comingle-json").value || "[]");
+          const comingleAnswers = JSON.parse(document.getElementById("comingle-answers").value || "{}");
+          await api("/api/host/config", {
+            method: "PUT",
+            body: JSON.stringify({ comingle, comingleAnswers }),
+          });
+          toast("Co-mingle saved");
+        } catch (e) {
+          toast(e.message || "Invalid JSON");
+        }
+      };
+
+      document.getElementById("btn-qr").onclick = genQr;
+      document.getElementById("qr-path").onchange = genQr;
+
+      document.getElementById("btn-reload-guests").onclick = () => loadGuests();
+      document.getElementById("btn-export").onclick = async () => {
+        try {
+          const data = await api("/api/host/export");
+          const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
+          const a = document.createElement("a");
+          a.href = URL.createObjectURL(blob);
+          a.download = `guest-hub-export-${new Date().toISOString().slice(0, 19).replace(/[:T]/g, "-")}.json`;
+          a.click();
+          toast("Export downloaded");
+        } catch (e) {
+          toast(e.message);
+        }
+      };
+
+      document.getElementById("btn-reset").onclick = async () => {
+        try {
+          await api("/api/host/reset", {
+            method: "POST",
+            body: JSON.stringify({
+              confirm: document.getElementById("reset-confirm").value,
+              scope: document.getElementById("reset-scope").value,
+            }),
+          });
+          document.getElementById("reset-confirm").value = "";
+          toast("Reset done");
+          await loadGuests();
+          await loadOverview();
+        } catch (e) {
+          toast(e.message);
+        }
+      };
+
+      async function boot() {
+        await loadOverview();
+        await loadGuests();
+        try {
+          await loadContent("trivia", "trivia-json");
+          await loadContent("he-said", "hesaid-json");
+          await loadContent("poses", "poses-json");
+        } catch (_) {
+          /* content optional on limited hosts */
+        }
+        genQr();
+      }
+
+      (async () => {
+        if (!token) return;
+        try {
+          await api("/api/host/overview");
+          showDesk(true);
+          await boot();
+        } catch (_) {
+          token = "";
+          sessionStorage.removeItem(TOKEN_KEY);
+        }
+      })();
+    </script>
+  </body>
+</html>
