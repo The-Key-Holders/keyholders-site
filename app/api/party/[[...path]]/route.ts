@@ -29,6 +29,23 @@ function json(data: unknown, status = 200) {
   return NextResponse.json(data, { status });
 }
 
+function normalizeMemory(raw: Partial<HiddenMemory> & { slot: number }): HiddenMemory {
+  let imageUrl = String(raw.imageUrl || "").trim();
+  if (imageUrl && !/^https:\/\//i.test(imageUrl)) imageUrl = "";
+  let imageDataUrl = String(raw.imageDataUrl || "");
+  // Cap data URL ~900KB encoded to stay under serverless body limits
+  if (imageDataUrl.length > 900_000) imageDataUrl = imageDataUrl.slice(0, 900_000);
+  // If external URL provided, prefer it and drop heavy data URL from store response path
+  return {
+    slot: raw.slot,
+    title: String(raw.title || `Hidden memory ${raw.slot}`).slice(0, 80),
+    caption: String(raw.caption || "").slice(0, 600),
+    imageDataUrl: imageUrl ? "" : imageDataUrl,
+    imageUrl,
+    enabled: Boolean(raw.enabled),
+  };
+}
+
 const HOST_PASSWORD = process.env.PARTY_HOST_PASSWORD || "dj-host-2026";
 
 function sessions() {
@@ -483,13 +500,7 @@ async function handle(req: NextRequest, path: string[]): Promise<NextResponse> {
           const base = emptyMemories();
           for (const raw of body.memories as HiddenMemory[]) {
             if (!raw || raw.slot < 1 || raw.slot > 10) continue;
-            base[raw.slot - 1] = {
-              slot: raw.slot,
-              title: String(raw.title || `Hidden memory ${raw.slot}`).slice(0, 80),
-              caption: String(raw.caption || "").slice(0, 600),
-              imageDataUrl: String(raw.imageDataUrl || "").slice(0, 1_500_000),
-              enabled: Boolean(raw.enabled),
-            };
+            base[raw.slot - 1] = normalizeMemory(raw);
           }
           host.memories = base;
         }
@@ -659,17 +670,22 @@ async function handle(req: NextRequest, path: string[]): Promise<NextResponse> {
       if (!incoming) return json({ error: "memories array required" }, 400);
       for (const raw of incoming as HiddenMemory[]) {
         if (!raw || raw.slot < 1 || raw.slot > 10) continue;
-        base[raw.slot - 1] = {
-          slot: raw.slot,
-          title: String(raw.title || `Hidden memory ${raw.slot}`).slice(0, 80),
-          caption: String(raw.caption || "").slice(0, 600),
-          imageDataUrl: String(raw.imageDataUrl || "").slice(0, 1_500_000),
-          enabled: Boolean(raw.enabled),
-        };
+        base[raw.slot - 1] = normalizeMemory(raw);
       }
       host.memories = base;
       host.updatedAt = new Date().toISOString();
-      return json({ ok: true, memories: host.memories });
+      return json({
+        ok: true,
+        memories: host.memories,
+        summary: host.memories.map((m) => ({
+          slot: m.slot,
+          enabled: m.enabled,
+          hasImage: Boolean(m.imageUrl || m.imageDataUrl),
+          imageDataUrlLen: (m.imageDataUrl || "").length,
+          imageUrl: m.imageUrl || "",
+        })),
+        note: "Prefer https image URL for reliability. Data-URL uploads work if kept small (~under 700KB).",
+      });
     }
   }
 

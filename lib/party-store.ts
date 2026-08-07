@@ -62,7 +62,10 @@ export type HiddenMemory = {
   slot: number;
   title: string;
   caption: string;
+  /** Inline photo (data URL). Prefer small/compressed; large payloads can fail on serverless. */
   imageDataUrl: string;
+  /** External https image URL (most reliable for public display). */
+  imageUrl?: string;
   enabled: boolean;
 };
 
@@ -281,6 +284,7 @@ export function emptyMemories(): HiddenMemory[] {
     title: `Hidden memory ${i + 1}`,
     caption: "",
     imageDataUrl: "",
+    imageUrl: "",
     enabled: false,
   }));
 }
@@ -458,14 +462,27 @@ export function getMemory(slot: number): HiddenMemory | null {
 export function publicMemory(slot: number) {
   const m = getMemory(slot);
   if (!m || !m.enabled || !m.caption) {
-    return { slot, enabled: false, title: "", caption: "", imageDataUrl: "" };
+    return {
+      slot,
+      enabled: false,
+      title: "",
+      caption: "",
+      imageDataUrl: "",
+      imageUrl: "",
+      hasImage: false,
+    };
   }
+  const imageUrl = (m.imageUrl || "").trim();
+  const imageDataUrl = m.imageDataUrl || "";
   return {
     slot: m.slot,
     enabled: true,
     title: m.title || `Hidden memory ${slot}`,
     caption: m.caption,
-    imageDataUrl: m.imageDataUrl || "",
+    // Prefer external URL (stable); fall back to data URL
+    imageUrl,
+    imageDataUrl: imageUrl ? "" : imageDataUrl,
+    hasImage: Boolean(imageUrl || imageDataUrl),
   };
 }
 

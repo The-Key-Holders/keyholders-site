@@ -135,14 +135,22 @@
           }
           document.title = (data.title || "Hidden memory") + " · Dani & Javad";
           titleEl.textContent = data.title || "Hidden memory " + slot;
-          if (data.imageDataUrl) {
+          const src = (data.imageUrl || data.imageDataUrl || "").trim();
+          if (src) {
             wrap.innerHTML = "";
             const img = document.createElement("img");
-            img.src = data.imageDataUrl;
+            img.src = src;
             img.alt = data.title || "Couples memory";
+            img.loading = "eager";
+            img.decoding = "async";
+            img.onerror = () => {
+              wrap.innerHTML =
+                '<p class="mem-empty">Photo failed to load. Host: re-save with a public https image link or a smaller upload.</p>';
+            };
             wrap.appendChild(img);
           } else {
-            document.getElementById("img-placeholder").textContent = "No photo yet — caption only.";
+            document.getElementById("img-placeholder").textContent =
+              "No photo yet — caption only. Host can add a photo or https image URL in Host desk.";
           }
           if (data.caption) {
             capEl.hidden = false;

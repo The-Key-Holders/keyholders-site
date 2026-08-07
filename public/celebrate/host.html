@@ -419,7 +419,20 @@
       }
 
       function renderMemories(list) {
-        memoriesCache = (list || []).slice();
+        // Preserve in-memory photos/urls when re-rendering
+        const prevBySlot = {};
+        for (const m of memoriesCache || []) prevBySlot[m.slot] = m;
+        memoriesCache = (list || []).map((m) => {
+          const prev = prevBySlot[m.slot] || {};
+          return {
+            slot: m.slot,
+            title: m.title || prev.title || "Hidden memory " + m.slot,
+            caption: m.caption != null ? m.caption : prev.caption || "",
+            imageDataUrl: m.imageDataUrl || prev.imageDataUrl || "",
+            imageUrl: m.imageUrl != null ? m.imageUrl : prev.imageUrl || "",
+            enabled: typeof m.enabled === "boolean" ? m.enabled : !!prev.enabled,
+          };
+        });
         while (memoriesCache.length < 10) {
           const n = memoriesCache.length + 1;
           memoriesCache.push({
@@ -427,14 +440,16 @@
             title: "Hidden memory " + n,
             caption: "",
             imageDataUrl: "",
+            imageUrl: "",
             enabled: false,
           });
         }
         const root = document.getElementById("memories-list");
         root.innerHTML = memoriesCache
-          .map((m, idx) => {
+          .map((m) => {
             const url = TKH_BASE + "hiddenmemory" + m.slot + ".html";
-            const hasImg = m.imageDataUrl ? "Photo set" : "No photo";
+            const preview = m.imageUrl || m.imageDataUrl || "";
+            const hasImg = preview ? "Photo set" : "No photo";
             return `
             <div class="host-card" style="margin:0.65rem 0;border-style:dashed" data-mem-slot="${m.slot}">
               <h2 style="font-size:1rem">Memory ${m.slot} · <span class="host-muted">${hasImg}</span></h2>
@@ -454,46 +469,64 @@
                   <label>Caption (“Did you know…?”)</label>
                   <textarea data-mem-caption="${m.slot}" style="min-height:70px">${escapeHtml(m.caption || "")}</textarea>
                 </div>
+                <div style="grid-column:1/-1">
+                  <label>Image URL (recommended, https only — most reliable)</label>
+                  <input data-mem-image-url="${m.slot}" placeholder="https://…/photo.jpg" value="${escapeAttr(m.imageUrl || "")}" />
+                </div>
                 <div>
-                  <label>Photo (jpg/png, keep under ~1MB)</label>
+                  <label>Or upload photo (auto-compress)</label>
                   <input type="file" accept="image/*" data-mem-file="${m.slot}" />
                 </div>
                 <div>
-                  <label>Public URL (QR this)</label>
+                  <label>Public page URL (print this QR)</label>
                   <input readonly value="${url}" onclick="this.select()" />
                 </div>
               </div>
               <div style="margin-top:0.6rem;display:flex;gap:0.75rem;align-items:center;flex-wrap:wrap">
                 <div class="qr-mini"><canvas data-mem-qr="${m.slot}" width="120" height="120"></canvas></div>
-                ${m.imageDataUrl ? `<img src="${m.imageDataUrl}" alt="" style="max-height:90px;border-radius:10px;border:1px solid rgba(255,255,255,0.15)" />` : ""}
+                ${
+                  preview
+                    ? `<img src="${preview}" alt="" style="max-height:90px;border-radius:10px;border:1px solid rgba(255,255,255,0.15)" />`
+                    : ""
+                }
               </div>
             </div>`;
           })
           .join("");
-        // bind file inputs + draw QRs
         root.querySelectorAll("[data-mem-file]").forEach((input) => {
           input.onchange = async (ev) => {
             const slot = Number(input.getAttribute("data-mem-file"));
             const f = ev.target.files && ev.target.files[0];
             if (!f) return;
-            if (f.size > 1_200_000) {
-              toast("Image too large — try under ~1MB or compress");
-              return;
+            try {
+              const dataUrl = await compressImageFile(f, 1280, 0.78);
+              const m = memoriesCache.find((x) => x.slot === slot);
+              if (m) {
+                m.imageDataUrl = dataUrl;
+                // clear competing URL so data URL is used unless host pastes URL later
+                // keep imageUrl if set? Prefer fresh upload:
+                m.imageUrl = "";
+                const urlEl = document.querySelector(`[data-mem-image-url="${slot}"]`);
+                if (urlEl) urlEl.value = "";
+              }
+              toast(
+                "Photo compressed for memory " +
+                  slot +
+                  " (" +
+                  Math.round(dataUrl.length / 1024) +
+                  " KB) — click Save all memories"
+              );
+              renderMemories(memoriesCache);
+            } catch (e) {
+              toast(e.message || "Image compress failed");
             }
-            const dataUrl = await readFileAsDataUrl(f);
-            const m = memoriesCache.find((x) => x.slot === slot);
-            if (m) m.imageDataUrl = dataUrl;
-            toast("Photo loaded for memory " + slot + " — click Save all memories");
-            renderMemories(memoriesCache);
           };
         });
         root.querySelectorAll("[data-mem-qr]").forEach((canvas) => {
           const slot = Number(canvas.getAttribute("data-mem-qr"));
           const url = TKH_BASE + "hiddenmemory" + slot + ".html";
           const lib = qrLib();
-          if (lib) {
-            lib.toCanvas(canvas, url, { width: 120, margin: 1 }, () => {});
-          }
+          if (lib) lib.toCanvas(canvas, url, { width: 120, margin: 1 }, () => {});
         });
       }
 
@@ -506,6 +539,37 @@
         });
       }
 
+      /** Resize/compress image so serverless can store it. */
+      async function compressImageFile(file, maxW, quality) {
+        const raw = await readFileAsDataUrl(file);
+        const img = await new Promise((resolve, reject) => {
+          const i = new Image();
+          i.onload = () => resolve(i);
+          i.onerror = () => reject(new Error("Could not read image"));
+          i.src = raw;
+        });
+        let w = img.naturalWidth || img.width;
+        let h = img.naturalHeight || img.height;
+        if (w > maxW) {
+          h = Math.round((h * maxW) / w);
+          w = maxW;
+        }
+        const canvas = document.createElement("canvas");
+        canvas.width = w;
+        canvas.height = h;
+        const ctx = canvas.getContext("2d");
+        ctx.drawImage(img, 0, 0, w, h);
+        let out = canvas.toDataURL("image/jpeg", quality);
+        // If still huge, compress harder
+        if (out.length > 700000) {
+          out = canvas.toDataURL("image/jpeg", 0.6);
+        }
+        if (out.length > 850000) {
+          throw new Error("Image still too large after compress — use a smaller photo or paste an https image URL instead");
+        }
+        return out;
+      }
+
       function collectMemoriesFromDom() {
         const out = [];
         for (let slot = 1; slot <= 10; slot++) {
@@ -514,16 +578,21 @@
             title: "",
             caption: "",
             imageDataUrl: "",
+            imageUrl: "",
             enabled: false,
           };
           const titleEl = document.querySelector(`[data-mem-title="${slot}"]`);
           const capEl = document.querySelector(`[data-mem-caption="${slot}"]`);
           const enEl = document.querySelector(`[data-mem-enabled="${slot}"]`);
+          const urlEl = document.querySelector(`[data-mem-image-url="${slot}"]`);
+          const imageUrl = urlEl ? urlEl.value.trim() : prev.imageUrl || "";
           out.push({
             slot,
             title: titleEl ? titleEl.value : prev.title,
             caption: capEl ? capEl.value : prev.caption,
-            imageDataUrl: prev.imageDataUrl || "",
+            imageUrl,
+            // if URL set, server will drop data URL; keep local preview until save
+            imageDataUrl: imageUrl ? "" : prev.imageDataUrl || "",
             enabled: enEl ? enEl.value === "true" : prev.enabled,
           });
         }
@@ -879,18 +948,42 @@
         try {
           const memories = collectMemoriesFromDom();
           memoriesCache = memories;
-          await api("/api/host/memories", {
+          const res = await api("/api/host/memories", {
             method: "PUT",
             body: JSON.stringify({ memories }),
           });
-          const st = await api("/api/host/state");
-          persistHostBackup(st.hostState);
-          const n = memories.filter((m) => m.enabled && m.caption).length;
-          status.textContent = "Saved " + n + " active memory page(s). QR print: use memory URLs above.";
+          // Keep full local cache (response includes full memories)
+          if (res.memories) memoriesCache = res.memories;
+          try {
+            const st = await api("/api/host/state");
+            persistHostBackup(st.hostState);
+          } catch (_) {
+            persistHostBackup({ memories: memoriesCache, publicBaseUrl: TKH_BASE });
+          }
+          // Verify public API returns image for enabled slots
+          const checks = [];
+          for (const m of memoriesCache) {
+            if (!m.enabled || !m.caption) continue;
+            try {
+              const pub = await fetch("/api/memories/" + m.slot, { cache: "no-store" }).then((r) =>
+                r.json()
+              );
+              checks.push(
+                "#" +
+                  m.slot +
+                  (pub.hasImage || pub.imageUrl || pub.imageDataUrl ? " img✓" : " img✗")
+              );
+            } catch {
+              checks.push("#" + m.slot + " verify?");
+            }
+          }
+          const n = memoriesCache.filter((m) => m.enabled && m.caption).length;
+          status.textContent =
+            "Saved " + n + " active memory page(s). " + (checks.length ? "Check: " + checks.join(", ") : "");
           toast("Memories saved");
-          renderMemories(memories);
+          renderMemories(memoriesCache);
         } catch (e) {
-          status.textContent = "Save failed: " + e.message;
+          status.textContent = "Save failed: " + e.message + " (try https image URL if upload is large)";
           toast(e.message);
         }
       };
