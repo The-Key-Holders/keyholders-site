@@ -1,0 +1,19 @@
+{
+  "name": "Dani & Javad Guest Hub",
+  "short_name": "Guest Hub",
+  "description": "Engagement party games, ring hunt guide, photos. No password.",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#fffaf3",
+  "theme_color": "#ff6b6b",
+  "orientation": "portrait-primary",
+  "lang": "en",
+  "icons": [
+    {
+      "src": "assets/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

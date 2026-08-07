@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=5" />
+    <title>Ring Hunt · Guest Hub</title>
+    <link rel="stylesheet" href="css/party.css" />
+    <script src="js/head-boot.js"></script>
+  </head>
+  <body data-page="rings">
+    <header class="app-header">
+      <div class="brand">
+        <div class="brand-mark">💍</div>
+        <div>
+          <h1>Ring Hunt</h1>
+          <p>Physical rings · digital bragging rights</p>
+        </div>
+      </div>
+      <div id="profile-chip"></div>
+      <div id="prize-banner" hidden></div>
+    </header>
+    <main>
+      <section class="hero">
+        <h2 id="rh-title">The Great Plastic Ring Hunt</h2>
+        <p class="lede" id="rh-blurb">
+          Real plastic wedding rings are hidden around the venue. Find them. Be gentle. Real gold stays on fingers.
+        </p>
+      </section>
+      <section class="card">
+        <h3>Rules of engagement</h3>
+        <ul id="rh-rules" class="muted"></ul>
+        <p class="muted">This is the real scavenger hunt — your phone just keeps score of how legendary you are.</p>
+      </section>
+      <section class="card">
+        <p><strong>Your finds:</strong> <span id="my-rings">0</span></p>
+        <p class="muted">Party total claimed (approx): <span id="party-rings">—</span></p>
+        <button class="btn btn-block" id="found-btn">I found a ring! 💍</button>
+      </section>
+    </main>
+    <nav id="bottom-nav"></nav>
+    <script src="js/config.js"></script>
+    <script src="js/api.js"></script>
+    <script src="js/profile.js"></script>
+    <script src="js/ui.js"></script>
+    <script src="js/shell.js"></script>
+    <script>
+      (async function () {
+        const p = PartyProfile.requireOrRedirect();
+        if (!p) return;
+        const rh =
+          (PARTY_CONFIG._remote && PARTY_CONFIG._remote.ringHunt) ||
+          PARTY_CONFIG.ringHunt || {
+            title: "The Great Plastic Ring Hunt",
+            blurb: document.getElementById("rh-blurb").textContent,
+            rules: [
+              "Scan the room carefully",
+              "Be kind to decor and humans",
+              "Follow host instructions when you find one",
+              "Tap the button so we can cheer",
+            ],
+          };
+        document.getElementById("rh-title").textContent = rh.title;
+        document.getElementById("rh-blurb").textContent = rh.blurb;
+        document.getElementById("rh-rules").innerHTML = (rh.rules || []).map((r) => `<li>${r}</li>`).join("");
+
+        async function refresh() {
+          try {
+            if (!String(p.id).startsWith("local-")) {
+              const full = await PartyAPI.getProfile(p.id);
+              PartyProfile.set(full.profile);
+              document.getElementById("my-rings").textContent = full.profile.ringsFound;
+            } else {
+              document.getElementById("my-rings").textContent = PartyProfile.local.get().rings || 0;
+            }
+            const lb = await PartyAPI.leaderboard();
+            document.getElementById("party-rings").textContent = lb.stats.ringsClaimed;
+          } catch {
+            document.getElementById("my-rings").textContent = PartyProfile.local.get().rings || 0;
+          }
+        }
+        await refresh();
+
+        document.getElementById("found-btn").onclick = async () => {
+          try {
+            if (!String(p.id).startsWith("local-")) {
+              const res = await PartyAPI.checkin({ profileId: p.id, kind: "ring" });
+              PartyProfile.set(res.profile);
+              document.getElementById("my-rings").textContent = res.profile.ringsFound;
+            } else {
+              const n = (PartyProfile.local.get().rings || 0) + 1;
+              PartyProfile.local.patch({ rings: n });
+              document.getElementById("my-rings").textContent = n;
+            }
+            PartyUI.confetti();
+            PartyUI.toast("Ring logged. Detective energy unlocked.");
+            refresh();
+          } catch (e) {
+            PartyUI.toast(e.message || "Could not log find");
+          }
+        };
+      })();
+    </script>
+  </body>
+</html>

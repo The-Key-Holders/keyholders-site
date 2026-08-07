@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=5" />
+    <title>Pose Spinner · Guest Hub</title>
+    <link rel="stylesheet" href="css/party.css" />
+    <script src="js/head-boot.js"></script>
+  </head>
+  <body data-page="poses">
+    <header class="app-header">
+      <div class="brand">
+        <div class="brand-mark">🌀</div>
+        <div>
+          <h1>Pose Spinner</h1>
+          <p>Arch content machine</p>
+        </div>
+      </div>
+      <div id="profile-chip"></div>
+      <div id="prize-banner" hidden></div>
+    </header>
+    <main>
+      <section class="hero">
+        <h2>Spin. Pose. Upload.</h2>
+        <p class="lede">Then yeet the photo into the shared album like a responsible friend.</p>
+      </section>
+      <div class="spinner-wheel" id="wheel"><span id="prompt">Tap spin</span></div>
+      <section class="card">
+        <button class="btn btn-block" id="spin">Spin 🌀</button>
+        <a class="btn btn-secondary btn-block" id="photos" style="margin-top: 0.5rem" target="_blank" rel="noopener"
+          >Open album</a
+        >
+      </section>
+    </main>
+    <nav id="bottom-nav"></nav>
+    <script src="js/config.js"></script>
+    <script src="js/api.js"></script>
+    <script src="js/profile.js"></script>
+    <script src="js/ui.js"></script>
+    <script src="js/shell.js"></script>
+    <script>
+      (async function () {
+        const p = PartyProfile.requireOrRedirect();
+        if (!p) return;
+        document.getElementById("photos").href = PARTY_CONFIG.photosUrl;
+        const data = await fetch("data/poses.json").then((r) => r.json());
+        const prompts = data.prompts;
+        let rot = 0;
+        document.getElementById("spin").onclick = async () => {
+          const pick = prompts[Math.floor(Math.random() * prompts.length)];
+          rot += 720 + Math.random() * 360;
+          document.getElementById("wheel").style.transform = `rotate(${rot}deg)`;
+          setTimeout(() => {
+            document.getElementById("prompt").textContent = pick;
+          }, 300);
+          try {
+            if (!String(p.id).startsWith("local-")) {
+              const res = await PartyAPI.checkin({ profileId: p.id, kind: "pose" });
+              PartyProfile.set(res.profile);
+            } else {
+              PartyProfile.local.patch({ poses: (PartyProfile.local.get().poses || 0) + 1 });
+            }
+          } catch (_) {
+            PartyProfile.local.patch({ poses: (PartyProfile.local.get().poses || 0) + 1 });
+          }
+        };
+      })();
+    </script>
+  </body>
+</html>

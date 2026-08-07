@@ -1,0 +1,68 @@
+{
+  "id": "trivia",
+  "title": "Couple Trivia",
+  "subtitle": "Prove you listen at dinner. Or guess stylishly.",
+  "pointsNote": "Your best run counts toward the leaderboard.",
+  "questions": [
+    {
+      "q": "Where is this party happening (city)?",
+      "choices": ["Sacramento", "San Francisco", "Stockton", "The cloud"],
+      "answer": 0,
+      "explain": "Sacramento. Farm-to-fork and freeways."
+    },
+    {
+      "q": "What are Dani & Javad wearing so you can spot the couple instantly?",
+      "choices": ["Matching Hawaiian shirts", "All white", "Superhero capes", "Camo"],
+      "answer": 1,
+      "explain": "All white. Everyone else: bright florals encouraged."
+    },
+    {
+      "q": "Main food energy today?",
+      "choices": ["Sushi conveyor", "Tacos", "Only celery", "Mystery meat loaf"],
+      "answer": 1,
+      "explain": "Tacos. Correct priorities."
+    },
+    {
+      "q": "Guest dress code vibe?",
+      "choices": ["Black-tie gala", "Bright floral semi-formal", "Pajamas only", "Full armor"],
+      "answer": 1,
+      "explain": "Bright, floral, semi-formal, approachable."
+    },
+    {
+      "q": "Gifts expectation?",
+      "choices": ["Mandatory toaster", "Your presence is the gift", "Crypto only", "Bring a goat"],
+      "answer": 1,
+      "explain": "Presence > presents."
+    },
+    {
+      "q": "Approx. party window?",
+      "choices": ["1–5 PM", "Midnight–sunrise", "Brunch at 9 AM sharp", "Whenever Zoom starts"],
+      "answer": 0,
+      "explain": "1:00–5:00 PM. Afternoon excellence."
+    },
+    {
+      "q": "Kids drinks policy (soft rule of the day)?",
+      "choices": ["Unlimited soda fountain", "Juice / lemonade / water energy", "Espresso martinis", "Nothing, they photosynthesize"],
+      "answer": 1,
+      "explain": "Juice, lemonade, sparkling water. Hydration nation."
+    },
+    {
+      "q": "If you want photos in the shared album, you should…",
+      "choices": ["Mail a USB stick", "Use the shared Google Photos album", "Fax them", "Describe them loudly"],
+      "answer": 1,
+      "explain": "Shared album. One tap from the Hub."
+    },
+    {
+      "q": "Nerdy host energy belongs to…",
+      "choices": ["Dani exclusively", "Javad (with gratitude)", "The taco tray", "A rogue Roomba"],
+      "answer": 1,
+      "explain": "Javad: grateful nerd with a QR code habit."
+    },
+    {
+      "q": "Best way to “win” this party?",
+      "choices": ["Max leaderboard + be kind", "Hide all the tacos", "Unplug the speakers", "Skip saying hi"],
+      "answer": 0,
+      "explain": "Points are fun. Kindness is meta."
+    }
+  ]
+}

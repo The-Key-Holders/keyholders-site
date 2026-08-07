@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=5" />
+    <title>Print QR pack · Guest Hub</title>
+    <link rel="stylesheet" href="../css/party.css" />
+    <script src="../js/head-boot.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.4/build/qrcode.min.js"></script>
+    <style>
+      body {
+        padding: 1rem;
+      }
+      .print-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+        gap: 1rem;
+      }
+      .print-card {
+        background: #fff;
+        border: 2px solid #1a1a1a;
+        border-radius: 16px;
+        padding: 1rem;
+        text-align: center;
+      }
+      .print-card h2 {
+        margin: 0.25rem 0;
+        font-size: 1.1rem;
+      }
+      .print-card p {
+        margin: 0.25rem 0 0.75rem;
+        font-size: 0.85rem;
+        color: #444;
+      }
+      canvas {
+        width: 180px !important;
+        height: 180px !important;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="no-print" style="margin-bottom: 1rem">
+      <h1>QR print pack</h1>
+      <p>
+        Set <code>publicBaseUrl</code> in <code>js/config.js</code> to your live hub root (with trailing path if needed),
+        then print.
+      </p>
+      <label
+        >Base URL
+        <input id="base" style="width: min(520px, 100%); padding: 0.5rem" placeholder="https://www.thekeyholders.org/celebrate/"
+      /></label>
+      <button class="btn" id="gen" style="margin-left: 0.5rem">Generate</button>
+      <button class="btn btn-secondary" onclick="print()">Print</button>
+    </div>
+    <div class="print-grid" id="grid"></div>
+    <script src="../js/config.js"></script>
+    <script>
+      const modules = [
+        { file: "index.html", title: "Guest Hub", blurb: "Start here · no password" },
+        { file: "join.html", title: "Join", blurb: "First + last name" },
+        { file: "photos.html", title: "Photos", blurb: "Shared album" },
+        { file: "rings.html", title: "Ring Hunt", blurb: "Plastic ring rules" },
+        { file: "guestbook.html", title: "Guest Book", blurb: "Sign the real book" },
+        { file: "trivia.html", title: "Trivia", blurb: "Couple brain teaser" },
+        { file: "he-said.html", title: "He / She Said", blurb: "Speed round" },
+        { file: "passport.html", title: "Passport", blurb: "Stamp quest" },
+        { file: "poses.html", title: "Pose Spinner", blurb: "Arch prompts" },
+        { file: "leaderboard.html", title: "Leaderboard", blurb: "Prize track" },
+      ];
+
+      document.getElementById("base").value =
+        PARTY_CONFIG.publicBaseUrl ||
+        location.href.replace(/print\/qrs\.html.*/, "");
+
+      async function generate() {
+        let base = document.getElementById("base").value.trim();
+        if (!base.endsWith("/")) base += "/";
+        const grid = document.getElementById("grid");
+        grid.innerHTML = "";
+        for (const m of modules) {
+          const url = base + m.file;
+          const card = document.createElement("div");
+          card.className = "print-card";
+          card.innerHTML = `<div style="font-size:1.4rem">🌸</div><h2>${m.title}</h2><p>${m.blurb}</p><canvas></canvas><p style="font-size:0.65rem;word-break:break-all">${url}</p>`;
+          grid.appendChild(card);
+          await QRCode.toCanvas(card.querySelector("canvas"), url, {
+            width: 180,
+            margin: 1,
+            color: { dark: "#1a1a1a", light: "#ffffff" },
+          });
+        }
+      }
+      document.getElementById("gen").onclick = generate;
+      generate();
+    </script>
+  </body>
+</html>

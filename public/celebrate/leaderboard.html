@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=5" />
+    <title>Leaderboard · Guest Hub</title>
+    <link rel="stylesheet" href="css/party.css" />
+    <script src="js/head-boot.js"></script>
+  </head>
+  <body data-page="leaderboard">
+    <header class="app-header">
+      <div class="brand">
+        <div class="brand-mark">🏆</div>
+        <div>
+          <h1>Leaderboard</h1>
+          <p>Friendly competition · real prize at the end</p>
+        </div>
+      </div>
+      <div id="profile-chip"></div>
+      <div id="prize-banner" hidden></div>
+    </header>
+    <main>
+      <section class="hero">
+        <h2 id="prize-title">Prize track</h2>
+        <p class="lede" id="prize-desc"></p>
+        <p class="muted" id="stats"></p>
+      </section>
+      <section class="card" id="board">
+        <p class="muted">Loading standings…</p>
+      </section>
+      <section class="card">
+        <p class="muted" id="legal"></p>
+        <button class="btn btn-secondary btn-block" id="refresh">Refresh</button>
+      </section>
+    </main>
+    <nav id="bottom-nav"></nav>
+    <script src="js/config.js"></script>
+    <script src="js/api.js"></script>
+    <script src="js/profile.js"></script>
+    <script src="js/ui.js"></script>
+    <script src="js/shell.js"></script>
+    <script>
+      async function load() {
+        const prize = PARTY_CONFIG.prize || {};
+        document.getElementById("prize-title").textContent = prize.enabled
+          ? `🏆 ${prize.title}`
+          : "Standings";
+        document.getElementById("prize-desc").textContent = prize.description || "";
+        document.getElementById("legal").textContent = prize.legalNote || "";
+        try {
+          const data = await PartyAPI.leaderboard();
+          document.getElementById("stats").textContent = `${data.stats.profiles} players · ${data.stats.ringsClaimed} rings claimed`;
+          const me = PartyProfile.get();
+          document.getElementById("board").innerHTML = data.leaderboard.length
+            ? data.leaderboard
+                .map((row) => {
+                  const mine = me && me.id === row.profileId ? " · you" : "";
+                  return `<div class="lb-row"><span>#${row.rank}</span><span>${PartyUI.escapeHtml(
+                    row.displayName
+                  )}${mine}</span><strong>${row.totalPoints} pts</strong></div>`;
+                })
+                .join("")
+            : `<p class="muted">No scores yet. Be the awkward first. We believe in you.</p>`;
+        } catch {
+          document.getElementById("board").innerHTML =
+            `<p class="muted">Leaderboard needs the API online. Local play still works on each phone.</p>`;
+        }
+      }
+      document.getElementById("refresh").onclick = load;
+      load();
+    </script>
+  </body>
+</html>

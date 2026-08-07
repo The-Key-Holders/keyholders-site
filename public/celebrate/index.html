@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=5" />
+    <title>Dani & Javad Guest Hub</title>
+    <link rel="stylesheet" href="css/party.css" />
+    <script src="js/head-boot.js"></script>
+  </head>
+  <body data-page="home">
+    <header class="app-header">
+      <div class="brand">
+        <div class="brand-mark">🌸</div>
+        <div>
+          <h1>Dani & Javad Guest Hub</h1>
+          <p>Digital party sidekick · free · no login wall</p>
+        </div>
+      </div>
+      <div id="profile-chip"></div>
+      <div id="prize-banner" hidden></div>
+    </header>
+    <main>
+      <section class="hero">
+        <h2>You made it. That already scores points in our hearts.</h2>
+        <p class="lede" id="thanks">
+          Thanks for showing up IRL. Scan, play, stamp your passport, and dump photos in the shared album.
+          We kept this password-free because we barely remember our own.
+        </p>
+        <div class="badge-row">
+          <span class="badge">🌸 Bright floral vibes</span>
+          <span class="badge">🌮 Taco timeline</span>
+          <span class="badge">🏆 Optional glory</span>
+        </div>
+      </section>
+
+      <div class="grid" id="tile-grid"></div>
+
+      <section class="card">
+        <h3>Today’s flow</h3>
+        <ul class="schedule" id="schedule"></ul>
+        <p class="muted">Times are guide rails, not a corporate stand-up.</p>
+      </section>
+
+      <section class="card">
+        <h3>How this works</h3>
+        <p class="muted">
+          1) Join with first + last name · 2) Play games / stamp real-world quests · 3) Climb the leaderboard ·
+          4) Be excellent to each other. Each activity also has its own QR around the room.
+        </p>
+      </section>
+    </main>
+    <nav id="bottom-nav"></nav>
+    <script src="js/config.js"></script>
+    <script src="js/api.js"></script>
+    <script src="js/profile.js"></script>
+    <script src="js/ui.js"></script>
+    <script src="js/shell.js"></script>
+    <script>
+      (async function () {
+        const cfg = PARTY_CONFIG;
+        const grid = document.getElementById("tile-grid");
+        grid.innerHTML = cfg.modules
+          .filter((m) => m.id !== "home")
+          .map(
+            (m) =>
+              `<a class="tile" href="${m.path}"><div class="emoji">${m.emoji}</div><strong>${m.title}</strong><span>${m.blurb}</span></a>`
+          )
+          .join("");
+
+        const remote = cfg._remote;
+        const schedule = (remote && remote.schedule) || [
+          { time: "1:00 PM", what: "Doors · drinks · photos" },
+          { time: "1:25 PM", what: "Welcome speech" },
+          { time: "1:30 PM", what: "Tacos" },
+          { time: "2:15 PM", what: "Surprise energy" },
+          { time: "2:30 PM", what: "Games" },
+          { time: "4:30 PM", what: "Last call" },
+          { time: "5:00 PM", what: "Farewell" },
+        ];
+        document.getElementById("schedule").innerHTML = schedule
+          .map((s) => `<li><strong>${s.time}</strong> — ${s.what}</li>`)
+          .join("");
+        if (remote && remote.thanks) document.getElementById("thanks").textContent = remote.thanks;
+      })();
+    </script>
+  </body>
+</html>

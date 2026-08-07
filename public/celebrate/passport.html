@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=5" />
+    <title>Party Passport · Guest Hub</title>
+    <link rel="stylesheet" href="css/party.css" />
+    <script src="js/head-boot.js"></script>
+  </head>
+  <body data-page="passport">
+    <header class="app-header">
+      <div class="brand">
+        <div class="brand-mark">🛂</div>
+        <div>
+          <h1>Party Passport</h1>
+          <p>Stamp collector mode</p>
+        </div>
+      </div>
+      <div id="profile-chip"></div>
+      <div id="prize-banner" hidden></div>
+    </header>
+    <main>
+      <section class="hero">
+        <h2>Collect stamps. Become legend.</h2>
+        <p class="lede">
+          Mix of real-world quests (rings, guest book) and phone quests (trivia, photos, poses). Complete all for a
+          bonus.
+        </p>
+        <div class="progress"><i id="bar"></i></div>
+        <p class="muted" id="summary"></p>
+      </section>
+      <section class="card" id="stamps"></section>
+      <section class="card">
+        <button class="btn btn-block" id="claim" disabled>Claim passport bonus (+25)</button>
+        <p class="muted" style="margin-top: 0.5rem">One-time bonus when every stamp is done.</p>
+      </section>
+    </main>
+    <nav id="bottom-nav"></nav>
+    <script src="js/config.js"></script>
+    <script src="js/api.js"></script>
+    <script src="js/profile.js"></script>
+    <script src="js/ui.js"></script>
+    <script src="js/shell.js"></script>
+    <script>
+      (async function () {
+        const p0 = PartyProfile.requireOrRedirect();
+        if (!p0) return;
+        let profile = p0;
+        let scores = [];
+        const local = PartyProfile.local.get();
+
+        try {
+          if (!String(profile.id).startsWith("local-")) {
+            const full = await PartyAPI.getProfile(profile.id);
+            profile = full.profile;
+            scores = full.scores || [];
+            PartyProfile.set(profile);
+          }
+        } catch (_) {}
+
+        const hasTrivia = scores.some((s) => s.game === "trivia") || !!local.trivia;
+        const stamps = [
+          {
+            id: "photo",
+            label: "Added a photo",
+            href: "photos.html",
+            done: !!local.photo,
+          },
+          {
+            id: "guestbook",
+            label: "Signed the guest book",
+            href: "guestbook.html",
+            done: !!(profile.guestbookSigned || local.guestbook),
+          },
+          {
+            id: "ring",
+            label: "Found a ring (or tried heroically)",
+            href: "rings.html",
+            done: (profile.ringsFound || local.rings || 0) > 0,
+          },
+          {
+            id: "trivia",
+            label: "Finished couple trivia",
+            href: "trivia.html",
+            done: hasTrivia,
+          },
+          {
+            id: "pose",
+            label: "Spun a photo pose",
+            href: "poses.html",
+            done: (profile.posesSpun || local.poses || 0) > 0,
+          },
+        ];
+
+        const doneCount = stamps.filter((s) => s.done).length;
+        document.getElementById("bar").style.width = `${(doneCount / stamps.length) * 100}%`;
+        document.getElementById("summary").textContent = `${doneCount} / ${stamps.length} stamps`;
+        document.getElementById("stamps").innerHTML = stamps
+          .map(
+            (s) =>
+              `<p><span class="stamp ${s.done ? "" : "todo"}">${s.done ? "✓" : "○"} ${s.label}</span> · <a href="${
+                s.href
+              }">Go</a></p>`
+          )
+          .join("");
+
+        const claim = document.getElementById("claim");
+        const already = (profile.passportBonus || 0) > 0 || !!local.passportBonus;
+        if (doneCount === stamps.length && !already) claim.disabled = false;
+        if (already) {
+          claim.disabled = true;
+          claim.textContent = "Bonus already claimed ✓";
+        }
+
+        claim.onclick = async () => {
+          try {
+            if (!String(profile.id).startsWith("local-")) {
+              const res = await PartyAPI.checkin({ profileId: profile.id, kind: "passport_complete" });
+              PartyProfile.set(res.profile);
+            } else {
+              PartyProfile.local.patch({ passportBonus: true });
+            }
+            PartyUI.confetti(2000);
+            PartyUI.toast("Passport complete. You absolute unit.");
+            claim.disabled = true;
+            claim.textContent = "Bonus claimed ✓";
+          } catch (e) {
+            PartyUI.toast(e.message || "Could not claim");
+          }
+        };
+      })();
+    </script>
+  </body>
+</html>

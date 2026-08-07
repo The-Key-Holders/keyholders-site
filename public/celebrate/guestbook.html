@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=5" />
+    <title>Guest Book · Guest Hub</title>
+    <link rel="stylesheet" href="css/party.css" />
+    <script src="js/head-boot.js"></script>
+  </head>
+  <body data-page="guestbook">
+    <header class="app-header">
+      <div class="brand">
+        <div class="brand-mark">✍️</div>
+        <div>
+          <h1>Guest book</h1>
+          <p>Paper first. Phone second.</p>
+        </div>
+      </div>
+      <div id="profile-chip"></div>
+      <div id="prize-banner" hidden></div>
+    </header>
+    <main>
+      <section class="hero">
+        <h2 id="gb-title">Sign the real guest book</h2>
+        <p class="lede" id="gb-blurb">
+          Ink beats pixels for keepsakes. Find the book, leave a note, then stamp your digital passport.
+        </p>
+      </section>
+      <section class="card">
+        <h3>Where</h3>
+        <p id="gb-loc" class="muted">Welcome table near the entrance.</p>
+        <button class="btn btn-block" id="signed-btn">I signed the book ✓</button>
+        <p id="status" class="muted" style="margin-top: 0.75rem"></p>
+      </section>
+    </main>
+    <nav id="bottom-nav"></nav>
+    <script src="js/config.js"></script>
+    <script src="js/api.js"></script>
+    <script src="js/profile.js"></script>
+    <script src="js/ui.js"></script>
+    <script src="js/shell.js"></script>
+    <script>
+      (async function () {
+        const p = PartyProfile.requireOrRedirect();
+        if (!p) return;
+        const gb =
+          (PARTY_CONFIG._remote && PARTY_CONFIG._remote.guestbook) ||
+          PARTY_CONFIG.guestbook || {
+            title: "Sign the real guest book",
+            location: "Welcome table near the entrance",
+            blurb: document.getElementById("gb-blurb").textContent,
+          };
+        document.getElementById("gb-title").textContent = gb.title;
+        document.getElementById("gb-blurb").textContent = gb.blurb;
+        document.getElementById("gb-loc").textContent = gb.location;
+
+        function setSignedUI(yes) {
+          document.getElementById("status").textContent = yes
+            ? "Passport stamp: signed. Future historians thank you."
+            : "";
+          if (yes) {
+            document.getElementById("signed-btn").disabled = true;
+            document.getElementById("signed-btn").textContent = "Already stamped ✓";
+          }
+        }
+
+        try {
+          if (!String(p.id).startsWith("local-")) {
+            const full = await PartyAPI.getProfile(p.id);
+            PartyProfile.set(full.profile);
+            setSignedUI(full.profile.guestbookSigned);
+          } else {
+            setSignedUI(!!PartyProfile.local.get().guestbook);
+          }
+        } catch {
+          setSignedUI(!!PartyProfile.local.get().guestbook);
+        }
+
+        document.getElementById("signed-btn").onclick = async () => {
+          try {
+            if (!String(p.id).startsWith("local-")) {
+              const res = await PartyAPI.checkin({ profileId: p.id, kind: "guestbook" });
+              PartyProfile.set(res.profile);
+            } else {
+              PartyProfile.local.patch({ guestbook: true });
+            }
+            setSignedUI(true);
+            PartyUI.confetti();
+            PartyUI.toast("Book stamped. Calligraphy optional.");
+          } catch (e) {
+            PartyUI.toast(e.message || "Could not stamp");
+          }
+        };
+      })();
+    </script>
+  </body>
+</html>

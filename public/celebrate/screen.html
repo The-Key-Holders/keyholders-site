@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=5" />
+    <title>Screen Mode · Guest Hub</title>
+    <link rel="stylesheet" href="css/party.css" />
+    <script src="js/head-boot.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.4/build/qrcode.min.js"></script>
+  </head>
+  <body class="screen-mode" data-page="screen">
+    <div class="screen-wrap">
+      <p class="screen-meta">Dani & Javad · Engagement Party</p>
+      <h1>Scan to join the Guest Hub</h1>
+      <p class="screen-meta" id="url-line"></p>
+      <canvas id="qr" class="screen-qr"></canvas>
+      <p class="screen-meta" id="prize-line"></p>
+      <p class="screen-meta" id="next-beat" style="margin-top: 1.25rem; font-size: 1.35rem"></p>
+      <p class="screen-meta" id="top" style="margin-top: 1rem; opacity: 0.75"></p>
+      <p class="screen-meta" style="margin-top: 2rem; font-size: 0.95rem">Press F11 for fullscreen · no password on the hub</p>
+    </div>
+    <script src="js/config.js"></script>
+    <script src="js/api.js"></script>
+    <script>
+      (async function () {
+        const base =
+          PARTY_CONFIG.publicBaseUrl ||
+          location.href.replace(/screen\.html.*/, "index.html");
+        document.getElementById("url-line").textContent = base;
+        if (window.QRCode) {
+          await QRCode.toCanvas(document.getElementById("qr"), base, {
+            width: 280,
+            margin: 1,
+            color: { dark: "#1a1a1a", light: "#ffffff" },
+          });
+        }
+        const prize = PARTY_CONFIG.prize;
+        if (prize && prize.enabled) {
+          document.getElementById("prize-line").textContent = `Prize: ${prize.title} · ${prize.announceAt || ""}`;
+        }
+        try {
+          const cfg = await PartyAPI.config();
+          const s = (cfg.schedule || [])[0];
+          if (cfg.schedule) {
+            const nowLabel = cfg.schedule.map((x) => `${x.time} ${x.what}`).slice(0, 3).join("  ·  ");
+            document.getElementById("next-beat").textContent = nowLabel;
+          }
+        } catch (_) {
+          document.getElementById("next-beat").textContent = "1:00 doors · 1:30 tacos · 2:30 games";
+        }
+        async function tops() {
+          try {
+            const lb = await PartyAPI.leaderboard();
+            document.getElementById("top").textContent = lb.leaderboard
+              .slice(0, 5)
+              .map((r) => `#${r.rank} ${r.displayName} (${r.totalPoints})`)
+              .join("   ");
+          } catch (_) {}
+        }
+        tops();
+        setInterval(tops, 20000);
+      })();
+    </script>
+  </body>
+</html>

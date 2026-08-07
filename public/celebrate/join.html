@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=5" />
+    <title>Join · Dani & Javad Guest Hub</title>
+    <link rel="stylesheet" href="css/party.css" />
+    <script src="js/head-boot.js"></script>
+  </head>
+  <body data-page="join">
+    <header class="app-header">
+      <div class="brand">
+        <div class="brand-mark">💍</div>
+        <div>
+          <h1>Guest Hub</h1>
+          <p>No password. Just your name.</p>
+        </div>
+      </div>
+    </header>
+    <main>
+      <section class="hero">
+        <h2>Pull up a seat (digitally)</h2>
+        <p class="lede">
+          First + last name only. We will track your trivia glory, ring finds, and passport stamps.
+          Cap is 150 profiles — plenty for a taco-powered afternoon.
+        </p>
+      </section>
+      <section class="card">
+        <form id="join-form">
+          <div class="field">
+            <label for="first">First name</label>
+            <input id="first" name="first" autocomplete="given-name" required maxlength="40" placeholder="Dani" />
+          </div>
+          <div class="field">
+            <label for="last">Last name</label>
+            <input id="last" name="last" autocomplete="family-name" required maxlength="40" placeholder="Awesome" />
+          </div>
+          <button class="btn btn-block" type="submit">Start playing ✨</button>
+        </form>
+        <div id="exists-box" class="card" style="display: none; margin-top: 1rem; background: #fff8e8"></div>
+        <p class="muted" style="margin-top: 1rem">
+          Already joined on this phone?
+          <button type="button" class="btn btn-secondary btn-small" id="resume-local">Resume saved profile</button>
+        </p>
+      </section>
+    </main>
+    <script src="js/config.js"></script>
+    <script src="js/api.js"></script>
+    <script src="js/profile.js"></script>
+    <script src="js/ui.js"></script>
+    <script>
+      const params = new URLSearchParams(location.search);
+      const next = params.get("next") || "index.html";
+
+      function go(profile) {
+        PartyProfile.set(profile);
+        PartyUI.confetti(1200);
+        PartyUI.toast("You're in. Thanks for being here.", "ok");
+        setTimeout(() => (location.href = next), 450);
+      }
+
+      document.getElementById("resume-local").onclick = () => {
+        const p = PartyProfile.get();
+        if (p) location.href = next;
+        else PartyUI.toast("No saved profile on this phone yet.");
+      };
+
+      document.getElementById("join-form").onsubmit = async (e) => {
+        e.preventDefault();
+        const firstName = document.getElementById("first").value.trim();
+        const lastName = document.getElementById("last").value.trim();
+        const box = document.getElementById("exists-box");
+        box.style.display = "none";
+        try {
+          const res = await PartyAPI.createProfile(firstName, lastName, false);
+          if (res.exists) {
+            box.style.display = "block";
+            box.innerHTML =
+              `<p><strong>Name already on the roster.</strong> Resume one, or create a distinct profile (middle initial helps).</p>` +
+              res.profiles
+                .map(
+                  (p) =>
+                    `<button type="button" class="btn btn-secondary btn-block" style="margin:0.35rem 0" data-id="${p.id}">Resume ${PartyUI.escapeHtml(
+                      p.displayName
+                    )} · ${p.totalPoints} pts</button>`
+                )
+                .join("") +
+              `<button type="button" class="btn btn-block" id="force-new" style="margin-top:0.5rem">Create new with this name anyway</button>`;
+            box.querySelectorAll("[data-id]").forEach((btn) => {
+              btn.onclick = async () => {
+                const full = await PartyAPI.getProfile(btn.dataset.id);
+                go(full.profile);
+              };
+            });
+            document.getElementById("force-new").onclick = async () => {
+              const created = await PartyAPI.createProfile(firstName, lastName, true);
+              go(created.profile);
+            };
+            return;
+          }
+          go(res.profile);
+        } catch (err) {
+          if (err.offline) {
+            // Local-only profile
+            const profile = {
+              id: "local-" + Date.now(),
+              firstName,
+              lastName,
+              displayName: firstName + " " + (lastName[0] || "") + ".",
+              ringsFound: 0,
+              guestbookSigned: false,
+              posesSpun: 0,
+              totalPoints: 0,
+              offline: true,
+            };
+            go(profile);
+            PartyUI.toast("API offline — progress stays on this phone until we reconnect.");
+            return;
+          }
+          PartyUI.toast(err.message || "Could not join", "err");
+        }
+      };
+    </script>
+  </body>
+</html>

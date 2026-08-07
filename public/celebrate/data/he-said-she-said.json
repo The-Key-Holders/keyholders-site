@@ -1,0 +1,37 @@
+{
+  "id": "he-said-she-said",
+  "title": "He Said / She Said",
+  "subtitle": "Who is more likely? Speed helps a tiny bit.",
+  "questions": [
+    {
+      "q": "More likely to over-optimize a packing list?",
+      "choices": ["Dani", "Javad"],
+      "answer": 1
+    },
+    {
+      "q": "More likely to notice the flowers first?",
+      "choices": ["Dani", "Javad"],
+      "answer": 0
+    },
+    {
+      "q": "More likely to say “we should document this”?",
+      "choices": ["Dani", "Javad"],
+      "answer": 1
+    },
+    {
+      "q": "More likely to claim the last taco “for balance”?",
+      "choices": ["Dani", "Javad", "Both, honestly"],
+      "answer": 2
+    },
+    {
+      "q": "More likely to dance first when the surprise hits?",
+      "choices": ["Dani", "Javad", "The guests"],
+      "answer": 0
+    },
+    {
+      "q": "More likely to thank you three times for coming?",
+      "choices": ["Dani", "Javad", "Both"],
+      "answer": 2
+    }
+  ]
+}
