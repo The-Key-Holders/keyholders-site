@@ -4,7 +4,7 @@
     const root = document.createElement("div");
     root.className = "confetti-root";
     root.setAttribute("aria-hidden", "true");
-    const colors = ["#e86a6a", "#c9a227", "#2a1f42", "#fff8ef", "#4a3568", "#ffd966"];
+    const colors = ["#FF6B6B", "#FFD966", "#D4AF37", "#fff", "#ff9f9f"];
     for (let i = 0; i < 40; i++) {
       const p = document.createElement("i");
       p.style.left = Math.random() * 100 + "%";
@@ -37,31 +37,22 @@
     const bar = document.getElementById("profile-chip");
     if (bar) {
       if (p) {
-        bar.innerHTML = `<span class="profile-pill"><span class="chip-dot" aria-hidden="true"></span>${escapeHtml(
+        bar.innerHTML = `<span class="chip-dot"></span> Playing as <strong>${escapeHtml(
           PartyProfile.display(p)
-        )} · <a href="join.html">Switch</a></span>`;
+        )}</strong> · <a href="join.html">Switch</a>`;
       } else {
-        bar.innerHTML = `<a class="btn btn-small" href="join.html">Join the Hub</a><span class="join-hint">phones only · no password</span>`;
+        bar.innerHTML = `<a class="btn btn-small" href="join.html">Join the Hub</a> <span class="muted">· phones only needed · no password</span>`;
       }
     }
     const nav = document.getElementById("bottom-nav");
     if (nav && cfg.modules) {
-      const main = ["home", "he-said", "trivia", "leaderboard", "photowall"];
-      const shortTitle = {
-        home: "Home",
-        "he-said": "Who",
-        trivia: "Trivia",
-        leaderboard: "Board",
-        photowall: "Photos",
-      };
+      const main = ["home", "trivia", "comingle", "photowall", "leaderboard"];
       nav.innerHTML = main
         .map((id) => {
           const m = cfg.modules.find((x) => x.id === id);
           if (!m) return "";
           const on = activeId === id ? "active" : "";
-          return `<a class="nav-item ${on}" href="${m.path}"><span>${m.emoji}</span><small>${
-            shortTitle[id] || m.title.split(" ")[0]
-          }</small></a>`;
+          return `<a class="nav-item ${on}" href="${m.path}"><span>${m.emoji}</span><small>${m.title}</small></a>`;
         })
         .join("");
     }
@@ -69,7 +60,9 @@
     if (prize) {
       if (cfg.prize && cfg.prize.enabled !== false && cfg.prize.title) {
         prize.hidden = false;
-        prize.innerHTML = `★ Live standings · ${escapeHtml(cfg.prize.title)} · <a href="leaderboard.html">Board</a>`;
+        prize.innerHTML = `🏆 <strong>Prize:</strong> ${escapeHtml(cfg.prize.title)} · ${escapeHtml(
+          cfg.prize.announceAt || ""
+        )} · <a href="leaderboard.html">Standings</a>`;
       } else {
         prize.hidden = true;
         prize.innerHTML = "";

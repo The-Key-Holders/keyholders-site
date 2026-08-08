@@ -3,18 +3,17 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=5" />
-    <meta name="theme-color" content="#1a1228" />
-    <title>Dani & Javad · Guest Hub</title>
+    <title>Dani & Javad Guest Hub</title>
     <link rel="stylesheet" href="css/party.css" />
     <script src="js/head-boot.js"></script>
   </head>
   <body data-page="home">
     <header class="app-header">
       <div class="brand">
-        <div class="brand-mark" aria-hidden="true">✦</div>
+        <div class="brand-mark">🌸</div>
         <div>
-          <h1>Dani &amp; Javad</h1>
-          <p>Guest Hub · engagement party</p>
+          <h1>Dani & Javad Guest Hub</h1>
+          <p>Digital party sidekick · free · no login wall</p>
         </div>
       </div>
       <div id="profile-chip"></div>
@@ -22,36 +21,34 @@
     </header>
     <main>
       <section class="hero">
-        <h2>You made it. That already scores points.</h2>
+        <h2>You made it. That already scores points in our hearts.</h2>
         <p class="lede" id="thanks">
-          Phone-only party sidekick: play games, scan venue QRs, climb the board.
-          No passwords. No app store.
+          Thanks for showing up IRL. Scan, play, stamp your passport, and dump photos in the shared album.
+          We kept this password-free because we barely remember our own.
         </p>
         <p class="muted" id="scoring-line"></p>
-        <div id="winner-home" class="card" style="display: none; margin-top: 0.85rem"></div>
+        <div id="winner-home" class="card" style="display:none;margin-top:0.85rem;background:linear-gradient(135deg,#fff8e1,#ffe0e0)"></div>
         <div class="badge-row">
-          <span class="badge">Golden hour</span>
-          <span class="badge">Tacos + margs</span>
-          <span class="badge">Freeze 4:30</span>
-          <span class="badge">QR only secrets</span>
+          <span class="badge">🌸 Bright floral vibes</span>
+          <span class="badge">🌮 Taco timeline</span>
+          <span class="badge">⏰ Points freeze 4:30 PM</span>
+          <span class="badge">🏆 $5,000 joke card*</span>
         </div>
       </section>
 
-      <p class="section-label">Play</p>
       <div class="grid" id="tile-grid"></div>
 
       <section class="card">
         <h3>Today’s flow</h3>
         <ul class="schedule" id="schedule"></ul>
-        <p class="muted" style="margin: 0.55rem 0 0">Guide rails, not a corporate stand-up.</p>
+        <p class="muted">Times are guide rails, not a corporate stand-up.</p>
       </section>
 
       <section class="card">
         <h3>How this works</h3>
-        <p class="muted" style="margin: 0">
-          1) Join with first + last name · 2) Play games and venue QRs ·
-          3) Climb the leaderboard · be excellent.
-          (Anything “hidden” is only on printed QRs, not linked here.)
+        <p class="muted">
+          1) Join with first + last name · 2) Play games / stamp real-world quests · 3) Climb the leaderboard ·
+          4) Be excellent to each other. Each activity also has its own QR around the room.
         </p>
       </section>
     </main>
@@ -65,53 +62,26 @@
       (async function () {
         const cfg = PARTY_CONFIG;
         const grid = document.getElementById("tile-grid");
-        const priority = [
-          "he-said",
-          "trivia",
-          "comingle",
-          "stations",
-          "margarita",
-          "poses",
-          "leaderboard",
-          "photowall",
-          "photos",
-          "rings",
-          "guestbook",
-          "passport",
-          "jukebox",
-          "predict",
-          "advice",
-          "ar",
-        ];
-        const mods = (cfg.modules || []).filter((m) => m.id !== "home");
-        mods.sort((a, b) => {
-          const ia = priority.indexOf(a.id);
-          const ib = priority.indexOf(b.id);
-          return (ia < 0 ? 99 : ia) - (ib < 0 ? 99 : ib);
-        });
-        // Clean tiles only: icon + title + blurb. NO couple photos on activity cards.
-        grid.innerHTML = mods
-          .map((m, i) => {
-            const wide = i === 0 ? " tile-wide" : "";
-            return `<a class="tile${wide}" href="${m.path}"><div class="emoji" aria-hidden="true">${
-              m.emoji || "·"
-            }</div><strong>${m.title}</strong><span>${m.blurb}</span></a>`;
-          })
+        grid.innerHTML = cfg.modules
+          .filter((m) => m.id !== "home")
+          .map(
+            (m) =>
+              `<a class="tile" href="${m.path}"><div class="emoji">${m.emoji}</div><strong>${m.title}</strong><span>${m.blurb}</span></a>`
+          )
           .join("");
 
         const remote = cfg._remote;
-        const schedule =
-          (remote && remote.schedule) || [
-            { time: "1:00 PM", what: "Doors · drinks · photos" },
-            { time: "1:25 PM", what: "Welcome speech" },
-            { time: "1:30 PM", what: "Tacos" },
-            { time: "2:30 PM", what: "Games + phone quests" },
-            { time: "4:30 PM", what: "Scoring freezes · winner locked" },
-            { time: "4:45 PM", what: "Prize announcement" },
-            { time: "5:00 PM", what: "Hugs · exit" },
-          ];
+        const schedule = (remote && remote.schedule) || [
+          { time: "1:00 PM", what: "Doors · drinks · photos" },
+          { time: "1:25 PM", what: "Welcome speech" },
+          { time: "1:30 PM", what: "Tacos" },
+          { time: "2:15 PM", what: "Surprise energy" },
+          { time: "2:30 PM", what: "Games" },
+          { time: "4:30 PM", what: "Last call" },
+          { time: "5:00 PM", what: "Farewell" },
+        ];
         document.getElementById("schedule").innerHTML = schedule
-          .map((s) => `<li><strong>${s.time}</strong><span>${s.what}</span></li>`)
+          .map((s) => `<li><strong>${s.time}</strong> — ${s.what}</li>`)
           .join("");
         if (remote && remote.thanks) document.getElementById("thanks").textContent = remote.thanks;
         try {
@@ -120,9 +90,7 @@
           if (st.winner) {
             const w = document.getElementById("winner-home");
             w.style.display = "block";
-            w.innerHTML = `<h3>Winner locked</h3><p><strong>${PartyUI.escapeHtml(
-              st.winner.displayName
-            )}</strong> · ${st.winner.totalPoints} pts</p>`;
+            w.innerHTML = `<h3>🏆 Winner locked</h3><p><strong>${PartyUI.escapeHtml(st.winner.displayName)}</strong> · ${st.winner.totalPoints} pts</p><p class="muted">${PartyUI.escapeHtml(st.winner.congrats)}</p>`;
           }
         } catch (_) {}
       })();

@@ -50,16 +50,10 @@
         if (!p) return;
         let data;
         try {
-          // Prefer static pack (always redeployed); fall back to API host content
-          const local = await fetch("data/trivia.json?v=3").then((r) => (r.ok ? r.json() : null));
-          if (local && Array.isArray(local.questions) && local.questions.length) {
-            data = local;
-          } else {
-            const remote = await fetch("/api/content/trivia").then((r) => (r.ok ? r.json() : null));
-            data = remote && remote.questions ? remote : local;
-          }
+          const remote = await fetch("/api/content/trivia").then((r) => (r.ok ? r.json() : null));
+          data = remote && remote.questions ? remote : await fetch("data/trivia.json").then((r) => r.json());
         } catch {
-          data = await fetch("data/trivia.json?v=3").then((r) => r.json());
+          data = await fetch("data/trivia.json").then((r) => r.json());
         }
         let i = 0;
         let score = 0;

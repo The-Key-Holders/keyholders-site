@@ -633,8 +633,7 @@ async function handle(req: NextRequest, path: string[]): Promise<NextResponse> {
   // Public content reads for guest pages that load JSON (optional)
   if (segs[0] === "content" && segs[1] && method === "GET") {
     const name = segs[1];
-    // Always serve current pack for guests (ignore stale host in-memory edits)
-    if (name === "trivia") return json(DEFAULT_TRIVIA);
+    if (name === "trivia") return json(host.content?.trivia || DEFAULT_TRIVIA);
     if (name === "he-said") return json(host.content?.heSaid || DEFAULT_HE_SAID);
     if (name === "poses") return json(host.content?.poses || DEFAULT_POSES);
   }

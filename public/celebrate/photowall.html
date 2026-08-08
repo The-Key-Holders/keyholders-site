@@ -6,41 +6,14 @@
     <title>Photo Wall · Guest Hub</title>
     <link rel="stylesheet" href="css/party.css" />
     <script src="js/head-boot.js"></script>
-    <style>
-      .wall-grid {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 0.55rem;
-      }
-      .wall-grid figure {
-        margin: 0;
-        border-radius: 14px;
-        overflow: hidden;
-        background: #fff;
-        box-shadow: 0 8px 20px rgba(26, 18, 40, 0.1);
-        border: 1px solid rgba(255, 255, 255, 0.9);
-      }
-      .wall-grid img {
-        width: 100%;
-        aspect-ratio: 1;
-        object-fit: cover;
-        display: block;
-      }
-      .wall-grid figcaption {
-        padding: 0.4rem 0.5rem 0.55rem;
-        font-size: 0.68rem;
-        color: #5c5368;
-        font-weight: 600;
-      }
-    </style>
   </head>
   <body data-page="photowall">
     <header class="app-header">
       <div class="brand">
-        <div class="brand-mark">◻</div>
+        <div class="brand-mark">📷</div>
         <div>
-          <h1>Photo Wall</h1>
-          <p>Public favorites · not the secret QR hunt</p>
+          <h1>Live Photo Wall</h1>
+          <p>Upload · wish · appear on the big screen</p>
         </div>
       </div>
       <div id="profile-chip"></div>
@@ -48,26 +21,24 @@
     </header>
     <main>
       <section class="hero">
-        <h2>Us, out loud</h2>
-        <p class="lede">
-          These are public wall photos (the leftover favorites that are <strong>not</strong> the QR-only hidden memories).
-          Secret memories are only on printed QRs. Dump extra guest shots to the Google album too.
-        </p>
+        <h2>Pixels + well-wishes</h2>
+        <p class="lede">Drop a photo for the projector wall, and/or leave a short note. Also dump extras to the Google album if you want archival glory.</p>
         <a class="btn btn-secondary" href="photos.html">Open Google album</a>
       </section>
-
       <section class="card">
-        <h3>Couple + friends wall</h3>
-        <div class="wall-grid" id="wall"></div>
+        <h3>Upload a photo</h3>
+        <div class="field"><label>Photo</label><input type="file" id="file" accept="image/*" capture="environment" /></div>
+        <div class="field"><label>Caption (optional)</label><input id="cap" maxlength="200" placeholder="Peak taco energy" /></div>
+        <button class="btn btn-block" id="up">Upload to wall</button>
       </section>
-
       <section class="card">
-        <h3>Leave a wish</h3>
-        <div class="field">
-          <label>Message</label>
-          <input id="wish" maxlength="500" placeholder="May your uptime be high and your arguments short." />
-        </div>
-        <button class="btn btn-block" id="wishBtn" type="button">Send wish</button>
+        <h3>Digital guestbook wish</h3>
+        <div class="field"><label>Message</label><input id="wish" maxlength="500" placeholder="May your uptime be high and your arguments short." /></div>
+        <button class="btn btn-block" id="wishBtn">Send wish</button>
+      </section>
+      <section class="card">
+        <h3>Recent wall</h3>
+        <div id="feed" class="grid" style="grid-template-columns:1fr 1fr"></div>
       </section>
     </main>
     <nav id="bottom-nav"></nav>
@@ -78,41 +49,42 @@
     <script src="js/shell.js"></script>
     <script>
       (async function () {
-        // Public wall only. Hidden memory assets are NOT listed here.
-        const wall = [
-          { file: "web_engagement_app_proposal2.jpg", label: "Proposal (more)" },
-          {
-            file: "web_engagement_app_seattle_trip_spaceneed_javad_walking_on_clouds_fav16.jpg",
-            label: "Seattle clouds",
-          },
-          { file: "web_engagement_app_crossed_fisher_rain_pic_fav20.jpg", label: "Rain adventure" },
-          { file: "web_engagement_app_friends_lupe_dani_santa_cruz_fav11.jpg", label: "Santa Cruz friends" },
-          { file: "web_engagement_app_random_silliness_8_fav9.jpg", label: "Silliness" },
-        ];
-        const base = "assets/photos/";
-        document.getElementById("wall").innerHTML = wall
-          .map(
-            (w) =>
-              `<figure><img src="${base}${w.file}" alt="${w.label}" loading="lazy"/><figcaption>${w.label}</figcaption></figure>`
-          )
-          .join("");
-
-        const p = PartyProfile.get();
-        document.getElementById("wishBtn").onclick = async () => {
-          if (!p) return PartyUI.toast("Join first");
-          const message = document.getElementById("wish").value.trim();
-          if (!message) return PartyUI.toast("Write a wish first");
+        const p = PartyProfile.requireOrRedirect();
+        if (!p) return;
+        async function load() {
+          const data = await PartyAPI.getPhotos();
+          document.getElementById("feed").innerHTML = (data.photos || [])
+            .map(
+              (ph) =>
+                `<div class="tile" style="min-height:auto;padding:0.4rem"><img src="${ph.url}" alt="" style="width:100%;border-radius:12px;display:block"/><span>${PartyUI.escapeHtml(ph.displayName || "")}</span></div>`
+            )
+            .join("") || "<p class='muted'>No photos yet. Be first.</p>";
+        }
+        document.getElementById("up").onclick = async () => {
+          const f = document.getElementById("file").files[0];
+          if (!f) return PartyUI.toast("Pick a photo first");
+          const fd = new FormData();
+          fd.append("photo", f);
+          fd.append("profileId", p.id);
+          fd.append("displayName", PartyProfile.display(p));
+          fd.append("caption", document.getElementById("cap").value);
           try {
-            await PartyAPI.postWish({
-              displayName: PartyProfile.display(p),
-              message,
-            });
-            PartyUI.toast("Wish sent.");
-            document.getElementById("wish").value = "";
+            await PartyAPI.uploadPhoto(fd);
+            PartyUI.confetti(900);
+            PartyUI.toast("On the wall.");
+            load();
           } catch (e) {
-            PartyUI.toast(e.message || "Wish failed");
+            PartyUI.toast(e.message || "Upload failed");
           }
         };
+        document.getElementById("wishBtn").onclick = async () => {
+          const message = document.getElementById("wish").value.trim();
+          if (!message) return;
+          await PartyAPI.postWish({ profileId: p.id, displayName: PartyProfile.display(p), message });
+          document.getElementById("wish").value = "";
+          PartyUI.toast("Wish saved. Soft and legendary.");
+        };
+        load();
       })();
     </script>
   </body>
