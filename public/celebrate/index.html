@@ -27,11 +27,11 @@
           No passwords. No app store. Just scan and go.
         </p>
         <p class="muted" id="scoring-line"></p>
-        <div id="winner-home" class="card" style="display:none;margin-top:0.85rem;background:linear-gradient(135deg,#fff8e1,#ffe0e0)"></div>
+        <div id="winner-home" class="card" style="display:none;margin-top:0.85rem"></div>
         <div class="badge-row">
           <span class="badge">Golden hour vibes</span>
           <span class="badge">Tacos + margs</span>
-          <span class="badge">Points freeze 4:30</span>
+          <span class="badge">~100 guests</span>
           <span class="badge">QR mysteries</span>
         </div>
       </section>
@@ -42,14 +42,14 @@
       <section class="card">
         <h3>Today’s flow</h3>
         <ul class="schedule" id="schedule"></ul>
-        <p class="muted">Times are guide rails, not a corporate stand-up.</p>
+        <p class="muted" style="margin:0.55rem 0 0">Times are guide rails, not a corporate stand-up.</p>
       </section>
 
       <section class="card">
         <h3>How this works</h3>
-        <p class="muted">
-          1) Join with first + last name · 2) Lock Shoe Game bets early · 3) Play tiles / scan room QRs ·
-          4) Climb the leaderboard · be excellent. Hidden memories are QR-only (not listed here).
+        <p class="muted" style="margin:0">
+          1) Join with first + last name · 2) Lock Shoe Game prop bets early · 3) Play tiles / scan room QRs ·
+          4) Climb the board · be excellent. Hidden memories are QR-only (not listed here).
         </p>
       </section>
     </main>
@@ -67,9 +67,9 @@
         // Feature Shoe Game first
         mods.sort((a, b) => (a.id === "shoe-game" ? -1 : b.id === "shoe-game" ? 1 : 0));
         grid.innerHTML = mods
-          .map((m, i) => {
+          .map((m) => {
             const wide = m.id === "shoe-game" ? " tile-wide" : "";
-            return `<a class="tile${wide}" href="${m.path}"><div class="emoji">${m.emoji}</div><strong>${m.title}</strong><span>${m.blurb}</span></a>`;
+            return `<a class="tile${wide}" href="${m.path}"><div class="emoji" aria-hidden="true">${m.emoji}</div><strong>${m.title}</strong><span>${m.blurb}</span></a>`;
           })
           .join("");
 
