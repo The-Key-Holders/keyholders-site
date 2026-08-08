@@ -231,8 +231,29 @@
       </section>
 
       <section class="host-card">
-        <h2>He / She said (CSV)</h2>
-        <p class="host-muted">Columns: <code>question,choice_a,choice_b,choice_c,answer_index</code> (choice_c optional; answer 0=A)</p>
+        <h2>Shoe Game (live control)</h2>
+        <p class="host-muted">
+          Phase 1 = guests lock bets (+10 each). Phase 2 = publish official answers + open grade (+15 match).
+          Guest page: <code>shoe-game.html</code>
+        </p>
+        <p class="host-muted" id="shoe-status">Store / phase: loading…</p>
+        <div class="host-actions">
+          <button class="btn btn-secondary" type="button" data-shoe-phase="predict">Open Phase 1 (predict)</button>
+          <button class="btn btn-secondary" type="button" data-shoe-phase="live">Live on stage</button>
+          <button class="btn" type="button" data-shoe-phase="grade">Open Phase 2 (grade)</button>
+          <button class="btn btn-secondary" type="button" data-shoe-phase="closed">Close</button>
+        </div>
+        <div id="shoe-answers" style="margin-top:0.75rem"></div>
+        <div class="host-actions">
+          <button class="btn" type="button" id="btn-shoe-save-answers">Save official answers</button>
+          <button class="btn btn-secondary" type="button" id="btn-shoe-save-open-grade">Save + open grade</button>
+          <button class="btn btn-secondary" type="button" id="btn-shoe-reload">Reload shoe</button>
+        </div>
+      </section>
+
+      <section class="host-card">
+        <h2>He / She legacy content (CSV)</h2>
+        <p class="host-muted">Legacy speed-round JSON still editable; guest UI redirects to Shoe Game. Columns: <code>question,choice_a,choice_b,choice_c,answer_index</code></p>
         <textarea id="hesaid-csv" style="min-height:120px"></textarea>
         <div class="host-actions">
           <button class="btn" type="button" id="btn-load-hesaid">Reload</button>
@@ -652,7 +673,58 @@
         renderStats(ov);
         fillPrize(ov.config);
         fillEvent(ov.config, ov.hostState);
+        const mode = ov.storeMode || (ov.paths && ov.paths.note) || "";
+        const shoeEl = document.getElementById("shoe-status");
+        if (shoeEl) {
+          const sh = ov.shoe || {};
+          shoeEl.textContent =
+            "Store: " +
+            (ov.storeMode || "unknown") +
+            " · phase: " +
+            (sh.phase || "?") +
+            " · locks: " +
+            (ov.shoeLocks ?? 0) +
+            (mode ? " · " + mode : "");
+        }
         return ov;
+      }
+
+      let shoeQuestionsCache = [];
+
+      async function loadShoe() {
+        const data = await api("/api/host/shoe");
+        const shoe = data.shoe || {};
+        shoeQuestionsCache = shoe.questions || [];
+        const answers = shoe.officialAnswers || {};
+        const root = document.getElementById("shoe-answers");
+        if (!root) return data;
+        root.innerHTML = shoeQuestionsCache
+          .map((q) => {
+            const cur = answers[q.id] || "";
+            return `<div style="margin:0.45rem 0">
+              <div style="font-weight:600;margin-bottom:0.25rem">${escapeHtml(q.q)}</div>
+              <label style="margin-right:0.75rem"><input type="radio" name="shoe-${escapeHtml(q.id)}" value="dani" ${cur === "dani" ? "checked" : ""}/> Dani</label>
+              <label><input type="radio" name="shoe-${escapeHtml(q.id)}" value="javad" ${cur === "javad" ? "checked" : ""}/> Javad</label>
+            </div>`;
+          })
+          .join("");
+        document.getElementById("shoe-status").textContent =
+          "Phase: " +
+          (shoe.phase || "?") +
+          " · locks: " +
+          (data.locks ?? 0) +
+          " · players: " +
+          (data.uniquePlayers ?? 0);
+        return data;
+      }
+
+      function collectShoeAnswers() {
+        const out = {};
+        for (const q of shoeQuestionsCache) {
+          const el = document.querySelector(`input[name="shoe-${q.id}"]:checked`);
+          if (el) out[q.id] = el.value;
+        }
+        return out;
       }
 
       async function loadGuests() {
@@ -1288,6 +1360,55 @@
         }
       };
 
+      document.querySelectorAll("[data-shoe-phase]").forEach((btn) => {
+        btn.onclick = async () => {
+          try {
+            await api("/api/host/shoe/phase", {
+              method: "POST",
+              body: JSON.stringify({ phase: btn.getAttribute("data-shoe-phase") }),
+            });
+            toast("Shoe phase → " + btn.getAttribute("data-shoe-phase"));
+            await loadShoe();
+            await loadOverview();
+          } catch (e) {
+            toast(e.message);
+          }
+        };
+      });
+      document.getElementById("btn-shoe-save-answers").onclick = async () => {
+        try {
+          await api("/api/host/shoe/answers", {
+            method: "POST",
+            body: JSON.stringify({ answers: collectShoeAnswers() }),
+          });
+          toast("Official answers saved");
+          await loadShoe();
+        } catch (e) {
+          toast(e.message);
+        }
+      };
+      document.getElementById("btn-shoe-save-open-grade").onclick = async () => {
+        try {
+          await api("/api/host/shoe/answers", {
+            method: "POST",
+            body: JSON.stringify({ answers: collectShoeAnswers(), openGrade: true }),
+          });
+          toast("Answers saved · grade open");
+          await loadShoe();
+          await loadOverview();
+        } catch (e) {
+          toast(e.message);
+        }
+      };
+      document.getElementById("btn-shoe-reload").onclick = async () => {
+        try {
+          await loadShoe();
+          toast("Shoe reloaded");
+        } catch (e) {
+          toast(e.message);
+        }
+      };
+
       async function boot() {
         // Re-apply last host settings from this browser (prize, memories, etc.)
         try {
@@ -1297,6 +1418,11 @@
           await loadOverview();
         } catch (e) {
           toast("Overview failed: " + e.message);
+        }
+        try {
+          await loadShoe();
+        } catch (e) {
+          toast("Shoe load failed: " + e.message);
         }
         try {
           await loadGuests();

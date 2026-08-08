@@ -10,10 +10,10 @@
   <body data-page="home">
     <header class="app-header">
       <div class="brand">
-        <div class="brand-mark">🌸</div>
+        <div class="brand-mark">✦</div>
         <div>
-          <h1>Dani & Javad Guest Hub</h1>
-          <p>Digital party sidekick · free · no login wall</p>
+          <h1>Dani &amp; Javad</h1>
+          <p>Guest Hub · engagement party</p>
         </div>
       </div>
       <div id="profile-chip"></div>
@@ -21,21 +21,22 @@
     </header>
     <main>
       <section class="hero">
-        <h2>You made it. That already scores points in our hearts.</h2>
+        <h2>You made it. That already scores points.</h2>
         <p class="lede" id="thanks">
-          Thanks for showing up IRL. Scan, play, stamp your passport, and dump photos in the shared album.
-          We kept this password-free because we barely remember our own.
+          Phone-only sidekick for today: play games, find secret memories, climb the board.
+          No passwords. No app store. Just scan and go.
         </p>
         <p class="muted" id="scoring-line"></p>
         <div id="winner-home" class="card" style="display:none;margin-top:0.85rem;background:linear-gradient(135deg,#fff8e1,#ffe0e0)"></div>
         <div class="badge-row">
-          <span class="badge">🌸 Bright floral vibes</span>
-          <span class="badge">🌮 Taco timeline</span>
-          <span class="badge">⏰ Points freeze 4:30 PM</span>
-          <span class="badge">🏆 $5,000 joke card*</span>
+          <span class="badge">Golden hour vibes</span>
+          <span class="badge">Tacos + margs</span>
+          <span class="badge">Points freeze 4:30</span>
+          <span class="badge">QR mysteries</span>
         </div>
       </section>
 
+      <p class="section-label">Play</p>
       <div class="grid" id="tile-grid"></div>
 
       <section class="card">
@@ -47,8 +48,8 @@
       <section class="card">
         <h3>How this works</h3>
         <p class="muted">
-          1) Join with first + last name · 2) Play games / stamp real-world quests · 3) Climb the leaderboard ·
-          4) Be excellent to each other. Each activity also has its own QR around the room.
+          1) Join with first + last name · 2) Lock Shoe Game bets early · 3) Play tiles / scan room QRs ·
+          4) Climb the leaderboard · be excellent. Hidden memories are QR-only (not listed here).
         </p>
       </section>
     </main>
@@ -62,12 +63,14 @@
       (async function () {
         const cfg = PARTY_CONFIG;
         const grid = document.getElementById("tile-grid");
-        grid.innerHTML = cfg.modules
-          .filter((m) => m.id !== "home")
-          .map(
-            (m) =>
-              `<a class="tile" href="${m.path}"><div class="emoji">${m.emoji}</div><strong>${m.title}</strong><span>${m.blurb}</span></a>`
-          )
+        const mods = cfg.modules.filter((m) => m.id !== "home");
+        // Feature Shoe Game first
+        mods.sort((a, b) => (a.id === "shoe-game" ? -1 : b.id === "shoe-game" ? 1 : 0));
+        grid.innerHTML = mods
+          .map((m, i) => {
+            const wide = m.id === "shoe-game" ? " tile-wide" : "";
+            return `<a class="tile${wide}" href="${m.path}"><div class="emoji">${m.emoji}</div><strong>${m.title}</strong><span>${m.blurb}</span></a>`;
+          })
           .join("");
 
         const remote = cfg._remote;
@@ -75,9 +78,9 @@
           { time: "1:00 PM", what: "Doors · drinks · photos" },
           { time: "1:25 PM", what: "Welcome speech" },
           { time: "1:30 PM", what: "Tacos" },
-          { time: "2:15 PM", what: "Surprise energy" },
-          { time: "2:30 PM", what: "Games" },
-          { time: "4:30 PM", what: "Last call" },
+          { time: "2:30 PM", what: "Games · Shoe Game live" },
+          { time: "4:30 PM", what: "Scoring freezes · winner locked" },
+          { time: "4:45 PM", what: "Prize announcement" },
           { time: "5:00 PM", what: "Farewell" },
         ];
         document.getElementById("schedule").innerHTML = schedule
@@ -90,7 +93,7 @@
           if (st.winner) {
             const w = document.getElementById("winner-home");
             w.style.display = "block";
-            w.innerHTML = `<h3>🏆 Winner locked</h3><p><strong>${PartyUI.escapeHtml(st.winner.displayName)}</strong> · ${st.winner.totalPoints} pts</p><p class="muted">${PartyUI.escapeHtml(st.winner.congrats)}</p>`;
+            w.innerHTML = `<h3>Winner locked</h3><p><strong>${PartyUI.escapeHtml(st.winner.displayName)}</strong> · ${st.winner.totalPoints} pts</p>`;
           }
         } catch (_) {}
       })();

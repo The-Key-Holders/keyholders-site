@@ -7,6 +7,7 @@ import {
   displayFor,
   getHost,
   getStore,
+  getShoeState,
   liveConfig,
   norm,
   recompute,
@@ -14,6 +15,8 @@ import {
   toPublic,
   publicMemory,
   emptyMemories,
+  ensurePartyHydrated,
+  schedulePersistParty,
   type PartyProfile,
   type HiddenMemory,
   DEFAULT_COMINGLE_ANSWERS,
@@ -21,12 +24,27 @@ import {
   DEFAULT_TRIVIA,
   DEFAULT_HE_SAID,
   DEFAULT_POSES,
+  defaultShoeHost,
 } from "@/lib/party-store";
+import { partyStoreMode } from "@/lib/party-persist";
+import {
+  DEFAULT_SHOE_QUESTIONS,
+  gradePredictions,
+  lockPredictions,
+  normalizeChoice,
+  shoePhaseLabel,
+  type ShoeChoice,
+  type ShoePhase,
+} from "@/lib/party-shoe";
 
 export const dynamic = "force-dynamic";
 
 function json(data: unknown, status = 200) {
   return NextResponse.json(data, { status });
+}
+
+function persist() {
+  schedulePersistParty(false);
 }
 
 function normalizeMemory(raw: Partial<HiddenMemory> & { slot: number }): HiddenMemory {
@@ -65,16 +83,22 @@ function hostAuthed(req: NextRequest): boolean {
 }
 
 async function handle(req: NextRequest, path: string[]): Promise<NextResponse> {
+  await ensurePartyHydrated();
   const store = getStore();
   const host = getHost();
   const method = req.method;
   const segs = path || [];
+  const mode = partyStoreMode();
 
   if (segs[0] === "health" && method === "GET") {
     return json({
       ok: true,
-      service: "party-api-vercel-memory",
-      note: "cellular-ready best-effort",
+      service: mode === "neon" ? "party-api-vercel-neon" : "party-api-vercel-memory",
+      storeMode: mode,
+      note:
+        mode === "neon"
+          ? "cellular-ready durable (Neon)"
+          : "cellular-ready best-effort memory",
       scoringOpen: scoringOpen(),
     });
   }
@@ -138,6 +162,7 @@ async function handle(req: NextRequest, path: string[]): Promise<NextResponse> {
       stationsDone: [],
     };
     store.profiles.set(id, profile);
+    persist();
     return json({ exists: false, profile: toPublic(profile) }, 201);
   }
 
@@ -175,6 +200,7 @@ async function handle(req: NextRequest, path: string[]): Promise<NextResponse> {
       createdAt: Date.now() / 1000,
     });
     const total = recompute(p);
+    persist();
     return json({
       ok: true,
       totalPoints: total,
@@ -195,6 +221,7 @@ async function handle(req: NextRequest, path: string[]): Promise<NextResponse> {
       p.passportBonus = 25;
     }
     const total = recompute(p);
+    persist();
     return json({
       ok: true,
       profile: toPublic(p),
@@ -432,6 +459,131 @@ async function handle(req: NextRequest, path: string[]): Promise<NextResponse> {
     });
   }
 
+  // ── Shoe Game (two-phase) ─────────────────────────────────────────────
+  if (segs[0] === "shoe" && segs[1] === "config" && method === "GET") {
+    const shoe = getShoeState();
+    const profileId = req.nextUrl.searchParams.get("profileId") || "";
+    const mine = profileId
+      ? store.shoePredictions.filter((p) => p.profileId === profileId)
+      : [];
+    const locked = mine.length > 0;
+    return json({
+      phase: shoe.phase,
+      phaseLabel: shoePhaseLabel(shoe.phase),
+      questions: shoe.questions || DEFAULT_SHOE_QUESTIONS,
+      pointsPhase1: 10,
+      pointsPhase2: 15,
+      locked,
+      myAnswers: locked
+        ? Object.fromEntries(mine.map((m) => [m.questionId, m.choice]))
+        : null,
+      graded: locked && mine.every((m) => m.graded),
+      canPredict: shoe.phase === "predict" && !locked,
+      canGrade: shoe.phase === "grade" && locked && !mine.every((m) => m.graded),
+      // Official answers only during grade/archived for guests who already locked
+      officialAnswers:
+        shoe.phase === "grade" || shoe.phase === "archived"
+          ? shoe.officialAnswers || {}
+          : undefined,
+      scoringOpen: scoringOpen(),
+    });
+  }
+
+  if (segs[0] === "shoe" && segs[1] === "predict" && method === "POST") {
+    if (!scoringOpen()) return json({ error: "Scoring is frozen." }, 403);
+    const shoe = getShoeState();
+    if (shoe.phase !== "predict") {
+      return json({ error: "Prediction phase is closed.", phase: shoe.phase }, 400);
+    }
+    const body = await req.json().catch(() => ({}));
+    const profileId = String(body.profileId || "");
+    if (!profileId || !store.profiles.has(profileId)) {
+      return json({ error: "Valid profile required." }, 400);
+    }
+    const answers = Array.isArray(body.answers) ? body.answers : [];
+    const result = lockPredictions({
+      existing: store.shoePredictions,
+      profileId,
+      answers,
+      questions: shoe.questions || DEFAULT_SHOE_QUESTIONS,
+    });
+    if (!result.ok) {
+      return json({ error: result.message, code: result.code }, 400);
+    }
+    store.shoePredictions.push(...result.predictions);
+    // award phase1 as a score game total
+    store.scores.push({
+      id: crypto.randomUUID(),
+      profileId,
+      game: "shoe_phase1",
+      score: result.phase1Score,
+      maxScore: result.predictions.length * 10,
+      createdAt: Date.now() / 1000,
+    });
+    const p = store.profiles.get(profileId)!;
+    recompute(p);
+    persist();
+    return json({
+      ok: true,
+      phase1Score: result.phase1Score,
+      totalPoints: p.totalPoints,
+      locked: true,
+    });
+  }
+
+  if (segs[0] === "shoe" && segs[1] === "grade" && method === "POST") {
+    if (!scoringOpen()) return json({ error: "Scoring is frozen." }, 403);
+    const shoe = getShoeState();
+    if (shoe.phase !== "grade") {
+      return json({ error: "Grading is not open yet.", phase: shoe.phase }, 400);
+    }
+    const body = await req.json().catch(() => ({}));
+    const profileId = String(body.profileId || "");
+    if (!profileId || !store.profiles.has(profileId)) {
+      return json({ error: "Valid profile required." }, 400);
+    }
+    const official = shoe.officialAnswers || {};
+    if (!Object.keys(official).length) {
+      return json({ error: "Host has not published official answers yet." }, 400);
+    }
+    const already = store.scores.some(
+      (s) => s.profileId === profileId && s.game === "shoe_phase2"
+    );
+    if (already) {
+      return json({ error: "Already graded.", code: "SHOE_ALREADY_GRADED" }, 400);
+    }
+    const graded = gradePredictions({
+      predictions: store.shoePredictions,
+      profileId,
+      official,
+      questions: shoe.questions || DEFAULT_SHOE_QUESTIONS,
+    });
+    store.shoePredictions = graded.updated;
+    store.scores.push({
+      id: crypto.randomUUID(),
+      profileId,
+      game: "shoe_phase2",
+      score: graded.bonus,
+      maxScore: (shoe.questions || DEFAULT_SHOE_QUESTIONS).length * 15,
+      createdAt: Date.now() / 1000,
+    });
+    const p = store.profiles.get(profileId)!;
+    recompute(p);
+    persist();
+    return json({
+      ok: true,
+      matches: graded.matches,
+      bonus: graded.bonus,
+      totalPoints: p.totalPoints,
+    });
+  }
+
+  if (segs[0] === "shoe" && segs[1] === "mine" && method === "GET") {
+    const profileId = req.nextUrl.searchParams.get("profileId") || "";
+    const mine = store.shoePredictions.filter((p) => p.profileId === profileId);
+    return json({ predictions: mine });
+  }
+
   // ── Host desk ─────────────────────────────────────────────────────────
   if (segs[0] === "host" && segs[1] === "login" && method === "POST") {
     const body = await req.json().catch(() => ({}));
@@ -468,16 +620,73 @@ async function handle(req: NextRequest, path: string[]): Promise<NextResponse> {
         scoring: deadlinePayload(),
         config: liveConfig(),
         hostState: host,
-        paths: { note: "vercel-memory-cellular" },
+        paths: { note: mode === "neon" ? "vercel-neon-cellular" : "vercel-memory-cellular" },
+        storeMode: mode,
+        shoe: getShoeState(),
+        shoeLocks: store.shoePredictions.length,
         links: {
           hub: "https://www.thekeyholders.org/celebrate/index.html",
           screen: "https://www.thekeyholders.org/celebrate/screen.html",
           qrs: "https://www.thekeyholders.org/celebrate/print/qrs.html",
           leaderboard: "https://www.thekeyholders.org/celebrate/leaderboard.html",
           join: "https://www.thekeyholders.org/celebrate/join.html",
+          shoe: "https://www.thekeyholders.org/celebrate/shoe-game.html",
         },
         passwordConfigured: true,
       });
+    }
+
+    // Host Shoe Game controls
+    if (segs[1] === "shoe" && method === "GET") {
+      return json({
+        ok: true,
+        shoe: getShoeState(),
+        locks: store.shoePredictions.length,
+        uniquePlayers: new Set(store.shoePredictions.map((p) => p.profileId)).size,
+      });
+    }
+    if (segs[1] === "shoe" && segs[2] === "phase" && method === "POST") {
+      const body = await req.json().catch(() => ({}));
+      const phase = String(body.phase || "") as ShoePhase;
+      if (!["closed", "predict", "live", "grade", "archived"].includes(phase)) {
+        return json({ error: "Invalid phase" }, 400);
+      }
+      if (!host.shoe) host.shoe = defaultShoeHost();
+      host.shoe.phase = phase;
+      host.updatedAt = new Date().toISOString();
+      persist();
+      return json({ ok: true, shoe: host.shoe });
+    }
+    if (segs[1] === "shoe" && segs[2] === "answers" && method === "POST") {
+      const body = await req.json().catch(() => ({}));
+      const answers = (body.answers || body.officialAnswers || {}) as Record<string, unknown>;
+      if (!host.shoe) host.shoe = defaultShoeHost();
+      const next: Record<string, ShoeChoice> = { ...(host.shoe.officialAnswers || {}) };
+      for (const [qid, raw] of Object.entries(answers)) {
+        const c = normalizeChoice(raw);
+        if (c) next[qid] = c;
+      }
+      host.shoe.officialAnswers = next;
+      if (body.openGrade) host.shoe.phase = "grade";
+      host.updatedAt = new Date().toISOString();
+      persist();
+      return json({ ok: true, shoe: host.shoe });
+    }
+    if (segs[1] === "shoe" && segs[2] === "questions" && method === "POST") {
+      const body = await req.json().catch(() => ({}));
+      if (!host.shoe) host.shoe = defaultShoeHost();
+      if (Array.isArray(body.questions) && body.questions.length) {
+        host.shoe.questions = body.questions.map(
+          (q: { id?: string; q?: string; question?: string; category?: string }, i: number) => ({
+            id: String(q.id || `q${i + 1}`),
+            q: String(q.q || q.question || "").slice(0, 200),
+            category: q.category,
+          })
+        );
+      }
+      host.updatedAt = new Date().toISOString();
+      persist();
+      return json({ ok: true, shoe: host.shoe });
     }
 
     if (segs[1] === "config") {
@@ -527,7 +736,8 @@ async function handle(req: NextRequest, path: string[]): Promise<NextResponse> {
         }
         if (!host.publicBaseUrl.endsWith("/")) host.publicBaseUrl += "/";
         host.updatedAt = new Date().toISOString();
-        return json({ ok: true, config: liveConfig(), hostState: host });
+        persist();
+        return json({ ok: true, config: liveConfig(), hostState: host, storeMode: mode });
       }
     }
 
@@ -538,6 +748,7 @@ async function handle(req: NextRequest, path: string[]): Promise<NextResponse> {
       }
       if (body.deadlineIso) host.deadlineIso = body.deadlineIso;
       host.updatedAt = new Date().toISOString();
+      persist();
       return json({ ok: true, scoring: deadlinePayload(), hostState: host });
     }
 
@@ -567,7 +778,8 @@ async function handle(req: NextRequest, path: string[]): Promise<NextResponse> {
           if (Array.isArray(data)) host.comingle = data;
         } else return json({ error: "Unknown content" }, 404);
         host.updatedAt = new Date().toISOString();
-        return json({ ok: true, name, written: ["memory"] });
+        persist();
+        return json({ ok: true, name, written: [mode] });
       }
     }
 
@@ -607,12 +819,14 @@ async function handle(req: NextRequest, path: string[]): Promise<NextResponse> {
       } else {
         store.profiles.clear();
         store.scores = [];
+        store.shoePredictions = [];
         store.predictions = [];
         store.wishes = [];
         store.songs = [];
         store.advice = [];
         store.margarita = [];
       }
+      persist();
       return json({ ok: true, scope: body.scope || "all" });
     }
 
@@ -620,12 +834,13 @@ async function handle(req: NextRequest, path: string[]): Promise<NextResponse> {
       return json({
         profiles: Array.from(store.profiles.values()).map(toPublic),
         scores: store.scores,
+        shoePredictions: store.shoePredictions,
         winner: computeWinner(),
-        hostPrizeNote: (liveConfig().prize as { hostOnlyRealPrize?: string }).hostOnlyRealPrize,
         exportedAt: new Date().toISOString(),
         scoring: deadlinePayload(),
         config: liveConfig(),
-        note: "vercel-memory-export",
+        storeMode: mode,
+        note: mode === "neon" ? "vercel-neon-export" : "vercel-memory-export",
       });
     }
   }
@@ -674,6 +889,7 @@ async function handle(req: NextRequest, path: string[]): Promise<NextResponse> {
       }
       host.memories = base;
       host.updatedAt = new Date().toISOString();
+      persist();
       return json({
         ok: true,
         memories: host.memories,
@@ -693,7 +909,7 @@ async function handle(req: NextRequest, path: string[]): Promise<NextResponse> {
   if (segs[0] === "host" && segs[1] === "state") {
     if (!hostAuthed(req)) return json({ error: "Host auth required" }, 401);
     if (method === "GET") {
-      return json({ ok: true, hostState: host, updatedAt: host.updatedAt });
+      return json({ ok: true, hostState: host, updatedAt: host.updatedAt, storeMode: mode });
     }
     if (method === "PUT" || method === "POST") {
       const body = await req.json().catch(() => ({}));
@@ -710,8 +926,10 @@ async function handle(req: NextRequest, path: string[]): Promise<NextResponse> {
       if (host.prize && typeof host.prize === "object") {
         delete (host.prize as { hostOnlyRealPrize?: string }).hostOnlyRealPrize;
       }
+      if (!host.shoe) host.shoe = defaultShoeHost();
       host.updatedAt = new Date().toISOString();
-      return json({ ok: true, hostState: host, config: liveConfig() });
+      persist();
+      return json({ ok: true, hostState: host, config: liveConfig(), storeMode: mode });
     }
   }
 
