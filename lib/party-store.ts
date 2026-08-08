@@ -396,6 +396,116 @@ export function emptyMemories(): HiddenMemory[] {
   }));
 }
 
+/**
+ * Durable QR-only memory seeds (HTTPS static files under /celebrate/assets/memories/).
+ * Prefer imageUrl over base64 so Vercel cold starts do not wipe photos.
+ */
+const MEMORY_ASSET_BASE = "https://www.thekeyholders.org/celebrate/assets/memories";
+
+export const SEED_MEMORIES: HiddenMemory[] = [
+  {
+    slot: 1,
+    title: "Fingers Crossed Night",
+    caption:
+      "Did you know Dani and Javad lit up the night under the FNGRS CRSSD neon, peace signs and all?",
+    imageDataUrl: "",
+    imageUrl: `${MEMORY_ASSET_BASE}/memory-01.jpg`,
+    enabled: true,
+  },
+  {
+    slot: 2,
+    title: "Concert Glow",
+    caption:
+      "Did you know the best show nights leave her hair damp, eyes closed, and completely in the music?",
+    imageDataUrl: "",
+    imageUrl: `${MEMORY_ASSET_BASE}/memory-02.jpg`,
+    enabled: true,
+  },
+  {
+    slot: 3,
+    title: "Windy Beach Day",
+    caption:
+      "Did you know a windy beach selfie with your favorite person beats any perfect hair day?",
+    imageDataUrl: "",
+    imageUrl: `${MEMORY_ASSET_BASE}/memory-03.jpg`,
+    enabled: true,
+  },
+  {
+    slot: 4,
+    title: "Summit Together",
+    caption: "Did you know the view from the top hits different when you hike it side by side?",
+    imageDataUrl: "",
+    imageUrl: `${MEMORY_ASSET_BASE}/memory-04.jpg`,
+    enabled: true,
+  },
+  {
+    slot: 5,
+    title: "Carousel Angel",
+    caption:
+      "Did you know she claimed the carousel horse, the angel wings, and the whole neon room?",
+    imageDataUrl: "",
+    imageUrl: `${MEMORY_ASSET_BASE}/memory-05.jpg`,
+    enabled: true,
+  },
+  {
+    slot: 6,
+    title: "Squad Social Night",
+    caption:
+      "Did you know the whole crew piled in for a Social night full of laughs and peace signs?",
+    imageDataUrl: "",
+    imageUrl: `${MEMORY_ASSET_BASE}/memory-06.jpg`,
+    enabled: true,
+  },
+  {
+    slot: 7,
+    title: "Holiday Menagerie",
+    caption: "Did you know Christmas at home means two cats, one dog, and maximum chaos smiles?",
+    imageDataUrl: "",
+    imageUrl: `${MEMORY_ASSET_BASE}/memory-07.jpg`,
+    enabled: true,
+  },
+  {
+    slot: 8,
+    title: "Waterfront Goofs",
+    caption: "Did you know ferry docks are prime territory for duck faces and big grins?",
+    imageDataUrl: "",
+    imageUrl: `${MEMORY_ASSET_BASE}/memory-08.jpg`,
+    enabled: true,
+  },
+  {
+    slot: 9,
+    title: "Red Dress Night",
+    caption:
+      "Did you know a red dress, warm lights, and her favorite person make the sweetest night out?",
+    imageDataUrl: "",
+    imageUrl: `${MEMORY_ASSET_BASE}/memory-09.jpg`,
+    enabled: true,
+  },
+  {
+    slot: 10,
+    title: "Hidden memory 10",
+    caption: "",
+    imageDataUrl: "",
+    imageUrl: "",
+    enabled: false,
+  },
+];
+
+/** Rehydrate empty/wiped memory slots from durable seed (HTTPS assets). */
+export function ensureSeedMemories(list: HiddenMemory[] | undefined): HiddenMemory[] {
+  const base = emptyMemories();
+  const incoming = Array.isArray(list) ? list : [];
+  for (const m of incoming) {
+    if (m && m.slot >= 1 && m.slot <= 10) {
+      base[m.slot - 1] = { ...base[m.slot - 1], ...m, slot: m.slot };
+    }
+  }
+  const anyLive = base.some((m) => m.enabled && (m.imageUrl || m.imageDataUrl) && m.caption);
+  if (anyLive) return base;
+  // Cold start / empty host: restore seed pack
+  return SEED_MEMORIES.map((m) => ({ ...m }));
+}
+
 function defaultHost(): HostState {
   return {
     scoringMode: "auto",
@@ -418,7 +528,7 @@ function defaultHost(): HostState {
       heSaid: DEFAULT_HE_SAID,
       poses: DEFAULT_POSES,
     },
-    memories: emptyMemories(),
+    memories: SEED_MEMORIES.map((m) => ({ ...m })),
   };
 }
 
@@ -443,14 +553,8 @@ function store(): Store {
   if (!s.host.comingle) s.host.comingle = DEFAULT_COMINGLE;
   if (!s.host.publicBaseUrl) s.host.publicBaseUrl = DEFAULT_PUBLIC_BASE;
   if (!Array.isArray(s.photos)) s.photos = [];
-  if (!s.host.memories || s.host.memories.length !== 10) {
-    const existing = s.host.memories || [];
-    const base = emptyMemories();
-    for (const m of existing) {
-      if (m && m.slot >= 1 && m.slot <= 10) base[m.slot - 1] = { ...base[m.slot - 1], ...m };
-    }
-    s.host.memories = base;
-  }
+  // Always normalize 10 slots; rehydrate from durable SEED_MEMORIES if wiped/empty
+  s.host.memories = ensureSeedMemories(s.host.memories);
   return s;
 }
 

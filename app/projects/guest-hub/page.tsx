@@ -32,6 +32,12 @@ export default function GuestHubProjectPage() {
             Open Guest Hub →
           </Link>
           <Link
+            href="/celebrate/photowall.html"
+            className="rounded-full border border-cyanGlow/40 bg-cyanGlow/10 px-5 py-2.5 text-sm font-medium text-cyanGlow transition hover:border-cyanGlow/70"
+          >
+            Live Photo Wall
+          </Link>
+          <Link
             href="/celebrate/help.html"
             className="rounded-full border border-white/20 px-5 py-2.5 text-sm font-medium text-white/80 transition hover:border-white/40"
           >
@@ -42,6 +48,12 @@ export default function GuestHubProjectPage() {
             className="rounded-full border border-white/20 px-5 py-2.5 text-sm font-medium text-white/80 transition hover:border-white/40"
           >
             Live board / projector
+          </Link>
+          <Link
+            href="/celebrate/host.html"
+            className="rounded-full border border-white/20 px-5 py-2.5 text-sm font-medium text-white/80 transition hover:border-white/40"
+          >
+            Host desk
           </Link>
         </div>
 
