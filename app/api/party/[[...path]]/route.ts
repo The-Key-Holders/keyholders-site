@@ -21,6 +21,7 @@ import {
   type HiddenMemory,
   type WallPhoto,
   DEFAULT_COMINGLE_ANSWERS,
+  resolveComingle,
   DEFAULT_STATION_KEYWORDS,
   DEFAULT_TRIVIA,
   DEFAULT_HE_SAID,
@@ -222,7 +223,10 @@ async function handle(req: NextRequest, path: string[]): Promise<NextResponse> {
     if (!p) return json({ error: "Profile not found" }, 404);
     const promptId = String(body.promptId || "");
     const answer = String(body.answer || "");
-    const prompts = host.comingle || liveConfig().comingle || [];
+    const resolved = resolveComingle(host.comingle, host.comingleAnswers);
+    host.comingle = resolved.comingle;
+    host.comingleAnswers = resolved.comingleAnswers;
+    const prompts = resolved.comingle;
     const prompt = prompts.find((x) => x.id === promptId);
     if (!prompt) return json({ error: "Unknown prompt" }, 404);
     if (p.comingleDone.includes(promptId)) {
@@ -236,7 +240,7 @@ async function handle(req: NextRequest, path: string[]): Promise<NextResponse> {
       });
     }
     const accepted =
-      (host.comingleAnswers && host.comingleAnswers[promptId]) ||
+      resolved.comingleAnswers[promptId] ||
       DEFAULT_COMINGLE_ANSWERS[promptId] ||
       [];
     const correct = accepted.length ? answerMatches(answer, accepted) : answer.trim().length > 1;

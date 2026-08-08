@@ -171,7 +171,7 @@ test.describe("Guest Hub + Host desk full E2E @ TKH", () => {
     expect(sc.totalPoints).toBeGreaterThanOrEqual(30);
 
     const com = await request.post(`${BASE}/api/comingle`, {
-      data: { profileId: profile.id, promptId: "chad", answer: "Quinn" },
+      data: { profileId: profile.id, promptId: "pet_intel", answer: "Luna" },
     });
     expect(com.status()).toBe(200);
     const cj = await com.json();

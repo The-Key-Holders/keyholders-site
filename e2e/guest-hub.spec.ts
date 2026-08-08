@@ -141,7 +141,7 @@ test.describe("Guest Hub full API flow (Docker)", () => {
     expect(score.ok()).toBeTruthy();
 
     const comingle = await request.post(`${BASE}/api/comingle`, {
-      data: { profileId: profile.id, promptId: "chad", answer: "Quinn" },
+      data: { profileId: profile.id, promptId: "pet_intel", answer: "Luna" },
     });
     expect(comingle.ok()).toBeTruthy();
     const cj = await comingle.json();

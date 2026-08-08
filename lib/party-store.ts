@@ -128,40 +128,109 @@ const globalForParty = globalThis as unknown as { __djPartyStoreV2?: Store };
 const DEFAULT_DEADLINE = "2026-08-08T16:30:00-07:00";
 const DEFAULT_PUBLIC_BASE = "https://www.thekeyholders.org/celebrate/";
 
+/** Co-mingle pack v2 — party-native icebreakers (not generic find-a-name stubs). */
+export const COMINGLE_PACK_VERSION = 2;
+
 export const DEFAULT_COMINGLE = [
   {
-    id: "chad",
-    prompt: "Find Chad Cahill and ask him his daughter's name.",
-    hint: "One word. Family-friendly spy work.",
-    points: 25,
-  },
-  {
-    id: "cupcakes",
+    id: "allwhite_love",
     prompt:
-      "Find Ronni or Alondra and ask what cupcake flavors are at the dessert station.",
-    hint: "Type the flavors you heard (any order is fine).",
+      'Find Dani or Javad (the all-white couple) and ask who said "I love you" first.',
+    hint: "One name. Cross-check with trivia if you're competitive.",
     points: 25,
   },
   {
-    id: "homelab",
-    prompt: "Find Uncle J and ask how many servers are in his homelab.",
-    hint: "A number. Nerds will know.",
+    id: "dessert_heist",
+    prompt:
+      "Find Ronni or Alondra near dessert and ask which cupcake flavor they would steal first.",
+    hint: "Any real flavor word counts (chocolate, red velvet, etc.).",
+    points: 25,
+  },
+  {
+    id: "pet_intel",
+    prompt: "Find a guest who has met the pets and ask the dog's name.",
+    hint: "Four legs. Maximum chaos. One word.",
+    points: 25,
+  },
+  {
+    id: "concert_crew",
+    prompt:
+      "Find someone from the Hilary Duff concert crew and ask who else was in that night's selfie.",
+    hint: "Name-drop one: Dani, Roni/Ronni, Lupe, Briauna, Chelsea…",
+    points: 25,
+  },
+  {
+    id: "hike_liar",
+    prompt:
+      'Find an outdoorsy friend and ask who is more likely to say "it\'s not that far" on a hike.',
+    hint: "Dani, Javad, or both (honest liars welcome).",
     points: 25,
   },
 ];
 
 export const DEFAULT_COMINGLE_ANSWERS: Record<string, string[]> = {
-  chad: ["quinn"],
-  cupcakes: [
+  allwhite_love: ["javad", "dani"],
+  dessert_heist: [
     "chocolate",
     "vanilla",
     "red velvet",
+    "redvelvet",
     "lemon",
     "funfetti",
     "strawberry",
+    "carrot",
+    "oreo",
+    "cookies",
   ],
-  homelab: ["3", "4", "5", "6", "7", "8", "9", "10", "12", "16"],
+  pet_intel: ["luna", "rue"],
+  concert_crew: [
+    "dani",
+    "roni",
+    "ronni",
+    "lupe",
+    "briauna",
+    "briana",
+    "chelsea",
+    "chelsey",
+  ],
+  hike_liar: ["javad", "dani", "both"],
 };
+
+const LEGACY_COMINGLE_IDS = new Set(["chad", "cupcakes", "homelab"]);
+
+export type ComingleQuest = {
+  id: string;
+  prompt: string;
+  hint?: string;
+  points?: number;
+};
+
+/** Prefer new pack when host still has the old 3 generic quests (or empty). */
+export function resolveComingle(
+  hostComingle: ComingleQuest[] | undefined,
+  hostAnswers: Record<string, string[]> | undefined
+): {
+  comingle: ComingleQuest[];
+  comingleAnswers: Record<string, string[]>;
+} {
+  const list = Array.isArray(hostComingle) ? hostComingle : [];
+  const allLegacy =
+    list.length > 0 && list.every((q) => LEGACY_COMINGLE_IDS.has(String(q.id)));
+  const tooShort = list.length < 5;
+  if (!list.length || allLegacy || tooShort) {
+    return {
+      comingle: DEFAULT_COMINGLE.map((q) => ({ ...q })),
+      comingleAnswers: { ...DEFAULT_COMINGLE_ANSWERS },
+    };
+  }
+  return {
+    comingle: list,
+    comingleAnswers: {
+      ...DEFAULT_COMINGLE_ANSWERS,
+      ...(hostAnswers || {}),
+    },
+  };
+}
 
 export const DEFAULT_STATIONS = [
   {
@@ -361,8 +430,8 @@ function defaultHost(): HostState {
       announceAt: "4:30 PM",
       legalNote: "One win per person. Must be present. Host decision final.",
     },
-    comingle: DEFAULT_COMINGLE,
-    comingleAnswers: DEFAULT_COMINGLE_ANSWERS,
+    comingle: DEFAULT_COMINGLE.map((q) => ({ ...q })),
+    comingleAnswers: { ...DEFAULT_COMINGLE_ANSWERS },
     stations: DEFAULT_STATIONS,
     stationKeywords: DEFAULT_STATION_KEYWORDS,
     content: {
@@ -392,8 +461,13 @@ function store(): Store {
   const s = globalForParty.__djPartyStoreV2;
   if (!s.host) s.host = defaultHost();
   if (!s.host.content) s.host.content = defaultHost().content;
-  if (!s.host.comingle) s.host.comingle = DEFAULT_COMINGLE;
   if (!s.host.publicBaseUrl) s.host.publicBaseUrl = DEFAULT_PUBLIC_BASE;
+  // Upgrade legacy 3-quest co-mingle pack to v2 icebreakers
+  {
+    const resolved = resolveComingle(s.host.comingle, s.host.comingleAnswers);
+    s.host.comingle = resolved.comingle;
+    s.host.comingleAnswers = resolved.comingleAnswers;
+  }
   if (!Array.isArray(s.photos)) s.photos = [];
   // Always normalize 10 slots; rehydrate from durable SEED_MEMORIES if wiped/empty
   s.host.memories = ensureSeedMemories(s.host.memories);
@@ -496,7 +570,7 @@ export function liveConfig() {
     couple: h.couple || BASE_PUBLIC_CONFIG.couple,
     photosUrl: h.photosUrl || BASE_PUBLIC_CONFIG.photosUrl,
     prize,
-    comingle: h.comingle || DEFAULT_COMINGLE,
+    comingle: resolveComingle(h.comingle, h.comingleAnswers).comingle,
     stations: h.stations || DEFAULT_STATIONS,
     pointsDeadlineIso: h.deadlineIso || DEFAULT_DEADLINE,
     publicBaseUrl: h.publicBaseUrl || DEFAULT_PUBLIC_BASE,

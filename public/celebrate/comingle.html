@@ -39,15 +39,43 @@
         if (!p) return;
         await PartyUI.hydrateConfigFromApi();
         const FALLBACK = [
-          { id: "chad", prompt: "Find Chad Cahill and ask him his daughter's name.", hint: "One word.", points: 25 },
-          { id: "cupcakes", prompt: "Find Ronni or Alondra and ask what cupcake flavors are at the dessert station.", hint: "Any flavors you heard.", points: 25 },
-          { id: "homelab", prompt: "Find Uncle J and ask how many servers are in his homelab.", hint: "A number.", points: 25 },
+          {
+            id: "allwhite_love",
+            prompt: "Find Dani or Javad (the all-white couple) and ask who said “I love you” first.",
+            hint: "One name. Cross-check with trivia if you’re competitive.",
+            points: 25,
+          },
+          {
+            id: "dessert_heist",
+            prompt: "Find Ronni or Alondra near dessert and ask which cupcake flavor they would steal first.",
+            hint: "Any real flavor word counts.",
+            points: 25,
+          },
+          {
+            id: "pet_intel",
+            prompt: "Find a guest who has met the pets and ask the dog’s name.",
+            hint: "Four legs. Maximum chaos.",
+            points: 25,
+          },
+          {
+            id: "concert_crew",
+            prompt: "Find someone from the Hilary Duff concert crew and ask who else was in that night’s selfie.",
+            hint: "Name-drop one: Dani, Roni, Lupe, Briauna, Chelsea…",
+            points: 25,
+          },
+          {
+            id: "hike_liar",
+            prompt: "Find an outdoorsy friend and ask who is more likely to say “it’s not that far” on a hike.",
+            hint: "Dani, Javad, or both.",
+            points: 25,
+          },
         ];
+        const remote = (PARTY_CONFIG._remote && PARTY_CONFIG._remote.comingle) || [];
+        const remoteIsLegacy =
+          remote.length > 0 &&
+          remote.every((q) => ["chad", "cupcakes", "homelab"].includes(String(q.id)));
         const prompts =
-          (PARTY_CONFIG._remote && PARTY_CONFIG._remote.comingle && PARTY_CONFIG._remote.comingle.length
-            ? PARTY_CONFIG._remote.comingle
-            : null) ||
-          FALLBACK;
+          remote.length >= 5 && !remoteIsLegacy ? remote : FALLBACK;
         const scoring = (PARTY_CONFIG._remote && PARTY_CONFIG._remote.scoring) || {};
         document.getElementById("score-note").textContent = scoring.message || "";
         const list = document.getElementById("list");
