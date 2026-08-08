@@ -46,8 +46,6 @@ const nextConfig = {
       { source: "/api/content/:path*", destination: "/api/party/content/:path*" },
       { source: "/api/memories", destination: "/api/party/memories" },
       { source: "/api/memories/:path*", destination: "/api/party/memories/:path*" },
-      { source: "/api/shoe", destination: "/api/party/shoe" },
-      { source: "/api/shoe/:path*", destination: "/api/party/shoe/:path*" },
       { source: "/api/host", destination: "/api/party/host" },
       { source: "/api/host/:path*", destination: "/api/party/host/:path*" },
     ];

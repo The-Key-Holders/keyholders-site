@@ -1,15 +1,7 @@
 /**
- * Party store for TKH /celebrate on Vercel.
- * In-memory hot cache; hydrates/saves Neon snapshot when DATABASE_URL is set (see party-persist).
+ * Party store for TKH /celebrate on Vercel (in-memory, best-effort multiplayer).
+ * Host desk can mutate config + content; guests use same origin /api/*.
  */
-import {
-  DEFAULT_SHOE_QUESTIONS,
-  type ShoePhase,
-  type ShoePrediction,
-  type ShoeQuestion,
-  type ShoeChoice,
-} from "./party-shoe";
-import { loadPartySnapshot, savePartySnapshot, partyStoreMode, type PartySnapshot } from "./party-persist";
 
 export type PartyProfile = {
   id: string;
@@ -63,12 +55,6 @@ export type HostState = {
   };
   /** Couples / hidden memory slots 1–10 (QR-only discovery) */
   memories?: HiddenMemory[];
-  /** Shoe Game (two-phase prop bets) */
-  shoe?: {
-    phase: ShoePhase;
-    questions: ShoeQuestion[];
-    officialAnswers: Record<string, ShoeChoice>;
-  };
   updatedAt?: string;
 };
 
@@ -86,18 +72,15 @@ export type HiddenMemory = {
 type Store = {
   profiles: Map<string, PartyProfile>;
   scores: PartyScore[];
-  shoePredictions: ShoePrediction[];
   predictions: Array<{ profileId: string; predictionId: string; option: string }>;
   wishes: Array<{ displayName: string; message: string; createdAt: number }>;
   songs: Array<{ displayName: string; title: string; artist: string; createdAt: number }>;
   advice: Array<{ displayName: string; message: string; createdAt: number }>;
   margarita: Array<{ profileId: string; flavor: string; rating: number }>;
   host: HostState;
-  _hydrated?: boolean;
-  _hydratePromise?: Promise<void>;
 };
 
-const globalForParty = globalThis as unknown as { __djPartyStoreV3?: Store };
+const globalForParty = globalThis as unknown as { __djPartyStoreV2?: Store };
 
 const DEFAULT_DEADLINE = "2026-08-08T16:30:00-07:00";
 const DEFAULT_PUBLIC_BASE = "https://www.thekeyholders.org/celebrate/";
@@ -280,28 +263,20 @@ export const DEFAULT_HE_SAID = {
 
 export const DEFAULT_POSES = {
   prompts: [
-    "California golden hour: soft smile, no forced poses",
-    "Paddle-board energy without the board",
-    "Neon-sign confidence (hands crossed optional)",
-    "Face only a cat parent understands (Rue / Ollie / Luna energy)",
-    "Flow-art heart pose (imaginary hoop OK)",
-    "Disaster Christmas family energy (loving)",
-    "Space Needle clouds walk recreation",
-    "Secret proposal smile (tasteful)",
-    "Taco cheers: lift your cup like crystal",
-    "Couple sandwich: friends both sides of Dani & Javad",
-    "Nerdy handshake: overcomplicated high-five sequence",
-    "Documentary mode: serious face, silly background",
+    "Taco cheers — lift your (empty) cup like it’s crystal",
+    "Couple sandwich — friends on both sides of Dani & Javad",
+    "All-white radar — frame the couple like a fashion ad",
+    "Ring hunter pose — detective magnifying glass (fingers OK)",
+    "Floral power — point at the brightest outfit in the room",
+    "Kids crown energy — flower crown or invisible crown",
+    "Nerdy handshake — overcomplicated high-five sequence",
+    "Group jump (safe ankles only)",
+    "Fake Oscar speech — 3 seconds, then laugh",
+    "Symmetry shot — line up by height",
+    "Heart hands — classic, we allow one cheese tax",
+    "Documentary mode — serious face, silly background",
   ],
 };
-
-export function defaultShoeHost() {
-  return {
-    phase: "predict" as ShoePhase,
-    questions: DEFAULT_SHOE_QUESTIONS,
-    officialAnswers: {} as Record<string, ShoeChoice>,
-  };
-}
 
 export function emptyMemories(): HiddenMemory[] {
   return Array.from({ length: 10 }, (_, i) => ({
@@ -337,36 +312,28 @@ function defaultHost(): HostState {
       poses: DEFAULT_POSES,
     },
     memories: emptyMemories(),
-    shoe: defaultShoeHost(),
   };
 }
 
 function store(): Store {
-  if (!globalForParty.__djPartyStoreV3) {
-    globalForParty.__djPartyStoreV3 = {
+  if (!globalForParty.__djPartyStoreV2) {
+    globalForParty.__djPartyStoreV2 = {
       profiles: new Map(),
       scores: [],
-      shoePredictions: [],
       predictions: [],
       wishes: [],
       songs: [],
       advice: [],
       margarita: [],
       host: defaultHost(),
-      _hydrated: partyStoreMode() === "memory",
     };
   }
   // migrate older empty host
-  const s = globalForParty.__djPartyStoreV3;
+  const s = globalForParty.__djPartyStoreV2;
   if (!s.host) s.host = defaultHost();
-  if (!s.shoePredictions) s.shoePredictions = [];
   if (!s.host.content) s.host.content = defaultHost().content;
   if (!s.host.comingle) s.host.comingle = DEFAULT_COMINGLE;
   if (!s.host.publicBaseUrl) s.host.publicBaseUrl = DEFAULT_PUBLIC_BASE;
-  if (!s.host.shoe) s.host.shoe = defaultShoeHost();
-  if (!s.host.shoe.questions?.length) s.host.shoe.questions = DEFAULT_SHOE_QUESTIONS;
-  if (!s.host.shoe.officialAnswers) s.host.shoe.officialAnswers = {};
-  if (!s.host.shoe.phase) s.host.shoe.phase = "predict";
   if (!s.host.memories || s.host.memories.length !== 10) {
     const existing = s.host.memories || [];
     const base = emptyMemories();
@@ -376,79 +343,6 @@ function store(): Store {
     s.host.memories = base;
   }
   return s;
-}
-
-function applySnapshot(snap: PartySnapshot) {
-  const s = store();
-  s.profiles = new Map((snap.profiles || []).map((p) => [p.id, p]));
-  s.scores = snap.scores || [];
-  s.shoePredictions = snap.shoePredictions || [];
-  s.predictions = snap.predictions || [];
-  s.wishes = snap.wishes || [];
-  s.songs = snap.songs || [];
-  s.advice = snap.advice || [];
-  s.margarita = snap.margarita || [];
-  if (snap.host) {
-    s.host = { ...defaultHost(), ...snap.host };
-    if (!s.host.shoe) s.host.shoe = defaultShoeHost();
-  }
-  s._hydrated = true;
-}
-
-export async function ensurePartyHydrated(): Promise<void> {
-  const s = store();
-  if (s._hydrated) return;
-  if (s._hydratePromise) return s._hydratePromise;
-  s._hydratePromise = (async () => {
-    const snap = await loadPartySnapshot();
-    if (snap) applySnapshot(snap);
-    s._hydrated = true;
-  })().finally(() => {
-    s._hydratePromise = undefined;
-  });
-  return s._hydratePromise;
-}
-
-export function buildSnapshot(): PartySnapshot {
-  const s = store();
-  return {
-    version: 1,
-    profiles: Array.from(s.profiles.values()),
-    scores: s.scores,
-    shoePredictions: s.shoePredictions || [],
-    host: s.host,
-    predictions: s.predictions,
-    wishes: s.wishes,
-    songs: s.songs,
-    advice: s.advice,
-    margarita: s.margarita,
-    savedAt: new Date().toISOString(),
-  };
-}
-
-let persistTimer: ReturnType<typeof setTimeout> | null = null;
-
-/** Debounced durable save (Neon). Safe to call after any mutation. */
-export function schedulePersistParty(immediate = false): void {
-  if (partyStoreMode() !== "neon") return;
-  if (persistTimer) clearTimeout(persistTimer);
-  const run = () => {
-    persistTimer = null;
-    void savePartySnapshot(buildSnapshot());
-  };
-  if (immediate) run();
-  else persistTimer = setTimeout(run, 250);
-}
-
-export async function persistPartyNow(): Promise<boolean> {
-  if (partyStoreMode() !== "neon") return false;
-  return savePartySnapshot(buildSnapshot());
-}
-
-export function getShoeState() {
-  const h = getHost();
-  const shoe = h.shoe || defaultShoeHost();
-  return shoe;
 }
 
 export const MAX_PROFILES = 150;
@@ -516,11 +410,7 @@ export const BASE_PUBLIC_CONFIG = {
       options: ["Beach / tropical", "Europe", "Staycation / NorCal", "Somewhere secret"],
     },
   ],
-  margaritaFlavors: [
-    "Fortified Classic Golden",
-    "Pineapple",
-    "Fresh Lime Reposado",
-  ],
+  margaritaFlavors: ["Classic Lime", "Strawberry", "Mango", "Spicy"],
   thanks:
     "Thanks for showing up IRL. The Wi-Fi of our hearts is stronger with you here.",
 };
@@ -555,16 +445,10 @@ export function liveConfig() {
     stations: h.stations || DEFAULT_STATIONS,
     pointsDeadlineIso: h.deadlineIso || DEFAULT_DEADLINE,
     publicBaseUrl: h.publicBaseUrl || DEFAULT_PUBLIC_BASE,
-    storeMode: partyStoreMode(),
-    shoe: {
-      phase: (h.shoe || defaultShoeHost()).phase,
-      questionCount: (h.shoe || defaultShoeHost()).questions?.length || 0,
-    },
     host: {
       scoringMode: h.scoringMode,
       publicBaseUrl: h.publicBaseUrl || DEFAULT_PUBLIC_BASE,
       updatedAt: h.updatedAt,
-      storeMode: partyStoreMode(),
     },
   };
 }
