@@ -3,55 +3,73 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=5" />
-    <title>Dani & Javad Guest Hub</title>
+    <meta name="theme-color" content="#1a1228" />
+    <title>Dani & Javad · Guest Hub</title>
     <link rel="stylesheet" href="css/party.css" />
     <script src="js/head-boot.js"></script>
   </head>
   <body data-page="home">
     <header class="app-header">
-      <div class="brand">
-        <div class="brand-mark">🌸</div>
-        <div>
-          <h1>Dani & Javad Guest Hub</h1>
-          <p>Digital party sidekick · free · no login wall</p>
+      <div class="header-hero">
+        <img
+          src="assets/photos/web_engagement_app_seattle_trip_kiss_space-needle_fav13.jpg"
+          alt="Dani and Javad"
+          width="900"
+          height="600"
+        />
+        <div class="veil" aria-hidden="true"></div>
+        <div class="header-inner">
+          <div class="brand">
+            <div class="brand-mark" aria-hidden="true">✦</div>
+            <div>
+              <h1>Dani &amp; Javad</h1>
+              <p>Guest Hub · engagement party</p>
+            </div>
+          </div>
+          <div id="profile-chip"></div>
+          <div id="prize-banner" hidden></div>
         </div>
       </div>
-      <div id="profile-chip"></div>
-      <div id="prize-banner" hidden></div>
     </header>
+
     <main>
       <section class="hero">
-        <h2>You made it. That already scores points in our hearts.</h2>
+        <h2>You made it. That already scores points.</h2>
         <p class="lede" id="thanks">
-          Thanks for showing up IRL. Scan, play, stamp your passport, and dump photos in the shared album.
-          We kept this password-free because we barely remember our own.
+          Phone-only party sidekick: play games, scan QR stations, find secret memories of us,
+          climb the board. No passwords. No app store.
         </p>
         <p class="muted" id="scoring-line"></p>
-        <div id="winner-home" class="card" style="display:none;margin-top:0.85rem;background:linear-gradient(135deg,#fff8e1,#ffe0e0)"></div>
+        <div id="winner-home" class="card" style="display: none; margin-top: 0.85rem"></div>
         <div class="badge-row">
-          <span class="badge">🌸 Bright floral vibes</span>
-          <span class="badge">🌮 Taco timeline</span>
-          <span class="badge">⏰ Points freeze 4:30 PM</span>
-          <span class="badge">🏆 $5,000 joke card*</span>
+          <span class="badge">Golden hour</span>
+          <span class="badge">Tacos + margs</span>
+          <span class="badge">Freeze 4:30</span>
+          <span class="badge">QR mysteries</span>
         </div>
       </section>
 
+      <p class="section-label">A few of our memories</p>
+      <div class="mem-rail" id="mem-rail" aria-label="Photo memories"></div>
+
+      <p class="section-label">Play</p>
       <div class="grid" id="tile-grid"></div>
 
       <section class="card">
         <h3>Today’s flow</h3>
         <ul class="schedule" id="schedule"></ul>
-        <p class="muted">Times are guide rails, not a corporate stand-up.</p>
+        <p class="muted" style="margin: 0.55rem 0 0">Guide rails, not a corporate stand-up.</p>
       </section>
 
       <section class="card">
         <h3>How this works</h3>
-        <p class="muted">
-          1) Join with first + last name · 2) Play games / stamp real-world quests · 3) Climb the leaderboard ·
-          4) Be excellent to each other. Each activity also has its own QR around the room.
+        <p class="muted" style="margin: 0">
+          1) Join with first + last name · 2) Play games and venue QRs · 3) Find hidden memory QRs around the room ·
+          4) Climb the leaderboard · be excellent.
         </p>
       </section>
     </main>
+
     <nav id="bottom-nav"></nav>
     <script src="js/config.js"></script>
     <script src="js/api.js"></script>
@@ -60,37 +78,113 @@
     <script src="js/shell.js"></script>
     <script>
       (async function () {
-        const cfg = PARTY_CONFIG;
-        const grid = document.getElementById("tile-grid");
-        grid.innerHTML = cfg.modules
-          .filter((m) => m.id !== "home")
+        const PHOTOS = "assets/photos/";
+        const memories = [
+          { file: "web_engagement_app_proposal1.jpg", label: "Proposal" },
+          { file: "web_engagement_app_pets_rue_dani_fav7.jpg", label: "Rue" },
+          { file: "web_engagement_app_4thofjuly_fav1.jpg", label: "July 4" },
+          { file: "web_engagement_app_mtsainthelena_d&j_fav5.jpg", label: "St Helena" },
+          { file: "web_engagement_app_wine_tasting_helwig_fav15.jpg", label: "Helwig" },
+          { file: "web_engagement_app_adventures_paddle_boards.jpg", label: "Paddle" },
+          { file: "web_engagement_app_crossed_festival_pose_neon_sign_fav12.jpg", label: "Neon" },
+          { file: "web_engagement_app_monteray_bay_aquarium_fav4.jpg", label: "Monterey" },
+          { file: "web_engagement_app_old_folsom_powerhouse_fav10.jpg", label: "Folsom" },
+          { file: "web_engagement_app_random_silliness_8_fav9.jpg", label: "Silly" },
+        ];
+        document.getElementById("mem-rail").innerHTML = memories
           .map(
             (m) =>
-              `<a class="tile" href="${m.path}"><div class="emoji">${m.emoji}</div><strong>${m.title}</strong><span>${m.blurb}</span></a>`
+              `<a href="photos.html" title="${m.label}"><img src="${PHOTOS}${m.file}" alt="${m.label}" loading="lazy" /><span>${m.label}</span></a>`
           )
           .join("");
 
-        const remote = cfg._remote;
-        const schedule = (remote && remote.schedule) || [
-          { time: "1:00 PM", what: "Doors · drinks · photos" },
-          { time: "1:25 PM", what: "Welcome speech" },
-          { time: "1:30 PM", what: "Tacos" },
-          { time: "2:15 PM", what: "Surprise energy" },
-          { time: "2:30 PM", what: "Games" },
-          { time: "4:30 PM", what: "Last call" },
-          { time: "5:00 PM", what: "Farewell" },
+        const thumbs = {
+          "he-said": "web_engagement_app_mtsainthelena_d&j_fav5.jpg",
+          trivia: "web_engagement_app_old_folsom_powerhouse_fav10.jpg",
+          comingle: "web_engagement_app_friends_lupe_dani_santa_cruz_fav11.jpg",
+          stations: "web_engagement_app_wine_tasting_helwig_fav15.jpg",
+          margarita: "web_engagement_app_4thofjuly_fav1.jpg",
+          poses: "web_engagement_app_crossed_festival_pose_neon_sign_fav12.jpg",
+          leaderboard: "web_engagement_app_proposal2.jpg",
+          photowall: "web_engagement_app_seattle_trip_spaceneed_javad_walking_on_clouds_fav16.jpg",
+          photos: "web_engagement_app_proposal1.jpg",
+          rings: "web_engagement_app_crossed_fisher_rain_pic_fav20.jpg",
+          guestbook: "web_engagement_app_pets_rue_dani_fav7.jpg",
+          passport: "web_engagement_app_monteray_bay_aquarium_fav4.jpg",
+          jukebox: "web_engagement_app_adventures_paddle_boards.jpg",
+          predict: "web_engagement_app_random_silliness_8_fav9.jpg",
+          advice: "web_engagement_app_proposal1.jpg",
+          ar: "web_engagement_app_crossed_festival_pose_neon_sign_fav12.jpg",
+        };
+
+        const priority = [
+          "he-said",
+          "trivia",
+          "comingle",
+          "stations",
+          "margarita",
+          "poses",
+          "leaderboard",
+          "photowall",
+          "photos",
+          "rings",
+          "guestbook",
+          "passport",
+          "jukebox",
+          "predict",
+          "advice",
+          "ar",
         ];
+        const mods = (PARTY_CONFIG.modules || []).filter((m) => m.id !== "home");
+        mods.sort((a, b) => {
+          const ia = priority.indexOf(a.id);
+          const ib = priority.indexOf(b.id);
+          return (ia < 0 ? 99 : ia) - (ib < 0 ? 99 : ib);
+        });
+
+        const grid = document.getElementById("tile-grid");
+        grid.innerHTML = mods
+          .map((m, i) => {
+            const wide = i === 0 ? " tile-wide" : "";
+            const t = thumbs[m.id];
+            if (t) {
+              return `<a class="tile${wide}" href="${m.path}">
+                <div class="thumb" style="background-image:url('${PHOTOS}${t}')"></div>
+                <div class="body"><strong>${m.title}</strong><span>${m.blurb}</span></div>
+              </a>`;
+            }
+            return `<a class="tile${wide}" href="${m.path}">
+              <div class="emoji" aria-hidden="true">${m.emoji || "·"}</div>
+              <div class="body"><strong>${m.title}</strong><span>${m.blurb}</span></div>
+            </a>`;
+          })
+          .join("");
+
+        const remote = PARTY_CONFIG._remote;
+        const schedule =
+          (remote && remote.schedule) || [
+            { time: "1:00 PM", what: "Doors · drinks · photos" },
+            { time: "1:25 PM", what: "Welcome speech" },
+            { time: "1:30 PM", what: "Tacos" },
+            { time: "2:30 PM", what: "Games + phone quests" },
+            { time: "4:30 PM", what: "Scoring freezes · winner locked" },
+            { time: "4:45 PM", what: "Prize announcement" },
+            { time: "5:00 PM", what: "Hugs · exit" },
+          ];
         document.getElementById("schedule").innerHTML = schedule
-          .map((s) => `<li><strong>${s.time}</strong> — ${s.what}</li>`)
+          .map((s) => `<li><strong>${s.time}</strong><span>${s.what}</span></li>`)
           .join("");
         if (remote && remote.thanks) document.getElementById("thanks").textContent = remote.thanks;
+
         try {
           const st = await PartyAPI.status();
           document.getElementById("scoring-line").textContent = st.message || "";
           if (st.winner) {
             const w = document.getElementById("winner-home");
             w.style.display = "block";
-            w.innerHTML = `<h3>🏆 Winner locked</h3><p><strong>${PartyUI.escapeHtml(st.winner.displayName)}</strong> · ${st.winner.totalPoints} pts</p><p class="muted">${PartyUI.escapeHtml(st.winner.congrats)}</p>`;
+            w.innerHTML = `<h3>Winner locked</h3><p><strong>${PartyUI.escapeHtml(
+              st.winner.displayName
+            )}</strong> · ${st.winner.totalPoints} pts</p>`;
           }
         } catch (_) {}
       })();
