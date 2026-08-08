@@ -4,33 +4,111 @@
   "subtitle": "Who is more likely? Speed helps a tiny bit.",
   "questions": [
     {
-      "q": "More likely to over-optimize a packing list?",
-      "choices": ["Dani", "Javad"],
-      "answer": 1
-    },
-    {
-      "q": "More likely to notice the flowers first?",
-      "choices": ["Dani", "Javad"],
+      "q": "Who is more dramatic?",
+      "choices": [
+        "Dani",
+        "Javad",
+        "Both, honestly"
+      ],
       "answer": 0
     },
     {
-      "q": "More likely to say “we should document this”?",
-      "choices": ["Dani", "Javad"],
-      "answer": 1
+      "q": "Who is more likely to get hangry first?",
+      "choices": [
+        "Dani",
+        "Javad",
+        "Both (dangerous)"
+      ],
+      "answer": 0
     },
     {
-      "q": "More likely to claim the last taco “for balance”?",
-      "choices": ["Dani", "Javad", "Both, honestly"],
+      "q": "Who is more likely to steal food off the other person's plate?",
+      "choices": [
+        "Dani",
+        "Javad",
+        "A coordinated joint operation"
+      ],
       "answer": 2
     },
     {
-      "q": "More likely to dance first when the surprise hits?",
-      "choices": ["Dani", "Javad", "The guests"],
+      "q": "Who says \"I'm fine\" when they are definitely not fine?",
+      "choices": [
+        "Dani",
+        "Javad",
+        "Both, Olympic level"
+      ],
       "answer": 0
     },
     {
-      "q": "More likely to thank you three times for coming?",
-      "choices": ["Dani", "Javad", "Both"],
+      "q": "Who is more likely to start an argument over something ridiculous?",
+      "choices": [
+        "Dani",
+        "Javad",
+        "Both, for sport"
+      ],
+      "answer": 2
+    },
+    {
+      "q": "Who is more stubborn?",
+      "choices": [
+        "Dani",
+        "Javad",
+        "Dead heat"
+      ],
+      "answer": 2
+    },
+    {
+      "q": "Who is more likely to steal the blankets?",
+      "choices": [
+        "Dani",
+        "Javad",
+        "The pets (true winners)"
+      ],
+      "answer": 0
+    },
+    {
+      "q": "Who is more likely to hit snooze until the alarm gives up?",
+      "choices": [
+        "Dani",
+        "Javad",
+        "Both, separate alarms"
+      ],
+      "answer": 1
+    },
+    {
+      "q": "Who is more likely to say \"we should clean\" and then not clean?",
+      "choices": [
+        "Dani",
+        "Javad",
+        "Both, then order tacos"
+      ],
+      "answer": 2
+    },
+    {
+      "q": "Who is more likely to say \"it's not that far\" on a hike when it absolutely is?",
+      "choices": [
+        "Dani",
+        "Javad",
+        "Both, lying with confidence"
+      ],
+      "answer": 1
+    },
+    {
+      "q": "Who is more likely to spoil the pets rotten?",
+      "choices": [
+        "Dani",
+        "Javad",
+        "Both (pets win)"
+      ],
+      "answer": 2
+    },
+    {
+      "q": "Who is the pets' favorite human (according to the pets)?",
+      "choices": [
+        "Dani",
+        "Javad",
+        "Whoever has treats"
+      ],
       "answer": 2
     }
   ]

@@ -609,10 +609,20 @@ async function handle(req: NextRequest, path: string[]): Promise<NextResponse> {
       if (!host.content) host.content = {};
       if (method === "GET") {
         let data: unknown = null;
-        if (name === "trivia") data = host.content.trivia || DEFAULT_TRIVIA;
-        else if (name === "he-said" || name === "he-said-she-said")
-          data = host.content.heSaid || DEFAULT_HE_SAID;
-        else if (name === "poses") data = host.content.poses || DEFAULT_POSES;
+        // Prefer shipped packs unless host has a full replacement (same or longer length)
+        if (name === "trivia") {
+          const cur = host.content.trivia as { questions?: unknown[] } | undefined;
+          data =
+            cur?.questions && cur.questions.length >= DEFAULT_TRIVIA.questions.length
+              ? cur
+              : DEFAULT_TRIVIA;
+        } else if (name === "he-said" || name === "he-said-she-said") {
+          const cur = host.content.heSaid as { questions?: unknown[] } | undefined;
+          data =
+            cur?.questions && cur.questions.length >= DEFAULT_HE_SAID.questions.length
+              ? cur
+              : DEFAULT_HE_SAID;
+        } else if (name === "poses") data = host.content.poses || DEFAULT_POSES;
         else if (name === "comingle")
           data = { prompts: host.comingle || liveConfig().comingle, answers: host.comingleAnswers };
         else return json({ error: "Unknown content" }, 404);
@@ -696,8 +706,22 @@ async function handle(req: NextRequest, path: string[]): Promise<NextResponse> {
   // Public content reads for guest pages that load JSON (optional)
   if (segs[0] === "content" && segs[1] && method === "GET") {
     const name = segs[1];
-    if (name === "trivia") return json(host.content?.trivia || DEFAULT_TRIVIA);
-    if (name === "he-said") return json(host.content?.heSaid || DEFAULT_HE_SAID);
+    if (name === "trivia") {
+      const cur = host.content?.trivia as { questions?: unknown[] } | undefined;
+      return json(
+        cur?.questions && cur.questions.length >= DEFAULT_TRIVIA.questions.length
+          ? cur
+          : DEFAULT_TRIVIA
+      );
+    }
+    if (name === "he-said") {
+      const cur = host.content?.heSaid as { questions?: unknown[] } | undefined;
+      return json(
+        cur?.questions && cur.questions.length >= DEFAULT_HE_SAID.questions.length
+          ? cur
+          : DEFAULT_HE_SAID
+      );
+    }
     if (name === "poses") return json(host.content?.poses || DEFAULT_POSES);
   }
 
