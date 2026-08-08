@@ -194,178 +194,20 @@ export const DEFAULT_STATION_KEYWORDS: Record<string, string[]> = {
   dessert: ["dessert", "cupcake", "sweet"],
 };
 
-export const DEFAULT_TRIVIA = {
-  id: "trivia",
-  title: "Couples & Family Trivia",
-  subtitle: "Speed round about Dani & Javad. +15 pts per correct answer.",
-  pointsPerCorrect: 15,
-  questions: [
-    {
-      q: "Who made the first move?",
-      choices: ["Dani", "Javad", "Mutual escalation", "Destiny + strong Wi-Fi"],
-      answer: 1,
-      explain: "Flip the official answer in Host desk if lore differs.",
-    },
-    {
-      q: "Who asked the other out?",
-      choices: ["Dani", "Javad", "A group chat forced it", "Still debating in committee"],
-      answer: 1,
-      explain: "Host: set the real story if needed.",
-    },
-    {
-      q: 'Who said "I love you" first?',
-      choices: ["Dani", "Javad", "Luna (via bark)", "Simultaneously, for the plot"],
-      answer: 1,
-      explain: "Canonical couple lore (edit on Host desk if wrong).",
-    },
-    {
-      q: "Who knew first that marriage was going to happen?",
-      choices: ["Dani", "Javad", "Both at the same time", "The dog knew first"],
-      answer: 0,
-      explain: "Soft lore. Host can re-point the truth.",
-    },
-    {
-      q: "What is the name of Javad & Dani's dog?",
-      choices: ["Luna", "Pixel", "Taco", "Server"],
-      answer: 0,
-      explain: "Luna. Correct. Good human.",
-    },
-    {
-      q: "Who is the better cook (according to household law)?",
-      choices: ["Dani", "Javad", "Takeout is the third partner", "Whoever didn't burn dinner"],
-      answer: 0,
-      explain: "Official household law until overruled by Host desk.",
-    },
-    {
-      q: "Who is more sentimental about old photos and texts?",
-      choices: ["Dani", "Javad", "The cloud storage bill", "Both, full softies"],
-      answer: 0,
-      explain: "Sentimentality points go here unless Host flips it.",
-    },
-    {
-      q: "Who planned more of the adventurous trips?",
-      choices: ["Dani", "Javad", "The group chat", "Google Maps (solo hero)"],
-      answer: 1,
-      explain: "Outdoorsy couple energy.",
-    },
-    {
-      q: "Who has the bigger celebrity-crush energy?",
-      choices: ["Dani", "Javad", "Both equally unhinged", "We don't talk about that"],
-      answer: 0,
-      explain: "Light roast. Host may reassign the unhinged party.",
-    },
-    {
-      q: "Who is more excited for the wedding day?",
-      choices: ["Dani", "Javad", "The guests (chaos option)", "Equal-volume screaming"],
-      answer: 3,
-      explain: "Equal hype unless Host declares a winner.",
-    },
-    {
-      q:
-        "Which of Dani's sisters is so self-centered, petty, and egotistical that the ENTIRE wedding party had to keep reminding her: today is Dani's engagement party (not hers), maid of honor is not a paid position, she may not be the center of attention, and she should focus on supporting her only sister Dani on one of the most important days of her life?",
-      choices: [
-        "Ronni",
-        "Alondra",
-        "Both (a full production)",
-        "We plead the fifth (coward option)",
-      ],
-      answer: 0,
-      explain:
-        "Confirm the correct sister in Host desk if needed. Roast level: intentional.",
-    },
-    {
-      q: "What are Dani & Javad wearing so you can spot them instantly?",
-      choices: ["Matching Hawaiian shirts", "All white", "Server-rack camo", "Superhero capes"],
-      answer: 1,
-      explain: "All white. Bright florals for everyone else.",
-    },
-    {
-      q: "Where is this party (city)?",
-      choices: ["Sacramento", "San Francisco", "The cloud", "Stockton"],
-      answer: 0,
-      explain: "Sacramento. Farm-to-fork and freeways.",
-    },
-    {
-      q: "Main food energy today?",
-      choices: ["Sushi conveyor", "Tacos", "Only celery", "Mystery meatloaf"],
-      answer: 1,
-      explain: "Tacos. Priorities.",
-    },
-    {
-      q: "Scoring freezes at what time?",
-      choices: ["3:00 PM", "4:30 PM", "Midnight", "Never (chaos mode)"],
-      answer: 1,
-      explain: "4:30 PM Pacific. Winner locks then.",
-    },
-  ],
-};
+// Trivia + he-said packs live in public/celebrate/data/*.json (pack v4+).
+// Single source of truth via party-content (which loads the JSON files).
+import {
+  DEFAULT_HE_SAID,
+  DEFAULT_TRIVIA,
+  SHIPPED_CONTENT_PACK_ID,
+  SHIPPED_CONTENT_PACK_VERSION,
+} from "@/lib/party-content";
 
-export const DEFAULT_HE_SAID = {
-  id: "he-said-she-said",
-  title: "He Said / She Said",
-  subtitle: "Who is more likely? Speed helps a tiny bit.",
-  questions: [
-    {
-      q: "Who is more dramatic?",
-      choices: ["Dani", "Javad", "Both, honestly"],
-      answer: 0,
-    },
-    {
-      q: "Who is more likely to get hangry first?",
-      choices: ["Dani", "Javad", "Both (dangerous)"],
-      answer: 0,
-    },
-    {
-      q: "Who is more likely to steal food off the other person's plate?",
-      choices: ["Dani", "Javad", "A coordinated joint operation"],
-      answer: 2,
-    },
-    {
-      q: 'Who says "I\'m fine" when they are definitely not fine?',
-      choices: ["Dani", "Javad", "Both, Olympic level"],
-      answer: 0,
-    },
-    {
-      q: "Who is more likely to start an argument over something ridiculous?",
-      choices: ["Dani", "Javad", "Both, for sport"],
-      answer: 2,
-    },
-    {
-      q: "Who is more stubborn?",
-      choices: ["Dani", "Javad", "Dead heat"],
-      answer: 2,
-    },
-    {
-      q: "Who is more likely to steal the blankets?",
-      choices: ["Dani", "Javad", "The pets (true winners)"],
-      answer: 0,
-    },
-    {
-      q: "Who is more likely to hit snooze until the alarm gives up?",
-      choices: ["Dani", "Javad", "Both, separate alarms"],
-      answer: 1,
-    },
-    {
-      q: 'Who is more likely to say "we should clean" and then not clean?',
-      choices: ["Dani", "Javad", "Both, then order tacos"],
-      answer: 2,
-    },
-    {
-      q: 'Who is more likely to say "it\'s not that far" on a hike when it absolutely is?',
-      choices: ["Dani", "Javad", "Both, lying with confidence"],
-      answer: 1,
-    },
-    {
-      q: "Who is more likely to spoil the pets rotten?",
-      choices: ["Dani", "Javad", "Both (pets win)"],
-      answer: 2,
-    },
-    {
-      q: "Who is the pets' favorite human (according to the pets)?",
-      choices: ["Dani", "Javad", "Whoever has treats"],
-      answer: 2,
-    },
-  ],
+export {
+  DEFAULT_HE_SAID,
+  DEFAULT_TRIVIA,
+  SHIPPED_CONTENT_PACK_ID,
+  SHIPPED_CONTENT_PACK_VERSION,
 };
 
 export const DEFAULT_POSES = {

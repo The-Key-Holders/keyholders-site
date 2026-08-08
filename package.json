@@ -10,12 +10,17 @@
     "test": "vitest run",
     "test:unit": "vitest run",
     "test:unit:content": "vitest run lib/party-content.test.ts",
+    "test:unit:memories": "vitest run lib/party-memories.test.ts",
+    "test:unit:party": "vitest run lib/party-content.test.ts lib/party-memories.test.ts",
     "test:e2e": "playwright test",
     "test:e2e:content": "playwright test e2e/guest-hub-content-packs.spec.ts",
     "test:e2e:site": "playwright test e2e/site-navigation.spec.ts",
     "test:e2e:tools": "playwright test e2e/advisor-tools.spec.ts e2e/advisor-tools-full.spec.ts",
     "test:verify:content": "node scripts/verify-content-packs.cjs",
     "test:verify:content:prod": "node scripts/verify-content-packs.cjs https://www.thekeyholders.org",
+    "test:verify:full": "node scripts/verify-guest-hub-full.cjs",
+    "test:verify:full:prod": "node scripts/verify-guest-hub-full.cjs https://www.thekeyholders.org",
+    "test:party:gate": "vitest run lib/party-content.test.ts lib/party-memories.test.ts && node scripts/verify-guest-hub-full.cjs https://www.thekeyholders.org",
     "test:all": "vitest run && playwright test"
   },
   "dependencies": {

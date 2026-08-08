@@ -627,7 +627,11 @@ async function handle(req: NextRequest, path: string[]): Promise<NextResponse> {
           data = resolveContentPack("he-said", host.content.heSaid);
           host.content.heSaid = data;
         } else if (name === "poses") {
-          data = resolveContentPack("poses", host.content.poses);
+          data = resolveContentPack(
+            "poses",
+            host.content.poses,
+            DEFAULT_POSES as unknown as Record<string, unknown>
+          );
           host.content.poses = data;
         } else if (name === "comingle")
           data = { prompts: host.comingle || liveConfig().comingle, answers: host.comingleAnswers };
@@ -742,7 +746,11 @@ async function handle(req: NextRequest, path: string[]): Promise<NextResponse> {
       return json(data);
     }
     if (name === "poses") {
-      const data = resolveContentPack("poses", host.content.poses);
+      const data = resolveContentPack(
+        "poses",
+        host.content.poses,
+        DEFAULT_POSES as unknown as Record<string, unknown>
+      );
       host.content.poses = data;
       return json(data);
     }

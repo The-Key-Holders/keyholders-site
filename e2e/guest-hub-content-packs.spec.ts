@@ -19,21 +19,23 @@ test.use({
   browserName: "chromium",
 });
 
-test.describe("Guest Hub content packs v3", () => {
-  test("API trivia is shipped v3 (sister roast + first move)", async ({ request }) => {
+test.describe("Guest Hub content packs v4", () => {
+  test("API trivia is shipped v4 (sister roast + first move, no basic ops)", async ({ request }) => {
     const res = await request.get(api("/api/content/trivia"));
     expect(res.status(), await res.text()).toBe(200);
     const body = await res.json();
     const qs = body.questions || [];
-    expect(qs.length).toBeGreaterThanOrEqual(15);
+    expect(qs.length).toBe(12);
     const blob = qs.map((q: { q: string }) => q.q).join("\n");
     expect(blob).toContain("Who made the first move?");
     expect(blob).toMatch(/self-centered|egotistical/i);
     expect(blob).toMatch(/maid of honor/i);
-    expect(body.contentPackVersion ?? 3).toBeGreaterThanOrEqual(3);
+    expect(blob).not.toMatch(/Main food energy today/i);
+    expect(blob).not.toMatch(/Scoring freezes at what time/i);
+    expect(body.contentPackVersion ?? 0).toBeGreaterThanOrEqual(4);
   });
 
-  test("API he-said is shipped v3 roast pack", async ({ request }) => {
+  test("API he-said is shipped v4 roast pack", async ({ request }) => {
     const res = await request.get(api("/api/content/he-said"));
     expect(res.status(), await res.text()).toBe(200);
     const body = await res.json();
@@ -45,23 +47,22 @@ test.describe("Guest Hub content packs v3", () => {
     expect(blob).toMatch(/not that far/i);
   });
 
-  test("health reports content pack version", async ({ request }) => {
+  test("health reports content pack version >= 4", async ({ request }) => {
     const res = await request.get(api("/api/health"));
     expect(res.status()).toBe(200);
     const body = await res.json();
     expect(body.ok).toBeTruthy();
-    if (body.contentPack) {
-      expect(body.contentPack.version).toBeGreaterThanOrEqual(3);
-    }
+    expect(body.contentPack?.version).toBeGreaterThanOrEqual(4);
   });
 
-  test("static trivia.json matches v3 markers", async ({ request }) => {
+  test("static trivia.json matches v4 markers", async ({ request }) => {
     const res = await request.get(pageUrl("data/trivia.json"));
     expect(res.status()).toBe(200);
     const body = await res.json();
     const blob = (body.questions || []).map((q: { q: string }) => q.q).join("\n");
     expect(blob).toContain("Who made the first move?");
     expect(blob).toMatch(/maid of honor/i);
+    expect(blob).not.toMatch(/Main food energy today/i);
   });
 
   test("browser trivia page shows first-move question after join", async ({ page }) => {

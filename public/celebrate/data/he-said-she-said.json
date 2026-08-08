@@ -2,6 +2,8 @@
   "id": "he-said-she-said",
   "title": "He Said / She Said",
   "subtitle": "Who is more likely? Speed helps a tiny bit.",
+  "contentPackVersion": 4,
+  "contentPackId": "guest-hub-questions-v4-20260808",
   "questions": [
     {
       "q": "Who is more dramatic?",
@@ -111,7 +113,5 @@
       ],
       "answer": 2
     }
-  ],
-  "contentPackVersion": 3,
-  "contentPackId": "guest-hub-questions-v3-20260808"
+  ]
 }

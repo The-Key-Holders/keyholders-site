@@ -23,7 +23,9 @@
       <section class="hero" id="intro">
         <h2>Who is more likely?</h2>
         <p class="lede">Answer fast. Correct answers pay; speed is a tiny bonus (we are not the Olympics).</p>
-        <button class="btn" id="start">Go</button>
+        <p class="muted" id="pack-badge" style="margin-top:0.5rem">Loading questions…</p>
+        <p class="muted" id="pack-error" hidden style="color:#f88;margin-top:0.5rem"></p>
+        <button class="btn" id="start" disabled>Go</button>
       </section>
       <section class="card" id="play" hidden>
         <div class="progress"><i id="bar"></i></div>
@@ -46,24 +48,45 @@
       (async function () {
         const p = PartyProfile.requireOrRedirect();
         if (!p) return;
+        const badge = document.getElementById("pack-badge");
+        const errEl = document.getElementById("pack-error");
+        const startBtn = document.getElementById("start");
         let data;
         try {
-          const packQs = "v=3&ts=" + Date.now();
+          const packQs = "v=4&ts=" + Date.now();
           const remote = await fetch("/api/content/he-said?" + packQs, { cache: "no-store" }).then((r) =>
             r.ok ? r.json() : null
           );
-          data =
-            remote && remote.questions
-              ? remote
-              : await fetch("data/he-said-she-said.json?" + packQs, { cache: "no-store" }).then((r) => r.json());
-        } catch {
-          data = await fetch("data/he-said-she-said.json?v=3", { cache: "no-store" }).then((r) => r.json());
+          const staticPack = await fetch("data/he-said-she-said.json?" + packQs, { cache: "no-store" })
+            .then((r) => (r.ok ? r.json() : null))
+            .catch(() => null);
+          data = remote && remote.questions && remote.questions.length >= 12 ? remote : staticPack;
+          if (!data || !data.questions || data.questions.length < 12) {
+            throw new Error("He/She pack missing or too short");
+          }
+          const blob = data.questions.map((q) => q.q || "").join("\n");
+          if (!/dramatic/i.test(blob) || !/hangry/i.test(blob)) {
+            throw new Error("He/She pack looks stale (missing roast markers)");
+          }
+        } catch (e) {
+          errEl.hidden = false;
+          errEl.textContent = "He/She pack failed: " + (e.message || e);
+          badge.textContent = "Pack error";
+          return;
         }
+        const qs = data.questions;
+        badge.textContent =
+          (data.contentPackId || "pack") +
+          " · v" +
+          (data.contentPackVersion || "?") +
+          " · " +
+          qs.length +
+          " questions";
+        startBtn.disabled = false;
         let i = 0;
         let score = 0;
         const t0 = performance.now();
         let qStart = t0;
-        const qs = data.questions;
 
         function showQ() {
           if (i >= qs.length) return finish();

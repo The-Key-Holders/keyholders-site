@@ -23,7 +23,9 @@
       <section class="hero" id="intro">
         <h2>How well do you know Dani & Javad?</h2>
         <p class="lede">Best score counts. Wrong answers still earn our eternal gratitude for trying.</p>
-        <button class="btn" id="start">Start trivia</button>
+        <p class="muted" id="pack-badge" style="margin-top:0.5rem">Loading questions…</p>
+        <p class="muted" id="pack-error" hidden style="color:#f88;margin-top:0.5rem"></p>
+        <button class="btn" id="start" disabled>Start trivia</button>
       </section>
       <section class="card" id="play" hidden>
         <div class="progress"><i id="bar"></i></div>
@@ -48,24 +50,67 @@
       (async function () {
         const p = PartyProfile.requireOrRedirect();
         if (!p) return;
-        let data;
+        const badge = document.getElementById("pack-badge");
+        const errEl = document.getElementById("pack-error");
+        const startBtn = document.getElementById("start");
+
+        function isValidPack(data) {
+          const qs = (data && data.questions) || [];
+          if (qs.length < 12) return { ok: false, reason: "Too few questions (" + qs.length + ")" };
+          const blob = qs.map((q) => q.q || "").join("\n");
+          if (!/first move/i.test(blob)) return { ok: false, reason: "Missing first-move lore question" };
+          if (!/self-centered|maid of honor/i.test(blob))
+            return { ok: false, reason: "Missing sister-roast question" };
+          if (/Main food energy today|Scoring freezes at what time|Where is this party \(city\)/i.test(blob))
+            return { ok: false, reason: "Stale basic ops questions still present" };
+          return { ok: true };
+        }
+
+        let data = null;
         try {
-          // Cache-bust: content packs are versioned (v3+). Avoid stale CDN/browser trivia.
-          const packQs = "v=3&ts=" + Date.now();
+          const packQs = "v=4&ts=" + Date.now();
           const remote = await fetch("/api/content/trivia?" + packQs, { cache: "no-store" }).then((r) =>
             r.ok ? r.json() : null
           );
-          data =
-            remote && remote.questions
-              ? remote
-              : await fetch("data/trivia.json?" + packQs, { cache: "no-store" }).then((r) => r.json());
-        } catch {
-          data = await fetch("data/trivia.json?v=3", { cache: "no-store" }).then((r) => r.json());
+          const staticPack = await fetch("data/trivia.json?" + packQs, { cache: "no-store" })
+            .then((r) => (r.ok ? r.json() : null))
+            .catch(() => null);
+          // Prefer API if valid; else static if valid; never accept invalid silently
+          const candidates = [remote, staticPack].filter(Boolean);
+          for (const c of candidates) {
+            const v = isValidPack(c);
+            if (v.ok) {
+              data = c;
+              break;
+            }
+          }
+          if (!data) {
+            const last = candidates[0];
+            const v = isValidPack(last || { questions: [] });
+            throw new Error(v.reason || "No valid trivia pack");
+          }
+        } catch (e) {
+          errEl.hidden = false;
+          errEl.textContent =
+            "Trivia pack failed to load: " + (e.message || e) + ". Hard-refresh or tell the host.";
+          badge.textContent = "Pack error";
+          return;
         }
+
+        const qs = data.questions;
+        const packLabel =
+          (data.contentPackId || "pack") +
+          " · v" +
+          (data.contentPackVersion || "?") +
+          " · " +
+          qs.length +
+          " questions";
+        badge.textContent = packLabel;
+        startBtn.disabled = false;
+
         let i = 0;
         let score = 0;
         const t0 = performance.now();
-        const qs = data.questions;
 
         function titleFor(s, max) {
           const r = s / max;

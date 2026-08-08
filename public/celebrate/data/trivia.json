@@ -1,8 +1,10 @@
 {
   "id": "trivia",
   "title": "Couples & Family Trivia",
-  "subtitle": "Speed round about Dani & Javad. +15 pts per correct answer.",
+  "subtitle": "Real Dani & Javad lore. +15 pts per correct answer.",
   "pointsPerCorrect": 15,
+  "contentPackVersion": 4,
+  "contentPackId": "guest-hub-questions-v4-20260808",
   "questions": [
     {
       "q": "Who made the first move?",
@@ -13,7 +15,7 @@
         "Destiny + strong Wi-Fi"
       ],
       "answer": 1,
-      "explain": "Flip the official answer in Host desk if lore differs."
+      "explain": "Edit official answer on Host desk if lore differs."
     },
     {
       "q": "Who asked the other out?",
@@ -24,7 +26,7 @@
         "Still debating in committee"
       ],
       "answer": 1,
-      "explain": "Host: set the real story if needed."
+      "explain": "Host can flip the official answer."
     },
     {
       "q": "Who said \"I love you\" first?",
@@ -35,7 +37,18 @@
         "Simultaneously, for the plot"
       ],
       "answer": 1,
-      "explain": "Canonical couple lore (edit on Host desk if wrong)."
+      "explain": "Canonical lore unless Host overrides."
+    },
+    {
+      "q": "Who fell in love first?",
+      "choices": [
+        "Dani",
+        "Javad",
+        "Both at the same second",
+        "The pets noticed first"
+      ],
+      "answer": 0,
+      "explain": "Soft lore."
     },
     {
       "q": "Who knew first that marriage was going to happen?",
@@ -46,7 +59,7 @@
         "The dog knew first"
       ],
       "answer": 0,
-      "explain": "Soft lore. Host can re-point the truth."
+      "explain": "Soft lore."
     },
     {
       "q": "What is the name of Javad & Dani's dog?",
@@ -57,7 +70,7 @@
         "Server"
       ],
       "answer": 0,
-      "explain": "Luna. Correct. Good human."
+      "explain": "Luna."
     },
     {
       "q": "Who is the better cook (according to household law)?",
@@ -68,7 +81,7 @@
         "Whoever didn't burn dinner"
       ],
       "answer": 0,
-      "explain": "Official household law until overruled by Host desk."
+      "explain": "Household law."
     },
     {
       "q": "Who is more sentimental about old photos and texts?",
@@ -79,7 +92,7 @@
         "Both, full softies"
       ],
       "answer": 0,
-      "explain": "Sentimentality points go here unless Host flips it."
+      "explain": "Sentimentality points."
     },
     {
       "q": "Who planned more of the adventurous trips?",
@@ -90,7 +103,7 @@
         "Google Maps (solo hero)"
       ],
       "answer": 1,
-      "explain": "Outdoorsy couple energy."
+      "explain": "Outdoors energy."
     },
     {
       "q": "Who has the bigger celebrity-crush energy?",
@@ -101,7 +114,7 @@
         "We don't talk about that"
       ],
       "answer": 0,
-      "explain": "Light roast. Host may reassign the unhinged party."
+      "explain": "Light roast."
     },
     {
       "q": "Who is more excited for the wedding day?",
@@ -112,7 +125,7 @@
         "Equal-volume screaming"
       ],
       "answer": 3,
-      "explain": "Equal hype unless Host declares a winner."
+      "explain": "Equal hype default."
     },
     {
       "q": "Which of Dani's sisters is so self-centered, petty, and egotistical that the ENTIRE wedding party had to keep reminding her: today is Dani's engagement party (not hers), maid of honor is not a paid position, she may not be the center of attention, and she should focus on supporting her only sister Dani on one of the most important days of her life?",
@@ -123,53 +136,7 @@
         "We plead the fifth (coward option)"
       ],
       "answer": 0,
-      "explain": "Confirm the correct sister in Host desk if needed. Roast level: intentional."
-    },
-    {
-      "q": "What are Dani & Javad wearing so you can spot them instantly?",
-      "choices": [
-        "Matching Hawaiian shirts",
-        "All white",
-        "Server-rack camo",
-        "Superhero capes"
-      ],
-      "answer": 1,
-      "explain": "All white. Bright florals for everyone else."
-    },
-    {
-      "q": "Where is this party (city)?",
-      "choices": [
-        "Sacramento",
-        "San Francisco",
-        "The cloud",
-        "Stockton"
-      ],
-      "answer": 0,
-      "explain": "Sacramento. Farm-to-fork and freeways."
-    },
-    {
-      "q": "Main food energy today?",
-      "choices": [
-        "Sushi conveyor",
-        "Tacos",
-        "Only celery",
-        "Mystery meatloaf"
-      ],
-      "answer": 1,
-      "explain": "Tacos. Priorities."
-    },
-    {
-      "q": "Scoring freezes at what time?",
-      "choices": [
-        "3:00 PM",
-        "4:30 PM",
-        "Midnight",
-        "Never (chaos mode)"
-      ],
-      "answer": 1,
-      "explain": "4:30 PM Pacific. Winner locks then."
+      "explain": "Confirm sister name on Host desk if needed. Roast intentional."
     }
-  ],
-  "contentPackVersion": 3,
-  "contentPackId": "guest-hub-questions-v3-20260808"
+  ]
 }
