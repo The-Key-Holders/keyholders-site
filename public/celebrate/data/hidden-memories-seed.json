@@ -1,0 +1,86 @@
+{
+  "note": "QR-only. Not linked in guest nav. Host desk: Save all memories, then Print QR pack.",
+  "baseUrl": "https://www.thekeyholders.org/celebrate/",
+  "memories": [
+    {
+      "slot": 1,
+      "title": "Hidden memory 1 · Proposal",
+      "caption": "We locked it in for real. One knee, zero chill. If trivia asks how this story started, start here.",
+      "imageUrl": "https://www.thekeyholders.org/celebrate/assets/photos/web_engagement_app_proposal1.jpg",
+      "enabled": true,
+      "triviaHint": "Proposal / locked-in story"
+    },
+    {
+      "slot": 2,
+      "title": "Hidden memory 2 · Seattle",
+      "caption": "Space Needle skyline. Kiss included. Some trips rewrite your map of “us.”",
+      "imageUrl": "https://www.thekeyholders.org/celebrate/assets/photos/web_engagement_app_seattle_trip_kiss_space-needle_fav13.jpg",
+      "enabled": true,
+      "triviaHint": "Seattle / Space Needle"
+    },
+    {
+      "slot": 3,
+      "title": "Hidden memory 3 · Rue",
+      "caption": "Soul cat energy. Rue always votes Dani. (Ollie is chaos. Luna is the dog.)",
+      "imageUrl": "https://www.thekeyholders.org/celebrate/assets/photos/web_engagement_app_pets_rue_dani_fav7.jpg",
+      "enabled": true,
+      "triviaHint": "Rue soul cat / Luna dog"
+    },
+    {
+      "slot": 4,
+      "title": "Hidden memory 4 · Mt St Helena",
+      "caption": "Legs burned. View paid us back. Mountain day: Mt St Helena.",
+      "imageUrl": "https://www.thekeyholders.org/celebrate/assets/photos/web_engagement_app_mtsainthelena_d&j_fav5.jpg",
+      "enabled": true,
+      "triviaHint": "Mt St Helena hike"
+    },
+    {
+      "slot": 5,
+      "title": "Hidden memory 5 · Helwig",
+      "caption": "Wine-country homework. The tasting name on the tip of your tongue: Helwig.",
+      "imageUrl": "https://www.thekeyholders.org/celebrate/assets/photos/web_engagement_app_wine_tasting_helwig_fav15.jpg",
+      "enabled": true,
+      "triviaHint": "Helwig wine"
+    },
+    {
+      "slot": 6,
+      "title": "Hidden memory 6 · Paddle",
+      "caption": "Boards on water. Still land people at heart. Outdoors is a love language.",
+      "imageUrl": "https://www.thekeyholders.org/celebrate/assets/photos/web_engagement_app_adventures_paddle_boards.jpg",
+      "enabled": true,
+      "triviaHint": "Outdoorsy / paddle"
+    },
+    {
+      "slot": 7,
+      "title": "Hidden memory 7 · Neon",
+      "caption": "Neon signs. Crossed pose. Festival world (Dani’s flow-art orbit).",
+      "imageUrl": "https://www.thekeyholders.org/celebrate/assets/photos/web_engagement_app_crossed_festival_pose_neon_sign_fav12.jpg",
+      "enabled": true,
+      "triviaHint": "Festival / neon / flow vibe"
+    },
+    {
+      "slot": 8,
+      "title": "Hidden memory 8 · July 4",
+      "caption": "California summer fireworks. America-themed chaos, couple edition.",
+      "imageUrl": "https://www.thekeyholders.org/celebrate/assets/photos/web_engagement_app_4thofjuly_fav1.jpg",
+      "enabled": true,
+      "triviaHint": "CA summer"
+    },
+    {
+      "slot": 9,
+      "title": "Hidden memory 9 · Monterey",
+      "caption": "Aquarium glass. Big tanks. Coast day stamped: Monterey Bay.",
+      "imageUrl": "https://www.thekeyholders.org/celebrate/assets/photos/web_engagement_app_monteray_bay_aquarium_fav4.jpg",
+      "enabled": true,
+      "triviaHint": "Monterey Bay Aquarium"
+    },
+    {
+      "slot": 10,
+      "title": "Hidden memory 10 · Folsom",
+      "caption": "Old Folsom powerhouse. Local roots. Sacramento-orbit life.",
+      "imageUrl": "https://www.thekeyholders.org/celebrate/assets/photos/web_engagement_app_old_folsom_powerhouse_fav10.jpg",
+      "enabled": true,
+      "triviaHint": "Old Folsom / Sacramento"
+    }
+  ]
+}

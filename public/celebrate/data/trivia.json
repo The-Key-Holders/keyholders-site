@@ -1,56 +1,104 @@
 {
   "id": "trivia",
-  "title": "Couples & Family Trivia",
-  "subtitle": "Speed round about Dani & Javad. +15 pts per correct answer.",
+  "title": "Dani & Javad · Party Trivia",
+  "subtitle": "Hunt QR hidden memories for hints. +15 per correct. Family-safe chaos allowed.",
   "pointsPerCorrect": 15,
   "questions": [
     {
-      "q": "Where did Dani & Javad go on their first date?",
-      "choices": ["Coffee shop hang", "Fancy steakhouse", "Bowling alley", "Homelab tour (romantic)"],
-      "answer": 0,
-      "explain": "First dates: keep it chill."
-    },
-    {
-      "q": "Who said 'I love you' first?",
-      "choices": ["Dani", "Javad", "Luna (via bark)", "Simultaneously, for the plot"],
-      "answer": 1,
-      "explain": "Host can edit this answer in trivia.json if lore differs."
-    },
-    {
-      "q": "What is the name of Javad & Dani's dog?",
+      "q": "What is the name of Dani & Javad’s dog?",
       "choices": ["Luna", "Pixel", "Taco", "Server"],
       "answer": 0,
-      "explain": "Luna. Correct. Good human."
+      "explain": "Luna. Aussie / Border Collie energy. Good human."
     },
     {
-      "q": "Who is most likely to steal the last taco from La Esperanza?",
-      "choices": ["Dani", "Javad", "A coordinated joint operation", "The dog (spiritual theft)"],
-      "answer": 2,
-      "explain": "Teamwork makes the taco work."
-    },
-    {
-      "q": "What are Dani & Javad wearing so you can spot them instantly?",
-      "choices": ["Matching Hawaiian shirts", "All white", "Server-rack camo", "Superhero capes"],
+      "q": "Dani’s “soul cat” is named…",
+      "choices": ["Ollie", "Rue", "Luna", "Pixel"],
       "answer": 1,
-      "explain": "All white. Bright florals for everyone else."
+      "explain": "Rue. (Ollie is the chaotic younger cat.) Hint: QR pet memory."
     },
     {
-      "q": "Where is this party (city)?",
-      "choices": ["Sacramento", "San Francisco", "The cloud", "Stockton"],
+      "q": "Which trip shows up hard in their photo vault: kiss + skyline + “walking on clouds”?",
+      "choices": ["Nashville", "Seattle (Space Needle)", "Disneyland", "Stockton wine crawl"],
+      "answer": 1,
+      "explain": "Seattle. Space Needle era. Hint: QR travel memory."
+    },
+    {
+      "q": "Which outdoor climb / hike shows Dani & Javad as a team on the mountain?",
+      "choices": ["Mt St Helena", "Everest base camp", "Capitol steps only", "The staircase to the taco line"],
       "answer": 0,
-      "explain": "Sacramento. Farm-to-fork and freeways."
+      "explain": "Mt St Helena. Legs burned, view paid them back. Hint: QR hike memory."
     },
     {
-      "q": "Main food energy today?",
-      "choices": ["Sushi conveyor", "Tacos", "Only celery", "Mystery meatloaf"],
+      "q": "Wine-country homework for these two often means which tasting name floating around their photos?",
+      "choices": ["Helwig", "Only boxed rosé forever", "The Homelab Cellar", "In-N-Out wine flight"],
+      "answer": 0,
+      "explain": "Helwig. Hint: QR wine memory."
+    },
+    {
+      "q": "Aquarium glass, big tanks, coast day: where were they?",
+      "choices": ["Monterey Bay Aquarium", "A fishtank in the living room", "IKEA cafeteria", "The cloud"],
+      "answer": 0,
+      "explain": "Monterey. Hint: QR aquarium memory."
+    },
+    {
+      "q": "Local-roots energy / powerhouse vibes: which Sacramento-orbit spot is in the vault?",
+      "choices": ["Old Folsom powerhouse", "Mars colony", "Only LA freeways", "A random Costco parking lot"],
+      "answer": 0,
+      "explain": "Old Folsom powerhouse. Hint: QR local memory."
+    },
+    {
+      "q": "Main food energy at THIS engagement party?",
+      "choices": ["Sushi conveyor only", "Tacos", "Celery cleanse", "Mystery meatloaf"],
       "answer": 1,
       "explain": "Tacos. Priorities."
     },
     {
-      "q": "Scoring freezes at what time?",
+      "q": "Where is this party (city)?",
+      "choices": ["Sacramento", "San Francisco", "The cloud", "Bakersfield"],
+      "answer": 0,
+      "explain": "Sacramento. Farm-to-fork and freeways."
+    },
+    {
+      "q": "Scoring freezes at what time (Pacific)?",
       "choices": ["3:00 PM", "4:30 PM", "Midnight", "Never (chaos mode)"],
       "answer": 1,
-      "explain": "4:30 PM Pacific. Winner locks then."
+      "explain": "4:30 PM. Winner locks then. Play for fun after."
+    },
+    {
+      "q": "What are Dani & Javad wearing so you can spot them instantly today?",
+      "choices": ["Matching Hawaiian shirts", "All white", "Server-rack camo", "Superhero capes"],
+      "answer": 1,
+      "explain": "All white. Bright florals for everyone else (Dani is not doing bridal white cosplay for the engagement party aesthetic talk, but the couple spot-check is all white)."
+    },
+    {
+      "q": "Who said “I love you” first?",
+      "choices": ["Dani", "Javad", "Luna (via bark)", "Simultaneously, for the plot"],
+      "answer": 1,
+      "explain": "Javad. (Host can override in Host desk if lore differs.)"
+    },
+    {
+      "q": "Which sister of Dani is so self-centered she tried her absolute hardest to sabotage the engagement party because she couldn’t stand the thought of her sister being happier than she’ll ever be?",
+      "choices": ["Ronni", "Lupe", "Luna the dog", "A random cousin from the taco line"],
+      "answer": 0,
+      "explain": "If you know, you know. Family lore. Be kind in person; savage on the scoreboard."
+    },
+    {
+      "q": "Can you guess who demanded a $200 custom gift before appointing herself “lead event planner,” despite no qualifications, then dumped the work on her partner?",
+      "choices": ["The maid of honor / self-appointed planner (Ronni)", "Javad’s homelab", "The margarita dispenser", "Chad Cahill"],
+      "answer": 0,
+      "explain": "Yes. That one. Clap politely if she’s in the room."
+    },
+    {
+      "q": "True or peak chaos: the maid of honor / self-appointed planner made no real invitations, didn’t manage basic tasks, refused to see the venue before today, AND still wanted more gifts for “all her hard work”?",
+      "choices": ["Tragically accurate", "False, she is a certified PMP", "Only the invitation part", "Only the gifts part"],
+      "answer": 0,
+      "explain": "Tragically accurate. Champagne optional; facts not."
+    },
+    {
+      "q": "Which sister might actually believe today is HER engagement party?",
+      "choices": ["Ronni", "Dani (correct bride energy)", "Ollie the cat", "The florist"],
+      "answer": 0,
+      "explain": "Main character syndrome: advanced edition."
     }
   ]
 }

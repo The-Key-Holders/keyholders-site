@@ -153,75 +153,208 @@ export const DEFAULT_STATION_KEYWORDS: Record<string, string[]> = {
 
 export const DEFAULT_TRIVIA = {
   id: "trivia",
-  title: "Couples & Family Trivia",
-  subtitle: "Speed round about Dani & Javad. +15 pts per correct answer.",
+  title: "Dani & Javad · Party Trivia",
+  subtitle:
+    "Hunt QR hidden memories for hints. +15 per correct. Family lore included.",
   pointsPerCorrect: 15,
   questions: [
     {
-      q: "Where did Dani & Javad go on their first date?",
-      choices: [
-        "Coffee shop hang",
-        "Fancy steakhouse",
-        "Bowling alley",
-        "Homelab tour (romantic)",
-      ],
-      answer: 0,
-      explain: "First dates: keep it chill.",
-    },
-    {
-      q: "Who said 'I love you' first?",
-      choices: ["Dani", "Javad", "Luna (via bark)", "Simultaneously, for the plot"],
-      answer: 1,
-      explain: "Host can edit this answer if lore differs.",
-    },
-    {
-      q: "What is the name of Javad & Dani's dog?",
+      q: "What is the name of Dani & Javad’s dog?",
       choices: ["Luna", "Pixel", "Taco", "Server"],
       answer: 0,
-      explain: "Luna. Correct. Good human.",
+      explain: "Luna. Aussie / Border Collie energy.",
     },
     {
-      q: "Who is most likely to steal the last taco from La Esperanza?",
-      choices: [
-        "Dani",
-        "Javad",
-        "A coordinated joint operation",
-        "The dog (spiritual theft)",
-      ],
-      answer: 2,
-      explain: "Teamwork makes the taco work.",
-    },
-    {
-      q: "What are Dani & Javad wearing so you can spot them instantly?",
-      choices: [
-        "Matching Hawaiian shirts",
-        "All white",
-        "Server-rack camo",
-        "Superhero capes",
-      ],
+      q: "Dani’s “soul cat” is named…",
+      choices: ["Ollie", "Rue", "Luna", "Pixel"],
       answer: 1,
-      explain: "All white. Bright florals for everyone else.",
+      explain: "Rue. (Ollie is the chaotic younger cat.) QR pet memory helps.",
     },
     {
-      q: "Where is this party (city)?",
-      choices: ["Sacramento", "San Francisco", "The cloud", "Stockton"],
+      q: "Which trip shows kiss + skyline + “walking on clouds” energy?",
+      choices: ["Nashville", "Seattle (Space Needle)", "Disneyland", "Stockton"],
+      answer: 1,
+      explain: "Seattle. QR travel memory helps.",
+    },
+    {
+      q: "Which hike shows them as a team on the mountain?",
+      choices: ["Mt St Helena", "Everest", "Capitol steps only", "The taco line"],
       answer: 0,
-      explain: "Sacramento. Farm-to-fork and freeways.",
+      explain: "Mt St Helena. QR hike memory helps.",
     },
     {
-      q: "Main food energy today?",
-      choices: ["Sushi conveyor", "Tacos", "Only celery", "Mystery meatloaf"],
+      q: "Wine-country homework often means which tasting name?",
+      choices: ["Helwig", "Only boxed rosé", "Homelab Cellar", "In-N-Out flight"],
+      answer: 0,
+      explain: "Helwig. QR wine memory helps.",
+    },
+    {
+      q: "Aquarium glass, big tanks, coast day: where?",
+      choices: ["Monterey Bay Aquarium", "Living room tank", "IKEA cafeteria", "The cloud"],
+      answer: 0,
+      explain: "Monterey. QR aquarium memory helps.",
+    },
+    {
+      q: "Local powerhouse vibes in the photo vault?",
+      choices: ["Old Folsom powerhouse", "Mars colony", "Only LA freeways", "Random Costco"],
+      answer: 0,
+      explain: "Old Folsom. QR local memory helps.",
+    },
+    {
+      q: "Main food energy at THIS engagement party?",
+      choices: ["Sushi conveyor only", "Tacos", "Celery cleanse", "Mystery meatloaf"],
       answer: 1,
       explain: "Tacos. Priorities.",
     },
     {
-      q: "Scoring freezes at what time?",
+      q: "Where is this party (city)?",
+      choices: ["Sacramento", "San Francisco", "The cloud", "Bakersfield"],
+      answer: 0,
+      explain: "Sacramento.",
+    },
+    {
+      q: "Scoring freezes at what time (Pacific)?",
       choices: ["3:00 PM", "4:30 PM", "Midnight", "Never (chaos mode)"],
       answer: 1,
-      explain: "4:30 PM Pacific. Winner locks then.",
+      explain: "4:30 PM. Winner locks then.",
+    },
+    {
+      q: "What are Dani & Javad wearing so you can spot them today?",
+      choices: ["Matching Hawaiian shirts", "All white", "Server-rack camo", "Superhero capes"],
+      answer: 1,
+      explain: "All white spot-check for the couple.",
+    },
+    {
+      q: "Who said “I love you” first?",
+      choices: ["Dani", "Javad", "Luna (via bark)", "Simultaneously, for the plot"],
+      answer: 1,
+      explain: "Javad. (Host can edit if lore differs.)",
+    },
+    {
+      q: "Which sister of Dani tried hardest to sabotage the engagement party because she couldn’t stand Dani being happier than she’ll ever be?",
+      choices: ["Ronni", "Lupe", "Luna the dog", "A random cousin from the taco line"],
+      answer: 0,
+      explain: "If you know, you know. Be kind in person; savage on the scoreboard.",
+    },
+    {
+      q: "Who demanded a $200 custom gift before appointing herself “lead event planner,” then dumped the work on her partner?",
+      choices: ["The maid of honor / self-appointed planner (Ronni)", "Javad’s homelab", "The margarita dispenser", "Chad Cahill"],
+      answer: 0,
+      explain: "Yes. That one.",
+    },
+    {
+      q: "True: maid of honor / self-appointed planner skipped real invites & venue work, then still wanted more gifts for “hard work”?",
+      choices: ["Tragically accurate", "False, she is a certified PMP", "Only the invitation part", "Only the gifts part"],
+      answer: 0,
+      explain: "Tragically accurate.",
+    },
+    {
+      q: "Which sister might actually believe today is HER engagement party?",
+      choices: ["Ronni", "Dani (correct bride energy)", "Ollie the cat", "The florist"],
+      answer: 0,
+      explain: "Main character syndrome: advanced edition.",
     },
   ],
 };
+
+/** QR-only defaults (not linked in guest nav). Host can edit; print pack uses these URLs. */
+export const DEFAULT_MEMORIES: HiddenMemory[] = [
+  {
+    slot: 1,
+    title: "Hidden memory 1 · Proposal",
+    caption:
+      "We locked it in for real. One knee, zero chill. If trivia asks how this story started, start here.",
+    imageDataUrl: "",
+    imageUrl:
+      "https://www.thekeyholders.org/celebrate/assets/photos/web_engagement_app_proposal1.jpg",
+    enabled: true,
+  },
+  {
+    slot: 2,
+    title: "Hidden memory 2 · Seattle",
+    caption:
+      "Space Needle skyline. Kiss included. Some trips rewrite your map of “us.”",
+    imageDataUrl: "",
+    imageUrl:
+      "https://www.thekeyholders.org/celebrate/assets/photos/web_engagement_app_seattle_trip_kiss_space-needle_fav13.jpg",
+    enabled: true,
+  },
+  {
+    slot: 3,
+    title: "Hidden memory 3 · Rue",
+    caption:
+      "Soul cat energy. Rue always votes Dani. (Ollie is chaos. Luna is the dog.)",
+    imageDataUrl: "",
+    imageUrl:
+      "https://www.thekeyholders.org/celebrate/assets/photos/web_engagement_app_pets_rue_dani_fav7.jpg",
+    enabled: true,
+  },
+  {
+    slot: 4,
+    title: "Hidden memory 4 · Mt St Helena",
+    caption: "Legs burned. View paid us back. Mountain day: Mt St Helena.",
+    imageDataUrl: "",
+    imageUrl:
+      "https://www.thekeyholders.org/celebrate/assets/photos/web_engagement_app_mtsainthelena_d&j_fav5.jpg",
+    enabled: true,
+  },
+  {
+    slot: 5,
+    title: "Hidden memory 5 · Helwig",
+    caption:
+      "Wine-country homework. The tasting name on the tip of your tongue: Helwig.",
+    imageDataUrl: "",
+    imageUrl:
+      "https://www.thekeyholders.org/celebrate/assets/photos/web_engagement_app_wine_tasting_helwig_fav15.jpg",
+    enabled: true,
+  },
+  {
+    slot: 6,
+    title: "Hidden memory 6 · Paddle",
+    caption:
+      "Boards on water. Still land people at heart. Outdoors is a love language.",
+    imageDataUrl: "",
+    imageUrl:
+      "https://www.thekeyholders.org/celebrate/assets/photos/web_engagement_app_adventures_paddle_boards.jpg",
+    enabled: true,
+  },
+  {
+    slot: 7,
+    title: "Hidden memory 7 · Neon",
+    caption: "Neon signs. Crossed pose. Festival world (Dani’s flow-art orbit).",
+    imageDataUrl: "",
+    imageUrl:
+      "https://www.thekeyholders.org/celebrate/assets/photos/web_engagement_app_crossed_festival_pose_neon_sign_fav12.jpg",
+    enabled: true,
+  },
+  {
+    slot: 8,
+    title: "Hidden memory 8 · July 4",
+    caption: "California summer fireworks. America-themed chaos, couple edition.",
+    imageDataUrl: "",
+    imageUrl:
+      "https://www.thekeyholders.org/celebrate/assets/photos/web_engagement_app_4thofjuly_fav1.jpg",
+    enabled: true,
+  },
+  {
+    slot: 9,
+    title: "Hidden memory 9 · Monterey",
+    caption: "Aquarium glass. Big tanks. Coast day stamped: Monterey Bay.",
+    imageDataUrl: "",
+    imageUrl:
+      "https://www.thekeyholders.org/celebrate/assets/photos/web_engagement_app_monteray_bay_aquarium_fav4.jpg",
+    enabled: true,
+  },
+  {
+    slot: 10,
+    title: "Hidden memory 10 · Folsom",
+    caption: "Old Folsom powerhouse. Local roots. Sacramento-orbit life.",
+    imageDataUrl: "",
+    imageUrl:
+      "https://www.thekeyholders.org/celebrate/assets/photos/web_engagement_app_old_folsom_powerhouse_fav10.jpg",
+    enabled: true,
+  },
+];
 
 export const DEFAULT_HE_SAID = {
   id: "he-said-she-said",
@@ -289,6 +422,10 @@ export function emptyMemories(): HiddenMemory[] {
   }));
 }
 
+export function seedMemories(): HiddenMemory[] {
+  return DEFAULT_MEMORIES.map((m) => ({ ...m }));
+}
+
 function defaultHost(): HostState {
   return {
     scoringMode: "auto",
@@ -311,7 +448,7 @@ function defaultHost(): HostState {
       heSaid: DEFAULT_HE_SAID,
       poses: DEFAULT_POSES,
     },
-    memories: emptyMemories(),
+    memories: seedMemories(),
   };
 }
 
@@ -336,11 +473,19 @@ function store(): Store {
   if (!s.host.publicBaseUrl) s.host.publicBaseUrl = DEFAULT_PUBLIC_BASE;
   if (!s.host.memories || s.host.memories.length !== 10) {
     const existing = s.host.memories || [];
-    const base = emptyMemories();
+    const base = seedMemories();
     for (const m of existing) {
       if (m && m.slot >= 1 && m.slot <= 10) base[m.slot - 1] = { ...base[m.slot - 1], ...m };
     }
     s.host.memories = base;
+  } else {
+    // If host has empty slots (fresh instance), fill defaults so QR hunt works without re-entry
+    const anyOn = s.host.memories.some((m) => m.enabled && m.caption);
+    if (!anyOn) s.host.memories = seedMemories();
+  }
+  if (!s.host.content?.trivia) {
+    if (!s.host.content) s.host.content = {};
+    s.host.content.trivia = DEFAULT_TRIVIA;
   }
   return s;
 }
