@@ -69,6 +69,17 @@ export type HiddenMemory = {
   enabled: boolean;
 };
 
+/** Live Photo Wall item (guest upload or durable stock seed). */
+export type WallPhoto = {
+  id: string;
+  url: string;
+  displayName: string;
+  caption?: string;
+  createdAt: number;
+  /** True for built-in stock seeds (not guest uploads). */
+  stock?: boolean;
+};
+
 type Store = {
   profiles: Map<string, PartyProfile>;
   scores: PartyScore[];
@@ -77,8 +88,40 @@ type Store = {
   songs: Array<{ displayName: string; title: string; artist: string; createdAt: number }>;
   advice: Array<{ displayName: string; message: string; createdAt: number }>;
   margarita: Array<{ profileId: string; flavor: string; rating: number }>;
+  /** Guest uploads only (stock lives in STOCK_WALL_PHOTOS so cold starts keep seeds). */
+  photos: WallPhoto[];
   host: HostState;
 };
+
+/** Durable stock wall seeds (static HTTPS paths under /celebrate/assets/photowall/). */
+export const STOCK_WALL_PHOTOS: WallPhoto[] = [
+  { id: "stock-01", url: "/celebrate/assets/photowall/wall-01.jpg", displayName: "Stock · 34th birthday crew", caption: "Cody, Javad & Nate birthday energy", createdAt: 0, stock: true },
+  { id: "stock-02", url: "/celebrate/assets/photowall/wall-02.jpg", displayName: "Stock · Paddle board adventures", caption: "Adventure day on the water", createdAt: 0, stock: true },
+  { id: "stock-03", url: "/celebrate/assets/photowall/wall-03.jpg", displayName: "Stock · Javad favorite", caption: "A classic Javad moment", createdAt: 0, stock: true },
+  { id: "stock-04", url: "/celebrate/assets/photowall/wall-04.jpg", displayName: "Stock · Maunee birthday", caption: "Dani and cousin Maunee birthday vibes", createdAt: 0, stock: true },
+  { id: "stock-05", url: "/celebrate/assets/photowall/wall-05.jpg", displayName: "Stock · Hilary Duff night", caption: "Dani, Roni, Lupe: concert mode", createdAt: 0, stock: true },
+  { id: "stock-06", url: "/celebrate/assets/photowall/wall-06.jpg", displayName: "Stock · Disaster Christmas", caption: "Holiday chaos with the pet fam", createdAt: 0, stock: true },
+  { id: "stock-07", url: "/celebrate/assets/photowall/wall-07.jpg", displayName: "Stock · Downtown Sac art", caption: "Downtown Sacramento art wander", createdAt: 0, stock: true },
+  { id: "stock-08", url: "/celebrate/assets/photowall/wall-08.jpg", displayName: "Stock · Sisters", caption: "Ronni & Dani sister energy", createdAt: 0, stock: true },
+  { id: "stock-09", url: "/celebrate/assets/photowall/wall-09.jpg", displayName: "Stock · Family photobomb", caption: "Aunti Cadena, Mom Regina, Javad photobomb", createdAt: 0, stock: true },
+  { id: "stock-10", url: "/celebrate/assets/photowall/wall-10.jpg", displayName: "Stock · Dani & Mom", caption: "Dani with Mom Regina", createdAt: 0, stock: true },
+  { id: "stock-11", url: "/celebrate/assets/photowall/wall-11.jpg", displayName: "Stock · Ronni & Briauna", caption: "Friends and family hang", createdAt: 0, stock: true },
+  { id: "stock-12", url: "/celebrate/assets/photowall/wall-12.jpg", displayName: "Stock · Hilary Duff crew", caption: "Dani, Briauna, Ronni, Chelsea", createdAt: 0, stock: true },
+  { id: "stock-13", url: "/celebrate/assets/photowall/wall-13.jpg", displayName: "Stock · Scotty & Briauna", caption: "Friend crew favorites", createdAt: 0, stock: true },
+  { id: "stock-14", url: "/celebrate/assets/photowall/wall-14.jpg", displayName: "Stock · Scotty & Briauna 2", caption: "More friend crew favorites", createdAt: 0, stock: true },
+  { id: "stock-15", url: "/celebrate/assets/photowall/wall-15.jpg", displayName: "Stock · Line dancing", caption: "Nancy & Justin line dancing night", createdAt: 0, stock: true },
+  { id: "stock-16", url: "/celebrate/assets/photowall/wall-16.jpg", displayName: "Stock · Pets & friends", caption: "Briauna and the pets", createdAt: 0, stock: true },
+  { id: "stock-17", url: "/celebrate/assets/photowall/wall-17.jpg", displayName: "Stock · Rue & Javad", caption: "Rue the dog and Javad", createdAt: 0, stock: true },
+];
+
+export const MAX_GUEST_PHOTOS = 80;
+export const MAX_PHOTO_DATA_URL_LEN = 700_000;
+
+/** Guest uploads first (newest), then durable stock seeds. */
+export function listWallPhotos(storePhotos: WallPhoto[] | undefined): WallPhoto[] {
+  const guest = Array.isArray(storePhotos) ? storePhotos : [];
+  return [...guest, ...STOCK_WALL_PHOTOS].slice(0, 120);
+}
 
 const globalForParty = globalThis as unknown as { __djPartyStoreV2?: Store };
 
@@ -325,6 +368,7 @@ function store(): Store {
       songs: [],
       advice: [],
       margarita: [],
+      photos: [],
       host: defaultHost(),
     };
   }
@@ -334,6 +378,7 @@ function store(): Store {
   if (!s.host.content) s.host.content = defaultHost().content;
   if (!s.host.comingle) s.host.comingle = DEFAULT_COMINGLE;
   if (!s.host.publicBaseUrl) s.host.publicBaseUrl = DEFAULT_PUBLIC_BASE;
+  if (!Array.isArray(s.photos)) s.photos = [];
   if (!s.host.memories || s.host.memories.length !== 10) {
     const existing = s.host.memories || [];
     const base = emptyMemories();

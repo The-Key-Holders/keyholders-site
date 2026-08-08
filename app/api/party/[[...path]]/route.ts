@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import {
   MAX_PROFILES,
+  MAX_GUEST_PHOTOS,
+  MAX_PHOTO_DATA_URL_LEN,
   answerMatches,
   computeWinner,
   deadlinePayload,
@@ -8,6 +10,7 @@ import {
   getHost,
   getStore,
   liveConfig,
+  listWallPhotos,
   norm,
   recompute,
   scoringOpen,
@@ -16,6 +19,7 @@ import {
   emptyMemories,
   type PartyProfile,
   type HiddenMemory,
+  type WallPhoto,
   DEFAULT_COMINGLE_ANSWERS,
   DEFAULT_STATION_KEYWORDS,
   DEFAULT_TRIVIA,
@@ -339,7 +343,7 @@ async function handle(req: NextRequest, path: string[]): Promise<NextResponse> {
     return json({
       leaderboard,
       predictions: {},
-      photos: [],
+      photos: listWallPhotos(store.photos).slice(0, 18),
       songs: store.songs.slice(0, 15),
       wishes: store.wishes.slice(0, 15),
       scoring: deadlinePayload(),
@@ -420,15 +424,74 @@ async function handle(req: NextRequest, path: string[]): Promise<NextResponse> {
 
   if (segs[0] === "photos" && method === "GET") {
     return json({
-      photos: [],
-      note: "Photo uploads use Google Photos album on cellular; see photos page.",
+      photos: listWallPhotos(store.photos),
+      note: "Guest uploads + stock seeds. Shared Google album remains optional archive.",
     });
   }
   if (segs[0] === "photos" && method === "POST") {
+    // Accept multipart (guest photowall.html) or JSON { url | imageDataUrl, displayName, caption }
+    let url = "";
+    let displayName = "Guest";
+    let caption = "";
+    const ct = (req.headers.get("content-type") || "").toLowerCase();
+    try {
+      if (ct.includes("multipart/form-data")) {
+        const form = await req.formData();
+        displayName = String(form.get("displayName") || "Guest").slice(0, 60);
+        caption = String(form.get("caption") || "").slice(0, 200);
+        const file = form.get("photo") || form.get("file") || form.get("image");
+        if (file && typeof file === "object" && "arrayBuffer" in file) {
+          const f = file as File;
+          const buf = Buffer.from(await f.arrayBuffer());
+          if (buf.length > 1_200_000) {
+            return json({ error: "Photo too large (keep under ~1MB; compress first)" }, 400);
+          }
+          const mime = (f.type || "image/jpeg").split(";")[0] || "image/jpeg";
+          if (!mime.startsWith("image/")) {
+            return json({ error: "File must be an image" }, 400);
+          }
+          url = `data:${mime};base64,${buf.toString("base64")}`;
+        }
+        const directUrl = String(form.get("url") || form.get("imageUrl") || "").trim();
+        if (!url && directUrl) url = directUrl;
+      } else {
+        const body = await req.json().catch(() => ({} as Record<string, unknown>));
+        displayName = String(body.displayName || "Guest").slice(0, 60);
+        caption = String(body.caption || "").slice(0, 200);
+        url = String(body.url || body.imageUrl || body.imageDataUrl || "").trim();
+      }
+    } catch {
+      return json({ error: "Could not read upload" }, 400);
+    }
+
+    if (!url) return json({ error: "photo, url, or imageDataUrl required" }, 400);
+    // Allow https image URLs or data:image/*; block other schemes
+    const okUrl =
+      /^https:\/\//i.test(url) ||
+      /^\/celebrate\//i.test(url) ||
+      /^data:image\//i.test(url);
+    if (!okUrl) return json({ error: "url must be https, /celebrate/ path, or data:image" }, 400);
+    if (url.startsWith("data:") && url.length > MAX_PHOTO_DATA_URL_LEN) {
+      return json({ error: "Photo data too large after encode; try a smaller image" }, 400);
+    }
+
+    const photo: WallPhoto = {
+      id: `guest-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`,
+      url,
+      displayName,
+      caption,
+      createdAt: Date.now() / 1000,
+      stock: false,
+    };
+    if (!Array.isArray(store.photos)) store.photos = [];
+    store.photos.unshift(photo);
+    if (store.photos.length > MAX_GUEST_PHOTOS) {
+      store.photos = store.photos.slice(0, MAX_GUEST_PHOTOS);
+    }
     return json({
       ok: true,
-      skipped: true,
-      message: "Use the shared Google Photos album on cellular (see Photos tile).",
+      photo: { id: photo.id, url: photo.url.slice(0, 80), displayName: photo.displayName },
+      count: listWallPhotos(store.photos).length,
     });
   }
 

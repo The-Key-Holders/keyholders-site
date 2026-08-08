@@ -22,13 +22,14 @@
     <main>
       <section class="hero">
         <h2>Pixels + well-wishes</h2>
-        <p class="lede">Drop a photo for the projector wall, and/or leave a short note. Also dump extras to the Google album if you want archival glory.</p>
+        <p class="lede">Stock favorites are already on the wall. Add yours for the projector, and leave a short note. Optional: dump extras to the Google album for archival glory.</p>
         <a class="btn btn-secondary" href="photos.html">Open Google album</a>
       </section>
       <section class="card">
         <h3>Upload a photo</h3>
         <div class="field"><label>Photo</label><input type="file" id="file" accept="image/*" capture="environment" /></div>
         <div class="field"><label>Caption (optional)</label><input id="cap" maxlength="200" placeholder="Peak taco energy" /></div>
+        <p class="muted" style="margin:0.35rem 0 0">Tip: keep phone photos under ~1MB so they land on the wall (not just the Google album).</p>
         <button class="btn btn-block" id="up">Upload to wall</button>
       </section>
       <section class="card">
@@ -56,13 +57,39 @@
           document.getElementById("feed").innerHTML = (data.photos || [])
             .map(
               (ph) =>
-                `<div class="tile" style="min-height:auto;padding:0.4rem"><img src="${ph.url}" alt="" style="width:100%;border-radius:12px;display:block"/><span>${PartyUI.escapeHtml(ph.displayName || "")}</span></div>`
+                `<div class="tile" style="min-height:auto;padding:0.4rem"><img src="${ph.url}" alt="" style="width:100%;border-radius:12px;display:block"/><span>${PartyUI.escapeHtml(ph.displayName || "")}</span>${ph.caption ? `<span class="muted" style="display:block;font-size:0.8em">${PartyUI.escapeHtml(ph.caption)}</span>` : ""}</div>`
             )
             .join("") || "<p class='muted'>No photos yet. Be first.</p>";
         }
+        /** Downscale large phone photos so serverless body limits don't reject them. */
+        async function maybeCompress(file) {
+          if (!file || !file.type.startsWith("image/")) return file;
+          if (file.size < 450_000) return file;
+          try {
+            const bmp = await createImageBitmap(file);
+            const maxEdge = 1280;
+            const scale = Math.min(1, maxEdge / Math.max(bmp.width, bmp.height));
+            const w = Math.max(1, Math.round(bmp.width * scale));
+            const h = Math.max(1, Math.round(bmp.height * scale));
+            const canvas = document.createElement("canvas");
+            canvas.width = w;
+            canvas.height = h;
+            const ctx = canvas.getContext("2d");
+            ctx.drawImage(bmp, 0, 0, w, h);
+            bmp.close();
+            const blob = await new Promise((resolve) => canvas.toBlob(resolve, "image/jpeg", 0.72));
+            if (!blob) return file;
+            return new File([blob], (file.name || "photo").replace(/\.\w+$/, "") + ".jpg", {
+              type: "image/jpeg",
+            });
+          } catch {
+            return file;
+          }
+        }
         document.getElementById("up").onclick = async () => {
-          const f = document.getElementById("file").files[0];
-          if (!f) return PartyUI.toast("Pick a photo first");
+          const raw = document.getElementById("file").files[0];
+          if (!raw) return PartyUI.toast("Pick a photo first");
+          const f = await maybeCompress(raw);
           const fd = new FormData();
           fd.append("photo", f);
           fd.append("profileId", p.id);
