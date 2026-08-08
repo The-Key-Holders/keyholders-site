@@ -26,6 +26,11 @@ import {
   DEFAULT_HE_SAID,
   DEFAULT_POSES,
 } from "@/lib/party-store";
+import {
+  SHIPPED_CONTENT_PACK_ID,
+  SHIPPED_CONTENT_PACK_VERSION,
+  resolveContentPack,
+} from "@/lib/party-content";
 
 export const dynamic = "force-dynamic";
 
@@ -80,6 +85,10 @@ async function handle(req: NextRequest, path: string[]): Promise<NextResponse> {
       service: "party-api-vercel-memory",
       note: "cellular-ready best-effort",
       scoringOpen: scoringOpen(),
+      contentPack: {
+        version: SHIPPED_CONTENT_PACK_VERSION,
+        id: SHIPPED_CONTENT_PACK_ID,
+      },
     });
   }
 
@@ -609,31 +618,45 @@ async function handle(req: NextRequest, path: string[]): Promise<NextResponse> {
       if (!host.content) host.content = {};
       if (method === "GET") {
         let data: unknown = null;
-        // Prefer shipped packs unless host has a full replacement (same or longer length)
+        // Versioned resolution: stale host memory cannot shadow shipped packs
         if (name === "trivia") {
-          const cur = host.content.trivia as { questions?: unknown[] } | undefined;
-          data =
-            cur?.questions && cur.questions.length >= DEFAULT_TRIVIA.questions.length
-              ? cur
-              : DEFAULT_TRIVIA;
+          data = resolveContentPack("trivia", host.content.trivia);
+          // Self-heal in-memory host so cold instances converge on shipped pack
+          host.content.trivia = data;
         } else if (name === "he-said" || name === "he-said-she-said") {
-          const cur = host.content.heSaid as { questions?: unknown[] } | undefined;
-          data =
-            cur?.questions && cur.questions.length >= DEFAULT_HE_SAID.questions.length
-              ? cur
-              : DEFAULT_HE_SAID;
-        } else if (name === "poses") data = host.content.poses || DEFAULT_POSES;
-        else if (name === "comingle")
+          data = resolveContentPack("he-said", host.content.heSaid);
+          host.content.heSaid = data;
+        } else if (name === "poses") {
+          data = resolveContentPack("poses", host.content.poses);
+          host.content.poses = data;
+        } else if (name === "comingle")
           data = { prompts: host.comingle || liveConfig().comingle, answers: host.comingleAnswers };
         else return json({ error: "Unknown content" }, 404);
-        return json({ ok: true, name, data, source: "memory" });
+        return json({
+          ok: true,
+          name,
+          data,
+          source: "memory",
+          contentPackVersion: SHIPPED_CONTENT_PACK_VERSION,
+          contentPackId: SHIPPED_CONTENT_PACK_ID,
+        });
       }
       if (method === "PUT" || method === "POST") {
         const body = await req.json().catch(() => ({}));
         const data = body.data !== undefined ? body.data : body;
-        if (name === "trivia") host.content.trivia = data;
-        else if (name === "he-said" || name === "he-said-she-said") host.content.heSaid = data;
-        else if (name === "poses") host.content.poses = data;
+        // Stamp host writes so intentional host edits keep working; unversioned CSV stays current if stamped
+        const stamp = (pack: unknown) => {
+          if (!pack || typeof pack !== "object") return pack;
+          const p = { ...(pack as Record<string, unknown>) };
+          if (typeof p.contentPackVersion !== "number") {
+            p.contentPackVersion = SHIPPED_CONTENT_PACK_VERSION;
+          }
+          if (!p.contentPackId) p.contentPackId = `host-write-${SHIPPED_CONTENT_PACK_ID}`;
+          return p;
+        };
+        if (name === "trivia") host.content.trivia = stamp(data);
+        else if (name === "he-said" || name === "he-said-she-said") host.content.heSaid = stamp(data);
+        else if (name === "poses") host.content.poses = stamp(data);
         else if (name === "comingle") {
           if (data.prompts) host.comingle = data.prompts;
           if (data.answers) host.comingleAnswers = data.answers;
@@ -703,26 +726,26 @@ async function handle(req: NextRequest, path: string[]): Promise<NextResponse> {
     }
   }
 
-  // Public content reads for guest pages that load JSON (optional)
+  // Public content reads for guest pages — always shipped packs (host memory cannot shadow).
+  // Host desk can still PUT custom packs for preview via /api/host/content/*; guests stay on shipped.
   if (segs[0] === "content" && segs[1] && method === "GET") {
     const name = segs[1];
+    if (!host.content) host.content = {};
     if (name === "trivia") {
-      const cur = host.content?.trivia as { questions?: unknown[] } | undefined;
-      return json(
-        cur?.questions && cur.questions.length >= DEFAULT_TRIVIA.questions.length
-          ? cur
-          : DEFAULT_TRIVIA
-      );
+      const data = resolveContentPack("trivia", null);
+      host.content.trivia = data;
+      return json(data);
     }
     if (name === "he-said") {
-      const cur = host.content?.heSaid as { questions?: unknown[] } | undefined;
-      return json(
-        cur?.questions && cur.questions.length >= DEFAULT_HE_SAID.questions.length
-          ? cur
-          : DEFAULT_HE_SAID
-      );
+      const data = resolveContentPack("he-said", null);
+      host.content.heSaid = data;
+      return json(data);
     }
-    if (name === "poses") return json(host.content?.poses || DEFAULT_POSES);
+    if (name === "poses") {
+      const data = resolveContentPack("poses", host.content.poses);
+      host.content.poses = data;
+      return json(data);
+    }
   }
 
   // Public hidden memories (QR-only discovery; no app nav links)

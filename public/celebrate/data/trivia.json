@@ -169,5 +169,7 @@
       "answer": 1,
       "explain": "4:30 PM Pacific. Winner locks then."
     }
-  ]
+  ],
+  "contentPackVersion": 3,
+  "contentPackId": "guest-hub-questions-v3-20260808"
 }

@@ -48,10 +48,16 @@
         if (!p) return;
         let data;
         try {
-          const remote = await fetch("/api/content/he-said").then((r) => (r.ok ? r.json() : null));
-          data = remote && remote.questions ? remote : await fetch("data/he-said-she-said.json").then((r) => r.json());
+          const packQs = "v=3&ts=" + Date.now();
+          const remote = await fetch("/api/content/he-said?" + packQs, { cache: "no-store" }).then((r) =>
+            r.ok ? r.json() : null
+          );
+          data =
+            remote && remote.questions
+              ? remote
+              : await fetch("data/he-said-she-said.json?" + packQs, { cache: "no-store" }).then((r) => r.json());
         } catch {
-          data = await fetch("data/he-said-she-said.json").then((r) => r.json());
+          data = await fetch("data/he-said-she-said.json?v=3", { cache: "no-store" }).then((r) => r.json());
         }
         let i = 0;
         let score = 0;
