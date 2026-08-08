@@ -483,9 +483,12 @@ function store(): Store {
     const anyOn = s.host.memories.some((m) => m.enabled && m.caption);
     if (!anyOn) s.host.memories = seedMemories();
   }
-  if (!s.host.content?.trivia) {
-    if (!s.host.content) s.host.content = {};
+  // Force trivia pack version so warm Vercel instances drop stale host.content.trivia
+  if (!s.host.content) s.host.content = {};
+  const triviaVer = (s.host.content as { triviaVersion?: number }).triviaVersion;
+  if (triviaVer !== 3) {
     s.host.content.trivia = DEFAULT_TRIVIA;
+    (s.host.content as { triviaVersion?: number }).triviaVersion = 3;
   }
   return s;
 }
