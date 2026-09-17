@@ -13,10 +13,10 @@ export type Venture = {
 };
 
 const accentMap = {
-  cyan: "from-cyanGlow/20 to-transparent border-cyanGlow/40 hover:shadow-[0_0_30px_rgba(34,211,238,0.25)]",
-  gold: "from-gold/20 to-transparent border-gold/40 hover:shadow-[0_0_30px_rgba(245,158,11,0.25)]",
-  violet: "from-violetGlow/20 to-transparent border-violetGlow/40 hover:shadow-[0_0_30px_rgba(167,139,250,0.25)]",
-  emerald: "from-emeraldGlow/20 to-transparent border-emeraldGlow/40 hover:shadow-[0_0_30px_rgba(52,211,153,0.25)]",
+  cyan: "border-cyanGlow/45 from-cyanGlow/30 via-vault-950/85 to-vault-950",
+  gold: "border-gold/45 from-gold/25 via-vault-950/85 to-vault-950",
+  violet: "border-violetGlow/45 from-violetGlow/25 via-vault-950/85 to-vault-950",
+  emerald: "border-emeraldGlow/45 from-emeraldGlow/25 via-vault-950/85 to-vault-950",
 };
 
 const ventures: Venture[] = [
@@ -110,35 +110,35 @@ export default function VentureOrbit({ unlocked }: VentureOrbitProps) {
   const reduceMotion = useReducedMotion();
 
   const cardClass = (venture: Venture) =>
-    `glass-card group bg-gradient-to-br ${accentMap[venture.accent]} p-4 transition-all duration-300 sm:p-5`;
+    `group block h-full rounded-2xl border bg-gradient-to-br ${accentMap[venture.accent]} p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.06)] transition-all duration-300 sm:p-5`;
 
   const motionFor = (index: number, orbital: boolean) => {
     const offset = orbitOffsets[index];
     if (reduceMotion) {
       return {
-        initial: { opacity: 1, y: 0, scale: 1 },
+        initial: { opacity: 1, y: 0, scale: 1, x: 0 },
         animate: { opacity: 1, y: 0, scale: 1, x: 0 },
         transition: { duration: 0 },
       };
     }
+    // Mobile grid: always a full card. The locked/faded look was clipping the first tile.
+    if (!orbital) {
+      return {
+        initial: { opacity: 0, y: 16 },
+        animate: { opacity: 1, y: 0 },
+        transition: { duration: 0.4, delay: index * 0.06 },
+      };
+    }
     if (unlocked) {
       return {
-        initial: orbital
-          ? { opacity: 0, scale: 0.88, x: 0, y: 24, rotate: 0 }
-          : { opacity: 0, y: 28, scale: 0.96 },
-        animate: orbital
-          ? { opacity: 1, scale: 1, x: offset.x, y: offset.y, rotate: offset.rotate }
-          : { opacity: 1, y: 0, scale: 1 },
+        initial: { opacity: 0, scale: 0.88, x: 0, y: 24, rotate: 0 },
+        animate: { opacity: 1, scale: 1, x: offset.x, y: offset.y, rotate: offset.rotate },
         transition: { duration: 0.65, delay: index * 0.1, ease: [0.22, 1, 0.36, 1] as const },
       };
     }
     return {
-      initial: orbital
-        ? { opacity: 0.2, scale: 0.92, x: 0, y: 12 }
-        : { opacity: 0.35, y: 18, scale: 0.98 },
-      animate: orbital
-        ? { opacity: 0.25, scale: 0.94, x: 0, y: 16 }
-        : { opacity: 0.35, y: 18, scale: 0.98 },
+      initial: { opacity: 0.2, scale: 0.92, x: 0, y: 12 },
+      animate: { opacity: 0.25, scale: 0.94, x: 0, y: 16 },
       transition: { duration: 0.4 },
     };
   };
@@ -151,7 +151,7 @@ export default function VentureOrbit({ unlocked }: VentureOrbitProps) {
         <div className="pointer-events-none absolute left-1/2 top-[-18rem] h-[22rem] w-[22rem] -translate-x-1/2 rounded-full border border-dashed border-cyanGlow/10" />
         {ventures.map((venture, index) => (
           <motion.div
-            key={venture.id}
+            key={`orbit-${venture.id}`}
             className="pointer-events-auto absolute left-1/2 top-[-18rem] w-52 -translate-x-1/2"
             {...motionFor(index, true)}
           >
@@ -163,7 +163,7 @@ export default function VentureOrbit({ unlocked }: VentureOrbitProps) {
       {/* Mobile / tablet grid fallback */}
       <div className="mt-12 grid gap-4 sm:grid-cols-2 lg:hidden">
         {ventures.map((venture, index) => (
-          <motion.div key={venture.id} {...motionFor(index, false)}>
+          <motion.div key={`grid-${venture.id}`} {...motionFor(index, false)}>
             <VentureCard venture={venture} className={cardClass(venture)} />
           </motion.div>
         ))}
