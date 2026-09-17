@@ -98,7 +98,7 @@ export default function SiteChatWidget() {
   }
 
   return (
-    <div className="fixed bottom-4 right-4 z-[60] flex flex-col items-end gap-3 sm:bottom-6 sm:right-6">
+    <div className="fixed bottom-[max(0.75rem,env(safe-area-inset-bottom))] right-3 z-40 flex flex-col items-end gap-3 sm:bottom-6 sm:right-6">
       {open && (
         <div className="flex h-[min(70vh,520px)] w-[min(100vw-2rem,380px)] flex-col overflow-hidden rounded-2xl border border-white/15 bg-vault-950/95 shadow-2xl shadow-black/50 backdrop-blur-md">
           <div className="flex items-center justify-between border-b border-white/10 px-4 py-3">
@@ -184,7 +184,7 @@ export default function SiteChatWidget() {
       <button
         type="button"
         onClick={() => setOpen((v) => !v)}
-        className="flex items-center gap-2 rounded-full border border-cyanGlow/40 bg-cyanGlow/15 px-4 py-3 text-sm font-semibold text-cyanGlow shadow-lg shadow-cyanGlow/10 transition hover:bg-cyanGlow/25"
+        className="flex items-center gap-2 rounded-full border border-cyanGlow/40 bg-vault-950/90 px-3 py-2 text-xs font-semibold text-cyanGlow shadow-lg shadow-cyanGlow/10 backdrop-blur-sm transition hover:bg-cyanGlow/25 sm:px-4 sm:py-3 sm:text-sm"
         aria-expanded={open}
         aria-label={open ? "Close site guide chat" : "Open site guide chat"}
       >

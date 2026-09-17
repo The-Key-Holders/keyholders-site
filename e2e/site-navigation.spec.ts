@@ -15,7 +15,7 @@ async function expectNoBrokenImages(page: Page) {
 }
 
 test.describe("Public pages load", () => {
-  for (const path of ["/", "/projects", "/trade", "/support", "/bark-park-buddy"] as const) {
+  for (const path of ["/", "/projects", "/trade", "/support"] as const) {
     test(`${path} returns 200 and has main landmark content`, async ({ page }) => {
       const res = await page.goto(path);
       expect(res?.ok() || res?.status() === 304).toBeTruthy();
@@ -129,6 +129,25 @@ test.describe("Desktop header navigation", () => {
     expect(popup.url()).toMatch(/thegeeksnextdoor\.com/i);
     await popup.close();
   });
+
+  test("Bark Park Buddy points at the live subdomain, not a 404 path", async ({ page }) => {
+    await page.goto("/");
+    const card = page.getByRole("heading", { name: "Bark Park Buddy" }).locator("xpath=ancestor::a[1]");
+    await expect(card).toHaveAttribute("href", "https://barkparkbuddy.thekeyholders.org");
+  });
+
+  test("/bark-park-buddy redirects to the Bark Park Buddy host", async ({ request }) => {
+    const res = await request.get("/bark-park-buddy", { maxRedirects: 0 });
+    expect([301, 302, 307, 308]).toContain(res.status());
+    expect(res.headers()["location"] || "").toContain("barkparkbuddy.thekeyholders.org");
+  });
+
+  test("Connect section has a tracked contact form", async ({ page }) => {
+    await page.goto("/#connect");
+    await expect(page.locator("#connect")).toBeVisible();
+    await expect(page.getByRole("button", { name: /Send message/i })).toBeVisible();
+    await expect(page.getByLabel(/^Email$/i)).toBeVisible();
+  });
 });
 
 test.describe("Mobile header menu", () => {
@@ -138,6 +157,7 @@ test.describe("Mobile header menu", () => {
     await page.goto("/");
     await page.getByRole("button", { name: /Open menu/i }).click();
     await expect(page.getByRole("button", { name: /Close menu/i })).toBeVisible();
+    await expect(page.getByRole("navigation").getByRole("link", { name: "Home", exact: true })).toBeVisible();
 
     // Mobile drawer links (not desktop nav)
     await page.locator("header").getByRole("link", { name: "Projects", exact: true }).click();

@@ -39,7 +39,7 @@ const ventures: Venture[] = [
     id: "labs",
     title: "Labs",
     tagline: "Legacy Vault, experiments, prototypes.",
-    href: "#labs",
+    href: "/projects",
     accent: "violet",
   },
   {

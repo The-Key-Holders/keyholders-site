@@ -57,6 +57,14 @@ const TOOLS: ToolCard[] = [
     tags: ["Fiscal", "TD-288", "SLA"],
   },
   {
+    href: "/advisor-tools/inquiries",
+    status: "live",
+    title: "Public contact inbox",
+    blurb:
+      "Tracked Connect form submissions and click events from thekeyholders.org — see who reached out even when mailto never fires.",
+    tags: ["Contact", "Tracking"],
+  },
+  {
     href: "/advisor-tools/for-engine",
     status: "live",
     title: "FOR Assembly Engine",

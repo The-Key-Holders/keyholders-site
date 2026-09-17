@@ -9,7 +9,6 @@ import {
   useMotionValueEvent,
   useReducedMotion,
   useScroll,
-  useSpring,
   useTransform,
 } from "framer-motion";
 import Link from "next/link";
@@ -25,19 +24,13 @@ export default function VaultHero() {
     offset: ["start start", "end start"],
   });
 
-  const smoothProgress = useSpring(scrollYProgress, {
-    stiffness: 85,
-    damping: 24,
-    restDelta: 0.001,
-  });
+  const headlineOpacity = useTransform(scrollYProgress, [0, 0.28], [1, 0.88]);
+  const headlineY = useTransform(scrollYProgress, [0, 0.38], [0, -28]);
+  const statusOpacity = useTransform(scrollYProgress, [0, 0.3, UNLOCK_THRESHOLD, 0.6], [0, 0.4, 1, 1]);
+  const vignetteIntensity = useTransform(scrollYProgress, [0, UNLOCK_THRESHOLD, 1], [0.55, 0.75, 0.9]);
+  const cinematicShift = useTransform(scrollYProgress, [0, UNLOCK_THRESHOLD, 1], [0, -12, -20]);
 
-  const headlineOpacity = useTransform(smoothProgress, [0, 0.28], [1, 0.88]);
-  const headlineY = useTransform(smoothProgress, [0, 0.38], [0, -28]);
-  const statusOpacity = useTransform(smoothProgress, [0, 0.3, UNLOCK_THRESHOLD, 0.6], [0, 0.4, 1, 1]);
-  const vignetteIntensity = useTransform(smoothProgress, [0, UNLOCK_THRESHOLD, 1], [0.55, 0.75, 0.9]);
-  const cinematicShift = useTransform(smoothProgress, [0, UNLOCK_THRESHOLD, 1], [0, -12, -20]);
-
-  useMotionValueEvent(smoothProgress, "change", (v) => {
+  useMotionValueEvent(scrollYProgress, "change", (v) => {
     if (reduceMotion) return;
     setUnlocked(v >= UNLOCK_THRESHOLD);
   });
@@ -85,10 +78,10 @@ export default function VaultHero() {
             initial={reduceMotion ? false : { opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.25, duration: 0.7 }}
-            className="mt-5 text-4xl font-bold tracking-tight text-white sm:text-5xl lg:text-7xl"
+            className="mt-5 max-w-full text-[1.85rem] font-bold leading-tight tracking-tight text-white sm:text-5xl lg:text-7xl"
           >
             Unlock your{" "}
-            <span className="bg-gradient-to-r from-cyanGlow via-gold to-goldLight bg-clip-text text-transparent">
+            <span className="block bg-gradient-to-r from-cyanGlow via-gold to-goldLight bg-clip-text text-transparent sm:inline">
               digital universe
             </span>
           </motion.h1>
@@ -107,18 +100,18 @@ export default function VaultHero() {
             initial={reduceMotion ? false : { opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.48, duration: 0.6 }}
-            className="mt-8 flex flex-wrap items-center justify-center gap-3"
+            className="mt-8 flex w-full max-w-sm flex-col gap-2.5 sm:max-w-none sm:flex-row sm:flex-wrap sm:items-center sm:justify-center sm:gap-3"
           >
-            <Link href="/pcf-vault/" className="btn-primary text-sm">
+            <Link href="/pcf-vault/" className="btn-primary w-full text-sm sm:w-auto">
               Open PCF Vault
             </Link>
-            <Link href="#pcf-vault" className="btn-secondary text-sm">
+            <Link href="#pcf-vault" className="btn-secondary w-full text-sm sm:w-auto">
               What&apos;s new
             </Link>
-            <Link href="/advisor-tools" className="btn-secondary text-sm">
+            <Link href="/advisor-tools" className="btn-secondary w-full text-sm sm:w-auto">
               Advisor tools
             </Link>
-            <Link href="/projects" className="btn-secondary text-sm">
+            <Link href="/projects" className="btn-secondary w-full text-sm sm:w-auto">
               All projects
             </Link>
           </motion.div>
@@ -134,7 +127,7 @@ export default function VaultHero() {
             transition={{ delay: 0.5, duration: 0.9 }}
             className="flex justify-center"
           >
-            <KeyVisual progress={smoothProgress} />
+            <KeyVisual progress={scrollYProgress} />
           </motion.div>
 
           <motion.div

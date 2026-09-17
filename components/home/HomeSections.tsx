@@ -152,30 +152,7 @@ export function AboutSection() {
   );
 }
 
-export function ContactSection() {
-  return (
-    <section id="connect" className="section-padding border-t border-white/5">
-      <div className="container-narrow px-4 sm:px-6 lg:px-8">
-        <div className="mx-auto max-w-xl text-center">
-          <h2 className="text-3xl font-bold text-white">Connect</h2>
-          <p className="mt-4 text-white/60">
-            Consumer services, contractor integrations, professional tools, or collabs — we respond within one
-            business day.
-          </p>
-          <div className="glass-card mt-8 p-6 text-left">
-            <p className="text-sm text-white/45">Email</p>
-            <a
-              href="mailto:javadkhoshnevisan@gmail.com"
-              className="mt-1 block text-lg font-semibold text-cyanGlow hover:underline"
-            >
-              javadkhoshnevisan@gmail.com
-            </a>
-          </div>
-        </div>
-      </div>
-    </section>
-  );
-}
+export { default as ContactSection } from "@/components/home/ContactPanel";
 
 /** @deprecated Labs folded into Projects catalog — kept for any old imports */
 export function LabsSection() {

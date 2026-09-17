@@ -4,11 +4,12 @@
 
 @layer base {
   html {
-    scroll-behavior: smooth;
+    scroll-behavior: auto;
+    overflow-x: hidden;
   }
 
   body {
-    @apply bg-vault-950 font-sans text-white antialiased;
+    @apply overflow-x-hidden bg-vault-950 font-sans text-white antialiased;
   }
 
   h1,

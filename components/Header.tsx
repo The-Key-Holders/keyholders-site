@@ -17,7 +17,7 @@ const navLinks = [
 
 function linkActive(pathname: string, href: string, isHome: boolean): boolean {
   if (href === "/") return isHome;
-  if (href.startsWith("/#")) return isHome;
+  if (href.startsWith("/#")) return false;
   if (href === "/advisor-tools") {
     return pathname.startsWith("/advisor-tools") || pathname.startsWith("/psap-allotment");
   }
@@ -34,6 +34,15 @@ export default function Header() {
     setOpen(false);
   }, [pathname]);
 
+  useEffect(() => {
+    if (!open) return;
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = prev;
+    };
+  }, [open]);
+
   return (
     <header
       className={cn(
@@ -41,8 +50,12 @@ export default function Header() {
         isTrade ? "border-gold/20 bg-vault-950/90" : "border-white/10 bg-vault-950/75"
       )}
     >
-      <div className="container-narrow flex h-[4.25rem] items-center justify-between gap-4 px-4 sm:h-[4.5rem] sm:px-6 lg:px-8">
-        <BrandLogo variant={isTrade ? "trade" : "parent"} size="header" />
+      <div className="container-narrow flex h-[4.25rem] min-w-0 items-center justify-between gap-3 px-4 sm:h-[4.5rem] sm:px-6 lg:px-8">
+        <BrandLogo
+          variant={isTrade ? "trade" : "parent"}
+          size="header"
+          className="min-w-0 max-w-[70%]"
+        />
 
         <nav className="hidden items-center gap-1 md:flex">
           {navLinks.map((link) => {
@@ -77,7 +90,7 @@ export default function Header() {
           </Link>
           <button
             type="button"
-            className="inline-flex items-center justify-center rounded-lg border border-white/15 p-2 text-white md:hidden"
+            className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-lg border border-white/15 text-white md:hidden"
             aria-label={open ? "Close menu" : "Open menu"}
             aria-expanded={open}
             onClick={() => setOpen((v) => !v)}
@@ -94,12 +107,13 @@ export default function Header() {
       </div>
 
       {open && (
-        <div className="border-t border-white/10 bg-vault-950/95 px-4 py-4 md:hidden">
+        <div className="fixed inset-x-0 bottom-0 top-[4.25rem] z-50 overflow-y-auto border-t border-white/10 bg-vault-950 px-4 py-4 md:hidden">
           <nav className="flex flex-col gap-1">
             {navLinks.map((link) => (
               <Link
                 key={link.href}
                 href={link.href}
+                onClick={() => setOpen(false)}
                 className={cn(
                   "rounded-lg px-3 py-3 text-sm font-medium",
                   linkActive(pathname, link.href, isHome)
@@ -114,7 +128,7 @@ export default function Header() {
               href="https://www.thegeeksnextdoor.com"
               target="_blank"
               rel="noopener noreferrer"
-              className="btn-primary mt-2 justify-center text-sm"
+              className="btn-primary mt-2 w-full justify-center text-sm"
             >
               Get Tech Help
             </a>

@@ -25,13 +25,14 @@ export const projects: Project[] = [
     id: "bark-park-buddy",
     name: "Bark Park Buddy",
     summary:
-      "TEMPORARY HOST — Full Sacramento dog-park care marketplace on barkparkbuddy.thekeyholders.org until a dedicated domain is ready.",
+      "Sacramento dog-park care marketplace — hosted at barkparkbuddy.thekeyholders.org until a dedicated domain is ready.",
     kind: "venture",
     status: "live",
-    href: "/bark-park-buddy",
+    href: "https://barkparkbuddy.thekeyholders.org",
     gated: false,
     tags: ["Marketplace", "Sacramento", "Temporary host"],
     featured: true,
+    external: true,
   },
   {
     id: "guest-hub",

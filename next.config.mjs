@@ -1,6 +1,20 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
+  async redirects() {
+    return [
+      {
+        source: "/bark-park-buddy",
+        destination: "https://barkparkbuddy.thekeyholders.org",
+        permanent: false,
+      },
+      {
+        source: "/bark-park-buddy/",
+        destination: "https://barkparkbuddy.thekeyholders.org",
+        permanent: false,
+      },
+    ];
+  },
   async rewrites() {
     return [
       // SPA fallback for PCF Vault static build under /public/pcf-vault

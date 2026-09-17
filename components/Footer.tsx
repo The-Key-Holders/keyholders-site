@@ -78,16 +78,6 @@ export default function Footer({ variant = "parent" }: FooterProps) {
                   )}
                 </li>
               ))}
-              <li>
-                <a
-                  href="https://www.thegeeksnextdoor.com"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="hover:text-cyanGlow"
-                >
-                  Geeks Next Door
-                </a>
-              </li>
             </ul>
           </div>
           <div>
