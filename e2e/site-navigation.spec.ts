@@ -15,7 +15,7 @@ async function expectNoBrokenImages(page: Page) {
 }
 
 test.describe("Public pages load", () => {
-  for (const path of ["/", "/projects", "/trade", "/support"] as const) {
+  for (const path of ["/", "/projects", "/trade", "/support", "/bark-park-buddy"] as const) {
     test(`${path} returns 200 and has main landmark content`, async ({ page }) => {
       const res = await page.goto(path);
       expect(res?.ok() || res?.status() === 304).toBeTruthy();
@@ -50,7 +50,7 @@ test.describe("Desktop header navigation", () => {
     await page.getByRole("navigation").getByRole("link", { name: "Support", exact: true }).click();
     await expect(page).toHaveURL(/\/support/);
     await expect(page.getByRole("heading", { name: /Key Holders Site Guide/i })).toBeVisible();
-    await expect(page.getByText(/powered by Taskade/i).first()).toBeVisible();
+    await expect(page.getByText(/Public site guide/i).first()).toBeVisible();
 
     // Tools is gated — should land on login
     await page.getByRole("navigation").getByRole("link", { name: "Tools", exact: true }).click();
@@ -66,9 +66,40 @@ test.describe("Desktop header navigation", () => {
     await page.goto("/support");
     await expect(page.getByLabel(/Message/i)).toBeVisible();
     await expect(page.getByRole("button", { name: /Send/i })).toBeVisible();
+    await expect(page.getByRole("heading", { name: /Key Holders Site Guide/i })).toBeVisible();
   });
 
-  test("Taskade site guide widget appears on public pages but not on gated tools login", async ({
+  test("support chat API does not expose provider or model", async ({ request }) => {
+    const res = await request.get("/api/support/chat");
+    expect(res.ok()).toBeTruthy();
+    const json = (await res.json()) as Record<string, unknown>;
+    expect(json.configured).toBe(true);
+    expect(json.scope).toBe("public-site");
+    expect(json).not.toHaveProperty("provider");
+    expect(json).not.toHaveProperty("model");
+    expect(JSON.stringify(json).toLowerCase()).not.toMatch(/grok|xai|taskade/);
+  });
+
+  test("floating site guide widget opens and returns a reply", async ({ page }) => {
+    await page.goto("/");
+    await page.getByRole("button", { name: /Open site guide chat/i }).click();
+    await expect(page.getByText(/Public pages/i).first()).toBeVisible();
+    await page.getByLabel("Message").fill("In one short sentence, what is The Key Holders?");
+    const chatResponse = page.waitForResponse(
+      (r) => r.url().includes("/api/support/chat") && r.request().method() === "POST"
+    );
+    await page.getByRole("button", { name: /^Send$/i }).click();
+    const res = await chatResponse;
+    expect(res.ok(), `support chat status ${res.status()}`).toBeTruthy();
+    const json = (await res.json()) as Record<string, unknown>;
+    expect(typeof json.reply).toBe("string");
+    expect(String(json.reply).length).toBeGreaterThan(20);
+    expect(JSON.stringify(json).toLowerCase()).not.toMatch(/grok|xai|taskade/);
+    await expect(page.getByText("In one short sentence, what is The Key Holders?")).toBeVisible();
+    await expect(page.getByText(/Thinking/i)).toHaveCount(0);
+  });
+
+  test("site guide widget appears on public pages but not on gated tools login", async ({
     page,
   }) => {
     await page.goto("/");

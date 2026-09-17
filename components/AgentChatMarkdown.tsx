@@ -1,5 +1,6 @@
 "use client";
 
+import { cn } from "@/lib/utils";
 import Link from "next/link";
 import { Fragment, type ReactNode } from "react";
 
@@ -192,11 +193,22 @@ function parseBlocks(src: string): Block[] {
   return blocks;
 }
 
-export default function AgentChatMarkdown({ content }: { content: string }) {
+export default function AgentChatMarkdown({
+  content,
+  className,
+}: {
+  content: string;
+  className?: string;
+}) {
   const blocks = parseBlocks(content || "");
 
   return (
-    <div className="agent-md space-y-2.5 text-sm leading-relaxed text-white/85">
+    <div
+      className={cn(
+        "agent-md space-y-2.5 text-sm leading-relaxed text-white/85",
+        className
+      )}
+    >
       {blocks.map((b, idx) => {
         const k = `b-${idx}`;
         if (b.type === "p") {

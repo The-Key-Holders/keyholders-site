@@ -56,7 +56,7 @@ export default function RootLayout({
         <SmoothScroll>
           <Header />
           <main>{children}</main>
-          {/* Taskade public site guide — hidden on password-gated Advisor Tools paths */}
+          {/* Public site guide — hidden on password-gated Advisor Tools paths */}
           <SiteChatWidget />
         </SmoothScroll>
       </body>

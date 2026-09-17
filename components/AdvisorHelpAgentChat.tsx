@@ -111,7 +111,7 @@ export default function AdvisorHelpAgentChat() {
         <Link href="/support" className="text-cyanGlow hover:underline">
           /support
         </Link>{" "}
-        (Taskade site guide).
+        (public site guide).
       </p>
 
       {configured === false && (

@@ -107,10 +107,10 @@ test.describe("PSAP portal", () => {
     expect(json.agentId).toBe("psap-funding-support-agent");
   });
 
-  test("Taskade site guide not shown on portal", async ({ page }) => {
+  test("public site guide not shown on portal", async ({ page }) => {
     await login(page, "/psap-portal");
     await enterAsPsap(page);
-    await expect(page.getByText(/Site Guide here \(Taskade\)/i)).toHaveCount(0);
+    await expect(page.getByText(/Site Guide here/i)).toHaveCount(0);
     await expect(page.getByRole("button", { name: /PSAP Support AI/i })).toBeVisible();
   });
 

@@ -113,7 +113,7 @@ export default function Footer({ variant = "parent" }: FooterProps) {
               </li>
               <li>
                 <Link href="/support" className="hover:text-cyanGlow">
-                  Support (Taskade)
+                  Support
                 </Link>
               </li>
               <li>

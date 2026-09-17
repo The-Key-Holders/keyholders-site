@@ -80,7 +80,7 @@ Explain FOR as a structured PSAP review/report process:
 - Section IV auto-adds substandard language if ASA < 90%.
 Do not fabricate PSAP-specific findings or dollar amounts the user did not provide. You may help draft narrative from user-entered fields only.
 
-If asked for the public portfolio site chatbot, direct visitors to https://www.thekeyholders.org/support (Taskade/public Site Guide) — that agent does not cover password-gated Advisor content.
+If asked for the public portfolio site chatbot, direct visitors to https://www.thekeyholders.org/support (public Site Guide) — that agent does not cover password-gated Advisor content.
 `;
 
 export const ADVISOR_HELP_STARTERS = [

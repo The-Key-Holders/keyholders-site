@@ -1,17 +1,22 @@
 "use client";
 
-import { PUBLIC_SITE_STARTERS } from "@/lib/public-site-agent";
+import AgentChatMarkdown from "@/components/AgentChatMarkdown";
+import {
+  PUBLIC_SITE_GREETING,
+  PUBLIC_SITE_STARTERS,
+} from "@/lib/public-site-agent";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { FormEvent, useEffect, useRef, useState } from "react";
 
 type ChatMessage = { role: "user" | "assistant"; content: string };
 
 export default function PublicSupportChat() {
+  const pathname = usePathname() || "/support";
   const [messages, setMessages] = useState<ChatMessage[]>([
     {
       role: "assistant",
-      content:
-        "Hi — I'm the **Key Holders Site Guide** (Taskade). I help with the public portfolio, Geeks Next Door, Trade, and how to reach Javad. Password-protected Advisor Tools are separate — authorized users unlock **/advisor-tools** after login.",
+      content: PUBLIC_SITE_GREETING,
     },
   ]);
   const [input, setInput] = useState("");
@@ -27,7 +32,9 @@ export default function PublicSupportChat() {
   useEffect(() => {
     fetch("/api/support/chat")
       .then((r) => r.json())
-      .then((d: { configured?: boolean }) => setConfigured(Boolean(d.configured)))
+      .then((d: { configured?: boolean }) => {
+        setConfigured(Boolean(d.configured));
+      })
       .catch(() => setConfigured(false));
   }, []);
 
@@ -47,6 +54,7 @@ export default function PublicSupportChat() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           message,
+          path: pathname,
           history: next.filter((m, i) => !(i === 0 && m.role === "assistant")),
         }),
       });
@@ -59,7 +67,7 @@ export default function PublicSupportChat() {
             role: "assistant",
             content:
               data.error ||
-              "I couldn't reach the site guide just now. Please try again shortly, or email javadkhoshnevisan@gmail.com.",
+              "I couldn't reach the site guide just now. Please try again shortly, or use Connect on the homepage.",
           },
         ]);
         return;
@@ -74,7 +82,7 @@ export default function PublicSupportChat() {
         ...prev,
         {
           role: "assistant",
-          content: "Network error. Please try again or use the contact email.",
+          content: "Network error. Please try again, or use Connect on the homepage.",
         },
       ]);
     } finally {
@@ -97,23 +105,22 @@ export default function PublicSupportChat() {
         <span>Support</span>
       </p>
       <p className="mt-4 text-sm font-medium uppercase tracking-widest text-cyanGlow/80">
-        Public · powered by Taskade
+        Public site guide
       </p>
       <h1 className="mt-2 font-display text-3xl font-bold text-white sm:text-4xl">
         Key Holders Site Guide
       </h1>
       <p className="mt-3 max-w-2xl text-sm leading-relaxed text-white/65">
-        Ask about the portfolio, Geeks Next Door, Trade, or how to get in touch. This chat is public — no
-        password. Internal Advisor coaching stays behind the Tools login (Grok help agent).
+        Ask about the public portfolio, Geeks Next Door, Trade, or finding your way around the site.
+        Restricted tools are not covered here.
       </p>
 
       {configured === false && (
         <div className="mt-4 rounded-xl border border-amber-400/35 bg-amber-500/10 px-4 py-3 text-sm text-amber-50/90">
-          Taskade is almost ready — an admin still needs to set{" "}
-          <code className="text-amber-50">TASKADE_API_KEY</code> on the server. Until then, email{" "}
-          <a className="underline" href="mailto:javadkhoshnevisan@gmail.com">
-            javadkhoshnevisan@gmail.com
-          </a>
+          The site guide is unavailable right now. Please try again shortly, or use{" "}
+          <Link href="/#connect" className="underline">
+            Connect
+          </Link>
           .
         </div>
       )}
@@ -140,17 +147,21 @@ export default function PublicSupportChat() {
               className={`flex ${m.role === "user" ? "justify-end" : "justify-start"}`}
             >
               <div
-                className={`max-w-[90%] whitespace-pre-wrap rounded-2xl px-4 py-3 text-sm leading-relaxed ${
+                className={`max-w-[90%] rounded-2xl px-4 py-3 text-sm leading-relaxed ${
                   m.role === "user"
-                    ? "bg-cyanGlow/20 text-white"
+                    ? "whitespace-pre-wrap bg-cyanGlow/20 text-white"
                     : "border border-white/10 bg-white/5 text-white/85"
                 }`}
               >
-                {m.content}
+                {m.role === "assistant" ? (
+                  <AgentChatMarkdown content={m.content} />
+                ) : (
+                  m.content
+                )}
               </div>
             </div>
           ))}
-          {loading && <div className="text-sm text-white/45">Taskade is thinking…</div>}
+          {loading && <div className="text-sm text-white/45">Thinking…</div>}
           <div ref={bottomRef} />
         </div>
 
@@ -188,7 +199,7 @@ export default function PublicSupportChat() {
             </button>
           </div>
           <p className="mt-2 text-[11px] text-white/40">
-            Public Taskade chat · rate-limited · not for confidential Advisor data
+            Public chat · rate-limited · not for private or restricted topics
           </p>
         </form>
       </div>

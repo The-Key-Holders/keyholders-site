@@ -22,6 +22,18 @@ export interface Project {
 
 export const projects: Project[] = [
   {
+    id: "bark-park-buddy",
+    name: "Bark Park Buddy",
+    summary:
+      "TEMPORARY HOST — Full Sacramento dog-park care marketplace on barkparkbuddy.thekeyholders.org until a dedicated domain is ready.",
+    kind: "venture",
+    status: "live",
+    href: "/bark-park-buddy",
+    gated: false,
+    tags: ["Marketplace", "Sacramento", "Temporary host"],
+    featured: true,
+  },
+  {
     id: "guest-hub",
     name: "Dani & Javad Guest Hub",
     summary:
@@ -114,14 +126,14 @@ export const projects: Project[] = [
   },
   {
     id: "public-support",
-    name: "Key Holders Site Guide (Taskade)",
+    name: "Key Holders Site Guide",
     summary:
-      "Public Taskade concierge for portfolio, Trade, and Geeks Next Door — floating chat on public pages.",
+      "Public concierge for portfolio, Trade, and Geeks Next Door — floating chat on public pages.",
     kind: "tool",
     status: "live",
     href: "/support",
     gated: false,
-    tags: ["Taskade", "Chat", "Public"],
+    tags: ["Chat", "Public"],
     featured: true,
   },
   {

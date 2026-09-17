@@ -1,12 +1,16 @@
 "use client";
 
-import { PUBLIC_SITE_STARTERS } from "@/lib/public-site-agent";
+import AgentChatMarkdown from "@/components/AgentChatMarkdown";
+import {
+  PUBLIC_SITE_STARTERS,
+  PUBLIC_SITE_WIDGET_GREETING,
+} from "@/lib/public-site-agent";
 import { usePathname } from "next/navigation";
 import { FormEvent, useEffect, useRef, useState } from "react";
 
 type ChatMessage = { role: "user" | "assistant"; content: string };
 
-/** Hide floating Taskade widget on gated Advisor Tools surfaces. */
+/** Hide floating site guide on gated Advisor Tools surfaces. */
 function isGatedPath(pathname: string): boolean {
   return (
     pathname.startsWith("/advisor-tools") ||
@@ -22,22 +26,31 @@ export default function SiteChatWidget() {
   const [messages, setMessages] = useState<ChatMessage[]>([
     {
       role: "assistant",
-      content:
-        "Site Guide here (Taskade). Ask about The Key Holders portfolio, Trade, Geeks Next Door, or contact options.",
+      content: PUBLIC_SITE_WIDGET_GREETING,
     },
   ]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
   const bottomRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     if (open) bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, loading, open]);
 
-  // Close widget when entering gated routes
   useEffect(() => {
     if (gated) setOpen(false);
   }, [gated]);
+
+  useEffect(() => {
+    if (!open) return;
+    inputRef.current?.focus();
+    function onKey(e: KeyboardEvent) {
+      if (e.key === "Escape") setOpen(false);
+    }
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [open]);
 
   if (gated) return null;
 
@@ -54,6 +67,7 @@ export default function SiteChatWidget() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           message,
+          path: pathname,
           history: next.filter((m, i) => !(i === 0 && m.role === "assistant")),
         }),
       });
@@ -62,10 +76,10 @@ export default function SiteChatWidget() {
         ...prev,
         {
           role: "assistant",
-          content:
-            res.ok
-              ? data.reply || "(empty reply)"
-              : data.error || "Couldn't reach the site guide. Try /support or email javadkhoshnevisan@gmail.com.",
+          content: res.ok
+            ? data.reply || "(empty reply)"
+            : data.error ||
+              "Couldn't reach the site guide. Try /support or Connect on the homepage.",
         },
       ]);
     } catch {
@@ -90,7 +104,7 @@ export default function SiteChatWidget() {
           <div className="flex items-center justify-between border-b border-white/10 px-4 py-3">
             <div>
               <p className="text-sm font-semibold text-white">Site Guide</p>
-              <p className="text-[11px] text-white/45">Taskade · public pages</p>
+              <p className="text-[11px] text-white/45">Public pages</p>
             </div>
             <button
               type="button"
@@ -121,13 +135,20 @@ export default function SiteChatWidget() {
                 className={`flex ${m.role === "user" ? "justify-end" : "justify-start"}`}
               >
                 <div
-                  className={`max-w-[90%] whitespace-pre-wrap rounded-xl px-3 py-2 text-xs leading-relaxed ${
+                  className={`max-w-[90%] rounded-xl px-3 py-2 text-xs leading-relaxed ${
                     m.role === "user"
-                      ? "bg-cyanGlow/20 text-white"
+                      ? "whitespace-pre-wrap bg-cyanGlow/20 text-white"
                       : "border border-white/10 bg-white/5 text-white/85"
                   }`}
                 >
-                  {m.content}
+                  {m.role === "assistant" ? (
+                    <AgentChatMarkdown
+                      content={m.content}
+                      className="space-y-1.5 text-xs"
+                    />
+                  ) : (
+                    m.content
+                  )}
                 </div>
               </div>
             ))}
@@ -140,6 +161,7 @@ export default function SiteChatWidget() {
                 Message
               </label>
               <input
+                ref={inputRef}
                 id="site-widget-input"
                 value={input}
                 onChange={(e) => setInput(e.target.value)}

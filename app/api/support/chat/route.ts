@@ -1,14 +1,21 @@
-import { PUBLIC_SITE_SYSTEM_CONTEXT } from "@/lib/public-site-agent";
+import {
+  composePublicSiteSystemPrompt,
+  looksLikeInjection,
+  PUBLIC_SITE_REMINDER,
+  PUBLIC_SITE_REFUSAL,
+  sanitizePublicChatHistory,
+  sanitizePublicPath,
+  sanitizePublicReply,
+  wrapUntrustedVisitorMessage,
+} from "@/lib/public-site-agent";
 import { NextResponse } from "next/server";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
-const TASKADE_PROMPT_URL = "https://www.taskade.com/api/v2/promptAgent";
 const MAX_MESSAGE = 2_000;
 const MAX_HISTORY = 12;
-
-type ChatMessage = { role: "user" | "assistant"; content: string };
+const DEFAULT_MODEL = process.env.XAI_MODEL?.trim() || "grok-4.6";
 
 /** Simple in-memory rate limit per IP (best-effort on serverless). */
 const hits = new Map<string, { count: number; reset: number }>();
@@ -33,58 +40,24 @@ function rateLimit(ip: string): boolean {
   return true;
 }
 
-function getTaskadeConfig() {
-  const apiKey =
-    process.env.TASKADE_API_KEY?.trim() || process.env.TASKADE_ACCESS_TOKEN?.trim();
-  const spaceId = process.env.TASKADE_SPACE_ID?.trim() || "912rDhsLvyDzJQ5r";
-  const agentId =
-    process.env.TASKADE_PUBLIC_AGENT_ID?.trim() ||
-    process.env.TASKADE_AGENT_ID?.trim() ||
-    "01KXFEPH8H7ZSKHPF2H02XKDAB";
-  return { apiKey, spaceId, agentId };
-}
-
-function buildPrompt(message: string, history: ChatMessage[]): string {
-  const recent = history.slice(-MAX_HISTORY);
-  const lines = recent.map((m) => {
-    const who = m.role === "user" ? "User" : "Assistant";
-    return `${who}: ${m.content.trim()}`;
-  });
-  return [
-    PUBLIC_SITE_SYSTEM_CONTEXT,
-    "",
-    "Continue this public site guide conversation.",
-    recent.length ? "Conversation so far:" : "",
-    ...lines,
-    "",
-    `User: ${message.trim()}`,
-    "Assistant:",
-  ]
-    .filter(Boolean)
-    .join("\n");
+function unavailable(status = 503) {
+  return NextResponse.json(
+    { error: "The site guide is unavailable right now. Please try again shortly." },
+    { status }
+  );
 }
 
 export async function GET() {
-  const { apiKey, agentId } = getTaskadeConfig();
+  const apiKey = process.env.XAI_API_KEY?.trim();
   return NextResponse.json({
     configured: Boolean(apiKey),
-    provider: "Taskade",
-    agentId: apiKey ? agentId : null,
     scope: "public-site",
   });
 }
 
 export async function POST(request: Request) {
-  const { apiKey, spaceId, agentId } = getTaskadeConfig();
-  if (!apiKey) {
-    return NextResponse.json(
-      {
-        error:
-          "Public site agent is not configured (set TASKADE_API_KEY on the server).",
-      },
-      { status: 503 }
-    );
-  }
+  const apiKey = process.env.XAI_API_KEY?.trim();
+  if (!apiKey) return unavailable(503);
 
   if (!rateLimit(clientIp(request))) {
     return NextResponse.json(
@@ -93,7 +66,7 @@ export async function POST(request: Request) {
     );
   }
 
-  let body: { message?: string; history?: ChatMessage[] } = {};
+  let body: { message?: string; history?: unknown; path?: unknown } = {};
   try {
     body = await request.json();
   } catch {
@@ -111,70 +84,61 @@ export async function POST(request: Request) {
     );
   }
 
-  const history = Array.isArray(body.history)
-    ? body.history
-        .filter(
-          (m): m is ChatMessage =>
-            !!m &&
-            (m.role === "user" || m.role === "assistant") &&
-            typeof m.content === "string" &&
-            m.content.trim().length > 0
-        )
-        .slice(-MAX_HISTORY)
-        .map((m) => ({
-          role: m.role,
-          content: m.content.slice(0, MAX_MESSAGE),
-        }))
-    : [];
+  let history = sanitizePublicChatHistory(
+    body.history,
+    MAX_HISTORY,
+    MAX_MESSAGE
+  );
+  const last = history[history.length - 1];
+  if (last?.role === "user" && last.content === message) {
+    history = history.slice(0, -1);
+  }
+  const system = composePublicSiteSystemPrompt(sanitizePublicPath(body.path));
 
-  const prompt = buildPrompt(message, history);
+  const messages = [
+    { role: "system" as const, content: system },
+    ...history.map((m) =>
+      m.role === "user"
+        ? { role: "user" as const, content: wrapUntrustedVisitorMessage(m.content) }
+        : { role: "assistant" as const, content: m.content }
+    ),
+    { role: "system" as const, content: PUBLIC_SITE_REMINDER },
+    {
+      role: "user" as const,
+      content: wrapUntrustedVisitorMessage(message),
+    },
+  ];
 
   try {
-    const res = await fetch(TASKADE_PROMPT_URL, {
+    const res = await fetch("https://api.x.ai/v1/chat/completions", {
       method: "POST",
       headers: {
         Authorization: `Bearer ${apiKey}`,
-        Accept: "application/json",
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ spaceId, agentId, prompt }),
+      body: JSON.stringify({
+        model: DEFAULT_MODEL,
+        messages,
+        temperature: looksLikeInjection(message) ? 0.15 : 0.35,
+        max_tokens: 700,
+      }),
     });
 
     const data = (await res.json().catch(() => ({}))) as {
-      ok?: boolean;
-      summary?: string;
-      message?: string;
-      error?: string;
-      item?: { summary?: string; content?: string };
+      choices?: { message?: { content?: string } }[];
     };
 
-    if (!res.ok) {
-      const detail =
-        data.message || data.error || `Taskade promptAgent failed (${res.status})`;
-      return NextResponse.json({ error: detail }, { status: 502 });
-    }
+    if (!res.ok) return unavailable(502);
 
-    const reply =
-      (typeof data.summary === "string" && data.summary.trim()) ||
-      (typeof data.item?.summary === "string" && data.item.summary.trim()) ||
-      (typeof data.item?.content === "string" && data.item.content.trim()) ||
-      "";
+    const raw = data.choices?.[0]?.message?.content?.trim() || "";
+    if (!raw) return unavailable(502);
 
-    if (!reply) {
-      return NextResponse.json(
-        { error: "Agent returned an empty reply. Try again in a moment." },
-        { status: 502 }
-      );
-    }
-
+    const { reply } = sanitizePublicReply(raw);
     return NextResponse.json({
       ok: true,
-      reply,
-      provider: "Taskade",
-      agentId,
+      reply: reply || PUBLIC_SITE_REFUSAL,
     });
-  } catch (err) {
-    const msg = err instanceof Error ? err.message : "Upstream agent error";
-    return NextResponse.json({ error: msg }, { status: 502 });
+  } catch {
+    return unavailable(502);
   }
 }
