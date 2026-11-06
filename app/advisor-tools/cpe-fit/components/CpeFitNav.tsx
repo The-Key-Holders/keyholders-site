@@ -9,7 +9,8 @@ export default function CpeFitNav() {
   const pathname = usePathname() || "";
   const estimateActive = pathname.startsWith(`${CPE_FIT_BASE}/estimate`);
   const positionsActive = pathname.startsWith(`${CPE_FIT_BASE}/positions`);
-  const homeActive = pathname === CPE_FIT_BASE || pathname === `${CPE_FIT_BASE}/`;
+  const homeActive =
+    pathname === "/" || pathname === CPE_FIT_BASE || pathname === `${CPE_FIT_BASE}/`;
 
   return (
     <header className="top">

@@ -1,3 +1,10 @@
+import { CPE_FIT_BASE } from "@/lib/cpe-fit/public-types";
+import {
+  isCpeFitHost,
+  isCpeFitHostAppPath,
+  isCpeFitHostStaticPath,
+  loginNextOnCpeFitHost,
+} from "@/lib/cpe-fit-host";
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
@@ -37,16 +44,11 @@ async function expectedToken(password: string): Promise<string> {
   return sha256Hex(`keyholders-advisor-tools:v1:${password}`);
 }
 
-export async function middleware(request: NextRequest) {
+/** null = cookie is valid, continue. Otherwise return the 401 / login redirect. */
+async function enforceAdvisorAuth(request: NextRequest, loginNext: string): Promise<NextResponse | null> {
   const { pathname } = request.nextUrl;
-
-  if (!isProtected(pathname)) {
-    return NextResponse.next();
-  }
-
   const password = process.env.ADVISOR_TOOLS_PASSWORD?.trim();
   if (!password) {
-    // Fail closed: tools unavailable until password is configured
     if (pathname.startsWith("/api/")) {
       return NextResponse.json(
         { error: "Advisor tools password not configured (ADVISOR_TOOLS_PASSWORD)." },
@@ -62,35 +64,82 @@ export async function middleware(request: NextRequest) {
   const cookie = request.cookies.get(COOKIE)?.value;
   const expected = await expectedToken(password);
   if (cookie && cookie === expected) {
-    return NextResponse.next();
+    return null;
   }
 
-  // Unauthenticated
   if (pathname.startsWith("/api/")) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
   const url = request.nextUrl.clone();
   url.pathname = "/advisor-tools/login";
-  url.searchParams.set("next", pathname);
+  url.searchParams.set("next", loginNext);
   return NextResponse.redirect(url);
+}
+
+function rewriteToCpeFitHome(request: NextRequest): NextResponse {
+  const url = request.nextUrl.clone();
+  url.pathname = CPE_FIT_BASE;
+  return NextResponse.rewrite(url);
+}
+
+async function cpeFitHostMiddleware(request: NextRequest): Promise<NextResponse> {
+  const { pathname } = request.nextUrl;
+
+  if (isCpeFitHostStaticPath(pathname)) {
+    return NextResponse.next();
+  }
+
+  if (isPublic(pathname)) {
+    if (
+      (pathname === "/advisor-tools/login" || pathname === "/advisor-tools/login/") &&
+      !request.nextUrl.searchParams.has("next")
+    ) {
+      const url = request.nextUrl.clone();
+      url.searchParams.set("next", "/");
+      return NextResponse.redirect(url);
+    }
+    return NextResponse.next();
+  }
+
+  const blocked = await enforceAdvisorAuth(request, loginNextOnCpeFitHost(pathname));
+  if (blocked) return blocked;
+
+  if (pathname === "/" || pathname === "") {
+    return rewriteToCpeFitHome(request);
+  }
+
+  if (!isCpeFitHostAppPath(pathname)) {
+    const url = request.nextUrl.clone();
+    url.pathname = "/";
+    url.search = "";
+    return NextResponse.redirect(url);
+  }
+
+  return NextResponse.next();
+}
+
+export async function middleware(request: NextRequest) {
+  const { pathname } = request.nextUrl;
+  const host = request.headers.get("x-forwarded-host") || request.headers.get("host");
+
+  if (isCpeFitHost(host)) {
+    return cpeFitHostMiddleware(request);
+  }
+
+  if (!isProtected(pathname)) {
+    return NextResponse.next();
+  }
+
+  const blocked = await enforceAdvisorAuth(request, pathname);
+  if (blocked) return blocked;
+  return NextResponse.next();
 }
 
 export const config = {
   matcher: [
-    "/advisor-tools",
-    "/advisor-tools/:path*",
-    "/psap-allotment",
-    "/psap-allotment/:path*",
-    "/psap-portal",
-    "/psap-portal/:path*",
-    "/api/psap-allotment",
-    "/api/psap-allotment/:path*",
-    "/api/psap-portal",
-    "/api/psap-portal/:path*",
-    "/api/invoice-reconcile",
-    "/api/invoice-reconcile/:path*",
-    "/api/advisor-tools",
-    "/api/advisor-tools/:path*",
+    // CPE Fit host must gate `/` and marketing paths; main site still no-ops those.
+    "/",
+    "/((?!_next/static|_next/image|favicon.ico).*)",
   ],
 };
