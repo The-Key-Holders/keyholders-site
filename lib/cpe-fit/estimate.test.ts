@@ -22,6 +22,15 @@ describe("CPE Fit engine goldens (Vault Advisor TS port)", () => {
     expect(existsSync(path.join(process.cwd(), "public/data/catalog.json"))).toBe(false);
   });
 
+  it("vendors 1 and 2 use live A261 contract IDs; A251 remains only in source file names", () => {
+    expect(VENDORS["1"][1]).toBe("A261018514");
+    expect(VENDORS["2"][1]).toBe("A261018515");
+    expect(cat["1"].contract).toBe("A261018514");
+    expect(cat["2"].contract).toBe("A261018515");
+    expect(String(cat["1"].file)).toContain("A251018514");
+    expect(String(cat["2"].file)).toContain("A251018515");
+  });
+
   it("SOS 5pos 5yr golden 532576.95", () => {
     expect(estimate({ vendor: "4", positions: 5, years: 5 }, cat).true_cost).toBeCloseTo(532576.95, 2);
   });
