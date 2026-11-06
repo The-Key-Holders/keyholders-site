@@ -1,6 +1,7 @@
 "use client";
 
 import AgentChatMarkdown from "@/components/AgentChatMarkdown";
+import { isCpeFitHost } from "@/lib/cpe-fit-host";
 import {
   PUBLIC_SITE_STARTERS,
   PUBLIC_SITE_WIDGET_GREETING,
@@ -21,7 +22,11 @@ function isGatedPath(pathname: string): boolean {
 
 export default function SiteChatWidget() {
   const pathname = usePathname() || "/";
-  const gated = isGatedPath(pathname);
+  const [onCpeFitHost, setOnCpeFitHost] = useState(false);
+  useEffect(() => {
+    setOnCpeFitHost(isCpeFitHost(window.location.host));
+  }, []);
+  const gated = isGatedPath(pathname) || onCpeFitHost;
   const [open, setOpen] = useState(false);
   const [messages, setMessages] = useState<ChatMessage[]>([
     {
