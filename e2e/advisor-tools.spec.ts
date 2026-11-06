@@ -49,6 +49,7 @@ test.describe("Advisor Tools Hub", () => {
     await expect(page.getByRole("heading", { name: "PSAP Allotment Engine" })).toBeVisible();
     await expect(page.getByRole("heading", { name: "Invoice ↔ TD-288 Reconciler" })).toBeVisible();
     await expect(page.getByRole("heading", { name: /FOR Assembly Engine/i })).toBeVisible();
+    await expect(page.getByRole("heading", { name: "CPE Fit" })).toBeVisible();
   });
 
   test("hub navigates to invoice reconciler", async ({ page }) => {

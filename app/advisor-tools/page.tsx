@@ -73,6 +73,14 @@ const TOOLS: ToolCard[] = [
     tags: ["FOR", "ECaTS", "Package"],
   },
   {
+    href: "/advisor-tools/cpe-fit",
+    status: "beta",
+    title: "CPE Fit",
+    blurb:
+      "CPE Purchase & Allotment Evaluator: estimate Exhibit C ceilings vs a signed allotment letter, then compare all 12 vendor contracts.",
+    tags: ["CPE", "MPA", "Allotment", "Exhibit C"],
+  },
+  {
     href: "/advisor-tools#roadmap",
     status: "planned",
     title: "CPE Package / Residual Gate",
@@ -161,6 +169,10 @@ export default function AdvisorToolsHubPage() {
           </li>
           <li>
             <strong className="text-white/90">Done (web):</strong> Invoice ↔ TD-288 Reconciler · FOR Assembly Engine
+          </li>
+          <li>
+            <strong className="text-white/90">Preview (web):</strong> CPE Fit — purchase vs allotment evaluator
+            (gated at /advisor-tools/cpe-fit)
           </li>
           <li>
             <strong className="text-white/90">Done (web):</strong> CA 9-1-1 Advisor AI (full Advisor persona) —
