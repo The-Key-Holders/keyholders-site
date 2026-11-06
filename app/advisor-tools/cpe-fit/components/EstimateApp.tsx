@@ -1,13 +1,11 @@
 "use client";
 
 import {
-  CPE_FIT_BASE,
   DEFAULT_CPE_FIT_INPUTS,
   type CpeFitInputs,
   type CpeFitResult,
   type VendorMap,
 } from "@/lib/cpe-fit/public-types";
-import Link from "next/link";
 import { FormEvent, useEffect, useMemo, useState } from "react";
 import { money, statusClass } from "../lib/money";
 
@@ -205,6 +203,21 @@ export default function EstimateApp({
     void runEstimate();
   }
 
+  function startNewEstimate() {
+    // Clear stored inputs first so a remount cannot restore the last compare.
+    sessionStorage.removeItem(STORAGE_KEY);
+    setInp({
+      ...DEFAULT_CPE_FIT_INPUTS,
+      positions: initialPositions ?? DEFAULT_CPE_FIT_INPUTS.positions,
+    });
+    setAllotmentText("");
+    setErrors([]);
+    setResult(null);
+    setRows([]);
+    setLoadError("");
+    setView("form");
+  }
+
   if (view === "results" && result) {
     return (
       <ResultsView
@@ -229,6 +242,7 @@ export default function EstimateApp({
         busy={busy}
         onDetails={(vendor) => void runEstimate(vendor)}
         onEdit={() => setView("form")}
+        onNewEstimate={startNewEstimate}
       />
     );
   }
@@ -645,6 +659,7 @@ function CompareView({
   busy,
   onDetails,
   onEdit,
+  onNewEstimate,
 }: {
   inp: CpeFitInputs;
   rows: CpeFitResult[];
@@ -653,6 +668,7 @@ function CompareView({
   busy: boolean;
   onDetails: (vendor: string) => void;
   onEdit: () => void;
+  onNewEstimate: () => void;
 }) {
   return (
     <>
@@ -720,9 +736,9 @@ function CompareView({
         <button className="btn ghost" type="button" onClick={onEdit}>
           Edit inputs
         </button>
-        <Link className="btn ghost" href={`${CPE_FIT_BASE}/estimate`}>
+        <button className="btn ghost" type="button" onClick={onNewEstimate}>
           New estimate
-        </Link>
+        </button>
       </div>
     </>
   );
