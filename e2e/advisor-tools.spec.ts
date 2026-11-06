@@ -7,11 +7,13 @@ const SAMPLE = `PSAP	Tracking	Amount	Notes
 3009 Huntington Beach PD	29501-OP	104229.00	CPE INSTALL
 3103 Placer County SO	25908	1200.50	MA North`;
 
-const ADVISOR_PASSWORD = process.env.ADVISOR_TOOLS_PASSWORD || "CalOES-911-AdvisorHub-2026";
+const advisorPassword = process.env.ADVISOR_TOOLS_PASSWORD?.trim() ?? "";
 
 async function loginAdvisorTools(page: import("@playwright/test").Page) {
+  test.skip(!advisorPassword, "Requires ADVISOR_TOOLS_PASSWORD");
+  if (!advisorPassword) return;
   await page.goto("/advisor-tools/login");
-  await page.getByLabel(/Password/i).fill(ADVISOR_PASSWORD);
+  await page.getByLabel(/Password/i).fill(advisorPassword);
   const responsePromise = page.waitForResponse(
     (r) => r.url().includes("/api/advisor-tools/auth") && r.request().method() === "POST"
   );
@@ -38,6 +40,8 @@ test.describe("Advisor Tools auth gate", () => {
 });
 
 test.describe("Advisor Tools Hub", () => {
+  test.skip(!advisorPassword, "Requires ADVISOR_TOOLS_PASSWORD");
+
   test.beforeEach(async ({ page }) => {
     await loginAdvisorTools(page);
   });
@@ -78,28 +82,31 @@ test.describe("Advisor Tools Hub", () => {
 });
 
 test.describe("FOR Assembly Engine", () => {
-  test.beforeEach(async ({ page }) => {
-    await loginAdvisorTools(page);
-  });
-
-  test("unauthenticated visitor is redirected from for-engine", async ({ page, context }) => {
-    await context.clearCookies();
+  test("unauthenticated visitor is redirected from for-engine", async ({ page }) => {
     await page.goto("/advisor-tools/for-engine");
     await expect(page).toHaveURL(/\/advisor-tools\/login/);
   });
 
-  test("demo package assembles and offers per-section and combined downloads", async ({ page }) => {
-    await page.goto("/advisor-tools/for-engine");
-    await page.getByRole("button", { name: /Load demo PSAP/i }).click();
-    await page.getByRole("button", { name: /Assemble FOR package/i }).click();
-    await expect(page.getByRole("button", { name: /Download all files/i })).toBeVisible({
-      timeout: 10_000,
+  test.describe("authenticated", () => {
+    test.skip(!advisorPassword, "Requires ADVISOR_TOOLS_PASSWORD");
+
+    test.beforeEach(async ({ page }) => {
+      await loginAdvisorTools(page);
     });
-    await expect(page.getByText(/COMBINED_Binder\.html/i)).toBeVisible();
-    await expect(page.getByText(/00_Cover_Page\.html/i)).toBeVisible();
-    await expect(page.getByText(/01_Section_I_Fiscal_Review\.html/i)).toBeVisible();
-    await expect(page.getByText(/07_FOR_Summary\.html/i)).toBeVisible();
-    await expect(page.getByText(/Demo City Police Department/i).first()).toBeVisible();
+
+    test("demo package assembles and offers per-section and combined downloads", async ({ page }) => {
+      await page.goto("/advisor-tools/for-engine");
+      await page.getByRole("button", { name: /Load demo PSAP/i }).click();
+      await page.getByRole("button", { name: /Assemble FOR package/i }).click();
+      await expect(page.getByRole("button", { name: /Download all files/i })).toBeVisible({
+        timeout: 10_000,
+      });
+      await expect(page.getByText(/COMBINED_Binder\.html/i)).toBeVisible();
+      await expect(page.getByText(/00_Cover_Page\.html/i)).toBeVisible();
+      await expect(page.getByText(/01_Section_I_Fiscal_Review\.html/i)).toBeVisible();
+      await expect(page.getByText(/07_FOR_Summary\.html/i)).toBeVisible();
+      await expect(page.getByText(/Demo City Police Department/i).first()).toBeVisible();
+    });
   });
 });
 
@@ -118,6 +125,8 @@ test.describe("Help agent chat gate", () => {
 });
 
 test.describe("Invoice TD-288 Reconciler web app", () => {
+  test.skip(!advisorPassword, "Requires ADVISOR_TOOLS_PASSWORD");
+
   test.beforeEach(async ({ page }) => {
     await loginAdvisorTools(page);
   });

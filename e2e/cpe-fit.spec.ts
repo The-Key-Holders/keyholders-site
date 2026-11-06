@@ -1,10 +1,12 @@
 import { expect, test } from "@playwright/test";
 
-const ADVISOR_PASSWORD = process.env.ADVISOR_TOOLS_PASSWORD || "CalOES-911-AdvisorHub-2026";
+const advisorPassword = process.env.ADVISOR_TOOLS_PASSWORD?.trim() ?? "";
 
 async function loginAdvisorTools(page: import("@playwright/test").Page) {
+  test.skip(!advisorPassword, "Requires ADVISOR_TOOLS_PASSWORD");
+  if (!advisorPassword) return;
   await page.goto("/advisor-tools/login");
-  await page.getByLabel(/Password/i).fill(ADVISOR_PASSWORD);
+  await page.getByLabel(/Password/i).fill(advisorPassword);
   const responsePromise = page.waitForResponse(
     (r) => r.url().includes("/api/advisor-tools/auth") && r.request().method() === "POST"
   );
@@ -27,9 +29,20 @@ test.describe("CPE Fit gate", () => {
     });
     expect(res.status()).toBe(401);
   });
+
+  test("catalog.json is not a public URL", async ({ request }) => {
+    for (const p of ["/catalog.json", "/cpe-fit/catalog.json", "/data/catalog.json", "/lib/cpe-fit/catalog.json"]) {
+      const res = await request.get(p);
+      expect(res.status(), p).toBeGreaterThanOrEqual(400);
+      const body = await res.text();
+      expect(body).not.toContain("A251018514");
+    }
+  });
 });
 
 test.describe("CPE Fit preview", () => {
+  test.skip(!advisorPassword, "Requires ADVISOR_TOOLS_PASSWORD");
+
   test.beforeEach(async ({ page }) => {
     await loginAdvisorTools(page);
   });
@@ -57,13 +70,7 @@ test.describe("CPE Fit preview", () => {
     await expect(page.getByRole("button", { name: "Details" })).toHaveCount(12);
   });
 
-  test("catalog.json is not a public URL", async ({ page, request }) => {
-    for (const p of ["/catalog.json", "/cpe-fit/catalog.json", "/data/catalog.json", "/lib/cpe-fit/catalog.json"]) {
-      const res = await request.get(p);
-      expect(res.status(), p).toBeGreaterThanOrEqual(400);
-      const body = await res.text();
-      expect(body).not.toContain("A251018514");
-    }
+  test("gated catalog path does not leak the price book", async ({ page }) => {
     const gated = await page.request.get("/advisor-tools/cpe-fit/catalog.json");
     const gatedBody = await gated.text();
     expect(gatedBody).not.toContain("A251018514");
